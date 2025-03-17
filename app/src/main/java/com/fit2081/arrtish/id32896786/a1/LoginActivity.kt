@@ -1,6 +1,8 @@
 package com.fit2081.arrtish.id32896786.a1
 
+import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -30,12 +32,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.fit2081.arrtish.id32896786.a1.ui.theme.A1Theme
+
+private const val usernameStatic: String = "testUser"
+private const val passwordStatic: String = "testPassword"
 
 class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,6 +58,8 @@ class LoginActivity : ComponentActivity() {
 @Preview(showBackground = true)
 @Composable
 fun LoginPage(modifier: Modifier = Modifier) {
+
+    val context = LocalContext.current
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
@@ -100,7 +108,15 @@ fun LoginPage(modifier: Modifier = Modifier) {
             )
 
             Button(
-                onClick = { /* Handle login */ },
+                onClick = {
+                    if (username == usernameStatic && password == passwordStatic){
+                        Toast.makeText(context,"Login Successful", Toast.LENGTH_LONG).show()
+
+                        context.startActivity(Intent(context,HomeActivity::class.java))
+                    }else{
+                        Toast.makeText(context,"Incorrect Credentials", Toast.LENGTH_LONG).show()
+                    }
+                },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Login")
