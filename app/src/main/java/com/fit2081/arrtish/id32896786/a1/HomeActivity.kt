@@ -1,8 +1,10 @@
 package com.fit2081.arrtish.id32896786.a1
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -36,6 +38,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.edit
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
@@ -55,10 +58,9 @@ class HomeActivity : ComponentActivity() {
 @Composable
 fun HomePage(modifier: Modifier = Modifier) {
     val context = LocalContext.current
-    val userDetails = remember { getUserDetails(context) }
-    val firstName = userDetails?.first ?: "Unknown"
-    val lastName = userDetails?.second ?: "Unknown"
-    val foodQualityScore = userDetails?.third ?: "Unknown"
+    val sharedPreferences = context.getSharedPreferences("assignment_1", Context.MODE_PRIVATE)
+    val savedUserId = sharedPreferences.getString("user_id", null)
+    val foodQualityScore = getUserDetails(context, savedUserId)
     var showDialog by remember { mutableStateOf(false) }
 
     // Check if the user has answered the questionnaire
@@ -99,7 +101,7 @@ fun HomePage(modifier: Modifier = Modifier) {
                     .padding(top = 16.dp),
                 contentAlignment = Alignment.TopCenter
             ) {
-                if (foodQualityScore >= 80.toString()) {
+                if (foodQualityScore!! >= 80.toString()) {
                     Image(
                         painter = painterResource(id = R.drawable.high_score_picture_removebg_preview),
                         contentDescription = "High Food Quality Score",
@@ -123,7 +125,7 @@ fun HomePage(modifier: Modifier = Modifier) {
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
-                text = "Hello, $firstName!",
+                text = "Hello, $savedUserId!",
                 fontSize = 24.sp,
                 style = MaterialTheme.typography.titleMedium,
                 textAlign = TextAlign.Center
@@ -151,15 +153,25 @@ fun HomePage(modifier: Modifier = Modifier) {
             Button(onClick = { onRouteToQuestionnaire(context) }) {
                 Text(text = "Edit Responses")
             }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(onClick = { onRouteToInsights(context) }) {
+                Text(text = "View Insights")
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(onClick = { logOut(context) }) {
+                Text(text = "Log Out")
+            }
         }
     }
 }
 
 
 
-fun getUserDetails(context: Context): Triple<String, String, String>? {
-    val sharedPreferences = context.getSharedPreferences("assignment_1", Context.MODE_PRIVATE)
-    val savedUserId = sharedPreferences.getString("user_id", null)
+fun getUserDetails(context: Context, savedUserId: String?): String? {
     val assets = context.assets
     try {
         val inputStream = assets.open("nutritrack_data.csv")
@@ -169,15 +181,13 @@ fun getUserDetails(context: Context): Triple<String, String, String>? {
             lines.drop(1).forEach { line -> // Skip header
                 val values = line.split(",")
                 if (values.size >= 4 && values[1].trim() == savedUserId) { // Match user ID
-                    val firstName = values[2].trim()
-                    val lastName = values[3].trim()
-                    val foodScoreByGender = if (values[4].trim() == "Male") {
-                        values[5].trim()
+                    val foodScoreByGender = if (values[2].trim() == "Male") {
+                        values[3].trim()
                     } else {
-                        values[6].trim()
+                        values[4].trim()
                     }
-
-                    return Triple(firstName, lastName, foodScoreByGender)
+                    Log.v("UserDetails", "Food Score by Gender: $foodScoreByGender")
+                    return foodScoreByGender
                 }
             }
         }
@@ -196,6 +206,23 @@ fun checkForQuestionnaire(context: Context, callback: (Boolean) -> Unit) {
 
 fun onRouteToQuestionnaire(context: Context) {
     val intent = Intent(context, QuestionnaireActivity::class.java)
-    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK
     context.startActivity(intent)
+}
+
+fun onRouteToInsights(context: Context) {
+    val intent = Intent(context, InsightsActivity::class.java)
+    context.startActivity(intent)
+}
+
+fun logOut(context: Context) {
+    val sharedPreferences = context.getSharedPreferences("assignment_1", Context.MODE_PRIVATE)
+    sharedPreferences.edit {
+        putString("user_id", null)
+        putString("phone_number", null)
+    }
+
+    val intent = Intent(context, LoginActivity::class.java)
+    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+    context.startActivity(intent)
+    (context as? Activity)?.finish() // Ensure the current activity is finished
 }

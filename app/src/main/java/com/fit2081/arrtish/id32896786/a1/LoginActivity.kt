@@ -176,7 +176,7 @@ fun isLoginValid(context: Context, inputUserId: String, inputPhoneNumber: String
         Toast.makeText(context,"Login Successful", Toast.LENGTH_LONG).show()
 
         val intent = Intent(context, HomeActivity::class.java)
-        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         context.startActivity(intent)
 
     }else{
