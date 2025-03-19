@@ -1,5 +1,6 @@
 package com.fit2081.arrtish.id32896786.a1
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
@@ -37,6 +38,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.fit2081.arrtish.id32896786.a1.ui.theme.A1Theme
+import java.io.BufferedReader
+import java.io.InputStreamReader
 
 private const val userIdStatic: String = "102"
 private const val phoneNumberStatic: String = "0179932143"
@@ -120,7 +123,7 @@ fun LoginPage(modifier: Modifier = Modifier) {
 
             Button(
                 onClick = {
-                    if (userId == userIdStatic && phoneNumber == phoneNumberStatic){
+                    if (isLoginValid(context,"nutritrack_data.csv",userId,phoneNumber)){
                         Toast.makeText(context,"Login Successful", Toast.LENGTH_LONG).show()
 
                         context.startActivity(Intent(context,HomeActivity::class.java))
@@ -139,8 +142,35 @@ fun LoginPage(modifier: Modifier = Modifier) {
 
 fun isValidNumber(number: String): Boolean {
     // Regex for Australian and Malaysian numbers
-    val aussieRegex = Regex("^((\\+61|0)[2-478]\\d{8})$")
-    val malaysianRegex = Regex("^((\\+60|0)[1-9]\\d{7,9})$")
+    val aussieRegex = Regex("^(61[2-478]\\d{8})$")
+    val malaysianRegex = Regex("^(60[1-9]\\d{7,9})$")
 
     return aussieRegex.matches(number) || malaysianRegex.matches(number)
+}
+
+fun isLoginValid(context: Context, fileName: String, inputUserId: String, inputPhoneNumber: String): Boolean {
+    val assets = context.assets
+
+    try {
+        val inputStream = assets.open(fileName)
+        val reader = BufferedReader(InputStreamReader(inputStream))
+
+        reader.useLines { lines ->
+            lines.drop(1).forEach { line ->  // Skip header
+                val values = line.split(",")
+                if (values.size >= 2) {
+                    val phoneNumber = values[0].trim()
+                    val userId = values[1].trim()
+
+                    if (phoneNumber == inputPhoneNumber && userId == inputUserId) {
+                        return true
+                    }
+                }
+            }
+        }
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+
+    return false  // User not found
 }
