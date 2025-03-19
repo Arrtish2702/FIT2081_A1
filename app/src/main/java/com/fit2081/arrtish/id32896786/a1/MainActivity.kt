@@ -2,7 +2,6 @@ package com.fit2081.arrtish.id32896786.a1
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -23,9 +22,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat.startActivity
 import com.fit2081.arrtish.id32896786.a1.ui.theme.A1Theme
-import kotlinx.coroutines.launch
+import androidx.core.net.toUri
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,12 +50,6 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-    }
-
-    private fun openMonashClinic() {
-        val url = "https://www.monash.edu/medicine/scs/nutrition/clinics/nutrition"
-        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-        startActivity(intent)
     }
 }
 
@@ -141,6 +133,6 @@ fun WelcomePage(
 
 private fun openMonashClinic(context: Context) {
     val url = "https://www.monash.edu/medicine/scs/nutrition-clinic"
-    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+    val intent = Intent(Intent.ACTION_VIEW, url.toUri())
     context.startActivity(intent)
 }
