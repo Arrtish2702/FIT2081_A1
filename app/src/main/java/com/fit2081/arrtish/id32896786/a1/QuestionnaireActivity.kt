@@ -3,15 +3,19 @@ package com.fit2081.arrtish.id32896786.a1
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
@@ -35,9 +39,23 @@ class QuestionnaireActivity : ComponentActivity() {
 @Composable
 fun QuestionnairePage(){
     val context = LocalContext.current
-    Button(onClick = { completeQuestionnaire(context) }) {
-        Text(text = "Edit Responses")
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxSize()
+    ){
+        Button(
+            onClick = { completeQuestionnaire(context) },
+        ) {
+            Text(text = "Save Responses")
+        }
+
+        Button(onClick = { tempEraseQuestionnaireData(context) }) {
+            Text(text = "Clear Response Data")
+        }
     }
+
 }
 
 fun completeQuestionnaire(context: Context){
@@ -45,6 +63,15 @@ fun completeQuestionnaire(context: Context){
     sharedPreferences.edit{
         putBoolean("answered", true)
     }
+    onRouteToHome(context)
+}
+
+fun tempEraseQuestionnaireData(context: Context){
+    val sharedPreferences = context.getSharedPreferences("assignment_1", Context.MODE_PRIVATE)
+    sharedPreferences.edit{
+        putBoolean("answered", false)
+    }
+    Toast.makeText(context,"Data Erased", Toast.LENGTH_LONG).show()
     onRouteToHome(context)
 }
 
