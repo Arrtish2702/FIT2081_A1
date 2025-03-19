@@ -40,9 +40,8 @@ import androidx.compose.ui.unit.dp
 import com.fit2081.arrtish.id32896786.a1.ui.theme.A1Theme
 import java.io.BufferedReader
 import java.io.InputStreamReader
+import androidx.core.content.edit
 
-private const val userIdStatic: String = "102"
-private const val phoneNumberStatic: String = "0179932143"
 
 class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -123,13 +122,7 @@ fun LoginPage(modifier: Modifier = Modifier) {
 
             Button(
                 onClick = {
-                    if (isLoginValid(context,"nutritrack_data.csv",userId,phoneNumber)){
-                        Toast.makeText(context,"Login Successful", Toast.LENGTH_LONG).show()
-
-                        context.startActivity(Intent(context,HomeActivity::class.java))
-                    }else{
-                        Toast.makeText(context,"Incorrect Credentials", Toast.LENGTH_LONG).show()
-                    }
+                    isLoginValid(context,userId,phoneNumber)
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -148,11 +141,12 @@ fun isValidNumber(number: String): Boolean {
     return aussieRegex.matches(number) || malaysianRegex.matches(number)
 }
 
-fun isLoginValid(context: Context, fileName: String, inputUserId: String, inputPhoneNumber: String): Boolean {
-    val assets = context.assets
+fun isLoginValid(context: Context, inputUserId: String, inputPhoneNumber: String){
 
+    val assets = context.assets
+    var loginSuccess = false
     try {
-        val inputStream = assets.open(fileName)
+        val inputStream = assets.open("nutritrack_data.csv")
         val reader = BufferedReader(InputStreamReader(inputStream))
 
         reader.useLines { lines ->
@@ -163,7 +157,7 @@ fun isLoginValid(context: Context, fileName: String, inputUserId: String, inputP
                     val userId = values[1].trim()
 
                     if (phoneNumber == inputPhoneNumber && userId == inputUserId) {
-                        return true
+                        loginSuccess = true
                     }
                 }
             }
@@ -172,5 +166,20 @@ fun isLoginValid(context: Context, fileName: String, inputUserId: String, inputP
         e.printStackTrace()
     }
 
-    return false  // User not found
+    if (loginSuccess){
+        val sharedPreferences = context.getSharedPreferences("assignment_1", Context.MODE_PRIVATE)
+        sharedPreferences.edit{
+            putString("user_id", inputUserId)
+            putString("phone_number", inputPhoneNumber)
+        }
+
+        Toast.makeText(context,"Login Successful", Toast.LENGTH_LONG).show()
+
+        val intent = Intent(context, HomeActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK
+        context.startActivity(intent)
+
+    }else{
+        Toast.makeText(context,"Incorrect Credentials", Toast.LENGTH_LONG).show()
+    }
 }
