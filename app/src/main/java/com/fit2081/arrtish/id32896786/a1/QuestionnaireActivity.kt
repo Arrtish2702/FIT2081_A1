@@ -9,7 +9,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,7 +19,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.content.edit
 import com.fit2081.arrtish.id32896786.a1.ui.theme.A1Theme
 import androidx.compose.foundation.layout.*
@@ -38,40 +36,62 @@ import androidx.compose.ui.unit.sp
 import java.util.Calendar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.ui.text.font.FontWeight
 
 class QuestionnaireActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            A1Theme {
-                QuestionnairePage()
-            }
-        }
-    }
-}
 
-
-@Preview(showBackground = true)
-@Composable
-fun QuestionnairePage() {
-    val context = LocalContext.current
-    val selectedCategories = remember { mutableStateListOf<String>() }
-    val personas = listOf(
+    private val selectedCategories = mutableStateListOf<String>()
+    private val personas = listOf(
         "Health Devotee", "Mindful Eater", "Wellness Striver",
         "Balance Seeker", "Health Procrastinator", "Food Carefree"
     )
 
-    // State to track selected persona and modal visibility
+    private val biggestMealTime = mutableStateOf("12:00 PM")
+    private val sleepTime = mutableStateOf("10:00 PM")
+    private val wakeTime = mutableStateOf("6:00 AM")
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        loadSavedPreferences()
+        setContent {
+            A1Theme {
+                QuestionnairePage(
+                    selectedCategories = selectedCategories,
+                    personas = personas,
+                    biggestMealTime = biggestMealTime,
+                    sleepTime = sleepTime,
+                    wakeTime = wakeTime
+                )
+            }
+        }
+    }
+
+    private fun loadSavedPreferences() {
+        val sharedPreferences = this.getSharedPreferences("assignment_1", Context.MODE_PRIVATE)
+        if(sharedPreferences.getBoolean("answered",false)){
+            // Load selected categories from SharedPreferences
+            val savedCategories = sharedPreferences.getStringSet("selectedCategories", emptySet()) ?: emptySet()
+            selectedCategories.clear()
+            selectedCategories.addAll(savedCategories) // Update mutable list
+
+            // Load other values from SharedPreferences
+            biggestMealTime.value = sharedPreferences.getString("biggestMealTime", "12:00 PM") ?: "12:00 PM"
+            sleepTime.value = sharedPreferences.getString("sleepTime", "10:00 PM") ?: "10:00 PM"
+            wakeTime.value = sharedPreferences.getString("wakeTime", "6:00 AM") ?: "6:00 AM"
+        }
+    }
+}
+
+@Composable
+fun QuestionnairePage(selectedCategories: MutableList<String>, personas: List<String>, biggestMealTime: MutableState<String>, sleepTime: MutableState<String>, wakeTime: MutableState<String>
+) {
+    val context = LocalContext.current
     var selectedPersonaForModal by remember { mutableStateOf<String?>(null) }
     var showModal by remember { mutableStateOf(false) }
-
-    val biggestMealTime = remember { mutableStateOf("12:00 PM") }
-    val sleepTime = remember { mutableStateOf("10:00 PM") }
-    val wakeTime = remember { mutableStateOf("6:00 AM") }
-
-    // Get current time
     val calendar = Calendar.getInstance()
     val hour = calendar.get(Calendar.HOUR_OF_DAY)
     val minute = calendar.get(Calendar.MINUTE)
@@ -224,13 +244,13 @@ fun QuestionnairePage() {
         Spacer(modifier = Modifier.height(16.dp))
 
         Row(horizontalArrangement = Arrangement.SpaceEvenly) {
-            Button(onClick = { completeQuestionnaire(context) }) {
+            Button(onClick = { completeQuestionnaire(context, selectedCategories, biggestMealTime, sleepTime, wakeTime) }) {
                 Text("Save Responses")
             }
 
             Spacer(modifier = Modifier.width(4.dp))
 
-            Button(onClick = { tempEraseQuestionnaireData(context) }) {
+            Button(onClick = { eraseQuestionnaireData(context, selectedCategories, biggestMealTime, sleepTime, wakeTime) }) {
                 Text("Clear Responses")
             }
         }
@@ -279,22 +299,28 @@ fun PersonaModal(selectedPersona: String, onDismiss: () -> Unit) {
 }
 
 
-
-
-
-
-fun completeQuestionnaire(context: Context){
+fun completeQuestionnaire(context: Context, selectedCategories: List<String>, biggestMealTime: MutableState<String>, sleepTime: MutableState<String>, wakeTime: MutableState<String>){
     val sharedPreferences = context.getSharedPreferences("assignment_1", Context.MODE_PRIVATE)
     sharedPreferences.edit{
+        putStringSet("selectedCategories", selectedCategories.toSet()) // Convert List to Set
+        putString("biggestMealTime", biggestMealTime.value) // Extract value from MutableState
+        putString("sleepTime", sleepTime.value) // Extract value from MutableState
+        putString("wakeTime", wakeTime.value) // Extract value from MutableState
         putBoolean("answered", true)
+        apply()
     }
     onRouteToHome(context)
 }
 
-fun tempEraseQuestionnaireData(context: Context){
+fun eraseQuestionnaireData(context: Context, selectedCategories: List<String>, biggestMealTime: MutableState<String>, sleepTime: MutableState<String>, wakeTime: MutableState<String>){
     val sharedPreferences = context.getSharedPreferences("assignment_1", Context.MODE_PRIVATE)
     sharedPreferences.edit{
+        putStringSet("selectedCategories", null) // Convert List to Set
+        putString("biggestMealTime", null) // Extract value from MutableState
+        putString("sleepTime", null) // Extract value from MutableState
+        putString("wakeTime", null) // Extract value from MutableState
         putBoolean("answered", false)
+        apply()
     }
     Toast.makeText(context,"Data Erased", Toast.LENGTH_LONG).show()
     onRouteToHome(context)
