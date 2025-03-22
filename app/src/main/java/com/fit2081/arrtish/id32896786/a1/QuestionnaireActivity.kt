@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.sp
 import java.util.Calendar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
+import java.util.Locale
 
 class QuestionnaireActivity : ComponentActivity() {
 
@@ -100,7 +101,7 @@ fun QuestionnairePage(selectedCategories: MutableList<String>, personas: List<St
     val biggestMealTimePicker = TimePickerDialog(
         context,
         { _, selectedHour, selectedMinute ->
-            biggestMealTime.value = String.format("%02d:%02d", selectedHour, selectedMinute)
+            biggestMealTime.value = String.format(Locale.getDefault(), "%02d:%02d", selectedHour, selectedMinute)
         },
         hour, minute, false
     )
@@ -108,7 +109,7 @@ fun QuestionnairePage(selectedCategories: MutableList<String>, personas: List<St
     val sleepTimePicker = TimePickerDialog(
         context,
         { _, selectedHour, selectedMinute ->
-            sleepTime.value = String.format("%02d:%02d", selectedHour, selectedMinute)
+            sleepTime.value = String.format(Locale.getDefault(), "%02d:%02d", selectedHour, selectedMinute)
         },
         hour, minute, false
     )
@@ -116,7 +117,7 @@ fun QuestionnairePage(selectedCategories: MutableList<String>, personas: List<St
     val wakeTimePicker = TimePickerDialog(
         context,
         { _, selectedHour, selectedMinute ->
-            wakeTime.value = String.format("%02d:%02d", selectedHour, selectedMinute)
+            wakeTime.value = String.format(Locale.getDefault(), "%02d:%02d", selectedHour, selectedMinute)
         },
         hour, minute, false
     )
@@ -250,7 +251,7 @@ fun QuestionnairePage(selectedCategories: MutableList<String>, personas: List<St
 
             Spacer(modifier = Modifier.width(4.dp))
 
-            Button(onClick = { eraseQuestionnaireData(context, selectedCategories, biggestMealTime, sleepTime, wakeTime) }) {
+            Button(onClick = { eraseQuestionnaireData(context) }) {
                 Text("Clear Responses")
             }
         }
@@ -312,7 +313,7 @@ fun completeQuestionnaire(context: Context, selectedCategories: List<String>, bi
     onRouteToHome(context)
 }
 
-fun eraseQuestionnaireData(context: Context, selectedCategories: List<String>, biggestMealTime: MutableState<String>, sleepTime: MutableState<String>, wakeTime: MutableState<String>){
+fun eraseQuestionnaireData(context: Context){
     val sharedPreferences = context.getSharedPreferences("assignment_1", Context.MODE_PRIVATE)
     sharedPreferences.edit{
         putStringSet("selectedCategories", null) // Convert List to Set
