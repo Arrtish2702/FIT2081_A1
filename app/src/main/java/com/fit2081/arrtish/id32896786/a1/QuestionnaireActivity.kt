@@ -7,12 +7,12 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -25,8 +25,12 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -52,7 +56,11 @@ fun QuestionnairePage() {
         "Health Devotee", "Mindful Eater", "Wellness Striver",
         "Balance Seeker", "Health Procrastinator", "Food Carefree"
     )
-    val selectedPersona = remember { mutableStateOf(personas[0]) }
+
+    // State to track the selected persona and modal visibility
+    var selectedPersona by remember { mutableStateOf<String?>(null) }
+    var showModal by remember { mutableStateOf(false) }
+
     val biggestMealTime = remember { mutableStateOf("12:00 PM") }
     val sleepTime = remember { mutableStateOf("10:00 PM") }
     val wakeTime = remember { mutableStateOf("6:00 AM") }
@@ -99,15 +107,25 @@ fun QuestionnairePage() {
         ) {
             items(personas) { persona ->
                 Button(
-                    onClick = { selectedPersona.value = persona },
-                    modifier = Modifier.padding(vertical = 4.dp)
+                    onClick = {
+                        selectedPersona = persona
+                        showModal = true
+                    },
+                    modifier = Modifier
+                        .padding(vertical = 4.dp)
+                        .size(width = 200.dp, height = 50.dp)
                 ) {
-                    Text(text = persona)
+                    Text(text = persona, fontSize = 12.sp)
                 }
             }
         }
-        
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         Text("Meal Timing:")
+
+        Spacer(modifier = Modifier.height(8.dp))
+
         TextField(
             value = biggestMealTime.value,
             onValueChange = { biggestMealTime.value = it },
@@ -141,7 +159,60 @@ fun QuestionnairePage() {
             }
         }
     }
+
+    // Show modal only if showModal is true
+    if (showModal && selectedPersona != null) {
+        PersonaModal(selectedPersona!!) { showModal = false }
+    }
 }
+
+@Composable
+fun PersonaModal(selectedPersona: String, onDismiss: () -> Unit) {
+    val textInput = when (selectedPersona) {
+        "Health Devotee" -> "You are highly committed to your health and wellness goals."
+        "Mindful Eater" -> "You pay close attention to your food choices and eat with awareness."
+        "Wellness Striver" -> "You make efforts to improve your well-being but seek more guidance."
+        "Balance Seeker" -> "You value a balanced lifestyle and strive for moderation in eating."
+        "Health Procrastinator" -> "You want to be healthier but often postpone taking action."
+        "Food Carefree" -> "You enjoy food freely without strict rules or limitations."
+        else -> "Invalid Persona"
+    }
+
+    val personaIndex = listOf(
+        "Health Devotee", "Mindful Eater", "Wellness Striver",
+        "Balance Seeker", "Health Procrastinator", "Food Carefree"
+    ).indexOf(selectedPersona)
+
+    val imageName = "persona_${personaIndex + 1}" // Generates "persona_1", "persona_2", etc.
+    val context = LocalContext.current
+    val imageResId = context.resources.getIdentifier(imageName, "drawable", context.packageName)
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(selectedPersona) },
+        text = {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Image(
+                    painter = painterResource(id = imageResId),
+                    contentDescription = selectedPersona,
+                    modifier = Modifier
+                        .size(150.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(textInput, textAlign = TextAlign.Center)
+            }
+        },
+        confirmButton = {
+            Button(onClick = onDismiss) {
+                Text("Close")
+            }
+        }
+    )
+}
+
 
 fun completeQuestionnaire(context: Context){
     val sharedPreferences = context.getSharedPreferences("assignment_1", Context.MODE_PRIVATE)
