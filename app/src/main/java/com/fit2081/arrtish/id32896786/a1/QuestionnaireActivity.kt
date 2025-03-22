@@ -1,6 +1,6 @@
 package com.fit2081.arrtish.id32896786.a1
 
-import android.annotation.SuppressLint
+import android.app.TimePickerDialog
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -9,6 +9,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -34,6 +35,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import java.util.Calendar
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.ui.text.font.FontWeight
 
 class QuestionnaireActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -58,13 +63,43 @@ fun QuestionnairePage() {
         "Balance Seeker", "Health Procrastinator", "Food Carefree"
     )
 
-    // State to track the selected persona and modal visibility
+    // State to track selected persona and modal visibility
     var selectedPersonaForModal by remember { mutableStateOf<String?>(null) }
     var showModal by remember { mutableStateOf(false) }
 
     val biggestMealTime = remember { mutableStateOf("12:00 PM") }
     val sleepTime = remember { mutableStateOf("10:00 PM") }
     val wakeTime = remember { mutableStateOf("6:00 AM") }
+
+    // Get current time
+    val calendar = Calendar.getInstance()
+    val hour = calendar.get(Calendar.HOUR_OF_DAY)
+    val minute = calendar.get(Calendar.MINUTE)
+
+    // Create TimePickerDialogs once
+    val biggestMealTimePicker = TimePickerDialog(
+        context,
+        { _, selectedHour, selectedMinute ->
+            biggestMealTime.value = String.format("%02d:%02d", selectedHour, selectedMinute)
+        },
+        hour, minute, false
+    )
+
+    val sleepTimePicker = TimePickerDialog(
+        context,
+        { _, selectedHour, selectedMinute ->
+            sleepTime.value = String.format("%02d:%02d", selectedHour, selectedMinute)
+        },
+        hour, minute, false
+    )
+
+    val wakeTimePicker = TimePickerDialog(
+        context,
+        { _, selectedHour, selectedMinute ->
+            wakeTime.value = String.format("%02d:%02d", selectedHour, selectedMinute)
+        },
+        hour, minute, false
+    )
 
     Column(
         modifier = Modifier
@@ -121,41 +156,70 @@ fun QuestionnairePage() {
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text("Select Persona:")
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        //TODO: PUT A DROPDOWN FOR THE PERSONAS HERE
+        //TODO: Do the DropDown for the personas
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text("Meal Timing:")
+        Text("Meal Timing:", fontSize = 20.sp)
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Biggest Meal Time Picker
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text("What time do you eat your biggest meal?", fontSize = 14.sp)
+                TextField(
+                    value = biggestMealTime.value,
+                    onValueChange = {},
+                    label = { Text("Biggest Meal Time") },
+                    readOnly = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Button(onClick = { biggestMealTimePicker.show() }) {
+                Icon(imageVector = Icons.Filled.DateRange, contentDescription = "Pick Biggest Meal Time")
+            }
+        }
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        TextField(
-            value = biggestMealTime.value,
-            onValueChange = { biggestMealTime.value = it },
-            label = { Text("Biggest Meal Time") }
-        )
+        // Sleep Time Picker
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text("What time do you go to sleep?", fontSize = 14.sp)
+                TextField(
+                    value = sleepTime.value,
+                    onValueChange = {},
+                    label = { Text("Sleep Time") },
+                    readOnly = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Button(onClick = { sleepTimePicker.show() }) {
+                Icon(imageVector = Icons.Filled.DateRange, contentDescription = "Pick Sleep Time")
+            }
+        }
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        TextField(
-            value = sleepTime.value,
-            onValueChange = { sleepTime.value = it },
-            label = { Text("Sleep Time") }
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        TextField(
-            value = wakeTime.value,
-            onValueChange = { wakeTime.value = it },
-            label = { Text("Wake-up Time") }
-        )
+        // Wake-up Time Picker
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text("What time do you wake up?", fontSize = 14.sp)
+                TextField(
+                    value = wakeTime.value,
+                    onValueChange = {},
+                    label = { Text("Wake-up Time") },
+                    readOnly = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Button(onClick = { wakeTimePicker.show() }) {
+                Icon(imageVector = Icons.Filled.DateRange, contentDescription = "Pick Wake-Up Time")
+            }
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -213,6 +277,10 @@ fun PersonaModal(selectedPersona: String, onDismiss: () -> Unit) {
         }
     )
 }
+
+
+
+
 
 
 fun completeQuestionnaire(context: Context){
