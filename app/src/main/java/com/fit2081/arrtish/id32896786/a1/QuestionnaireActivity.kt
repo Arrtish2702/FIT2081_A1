@@ -1,5 +1,6 @@
 package com.fit2081.arrtish.id32896786.a1
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -58,7 +59,7 @@ fun QuestionnairePage() {
     )
 
     // State to track the selected persona and modal visibility
-    var selectedPersona by remember { mutableStateOf<String?>(null) }
+    var selectedPersonaForModal by remember { mutableStateOf<String?>(null) }
     var showModal by remember { mutableStateOf(false) }
 
     val biggestMealTime = remember { mutableStateOf("12:00 PM") }
@@ -108,7 +109,7 @@ fun QuestionnairePage() {
             items(personas) { persona ->
                 Button(
                     onClick = {
-                        selectedPersona = persona
+                        selectedPersonaForModal = persona
                         showModal = true
                     },
                     modifier = Modifier
@@ -119,6 +120,14 @@ fun QuestionnairePage() {
                 }
             }
         }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text("Select Persona:")
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        //TODO: PUT A DROPDOWN FOR THE PERSONAS HERE
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -154,46 +163,38 @@ fun QuestionnairePage() {
             Button(onClick = { completeQuestionnaire(context) }) {
                 Text("Save Responses")
             }
+
+            Spacer(modifier = Modifier.width(4.dp))
+
             Button(onClick = { tempEraseQuestionnaireData(context) }) {
-                Text("Clear Response Data")
+                Text("Clear Responses")
             }
         }
     }
 
     // Show modal only if showModal is true
-    if (showModal && selectedPersona != null) {
-        PersonaModal(selectedPersona!!) { showModal = false }
+    if (showModal && selectedPersonaForModal != null) {
+        PersonaModal(selectedPersonaForModal!!) { showModal = false }
     }
 }
 
 @Composable
 fun PersonaModal(selectedPersona: String, onDismiss: () -> Unit) {
-    val textInput = when (selectedPersona) {
-        "Health Devotee" -> "You are highly committed to your health and wellness goals."
-        "Mindful Eater" -> "You pay close attention to your food choices and eat with awareness."
-        "Wellness Striver" -> "You make efforts to improve your well-being but seek more guidance."
-        "Balance Seeker" -> "You value a balanced lifestyle and strive for moderation in eating."
-        "Health Procrastinator" -> "You want to be healthier but often postpone taking action."
-        "Food Carefree" -> "You enjoy food freely without strict rules or limitations."
-        else -> "Invalid Persona"
+    val (textInput, imageResId) = when (selectedPersona) {
+        "Health Devotee" -> "You are highly committed to your health and wellness goals." to R.drawable.persona_1
+        "Mindful Eater" -> "You pay close attention to your food choices and eat with awareness." to R.drawable.persona_2
+        "Wellness Striver" -> "You make efforts to improve your well-being but seek more guidance." to R.drawable.persona_3
+        "Balance Seeker" -> "You value a balanced lifestyle and strive for moderation in eating." to R.drawable.persona_4
+        "Health Procrastinator" -> "You want to be healthier but often postpone taking action." to R.drawable.persona_5
+        "Food Carefree" -> "You enjoy food freely without strict rules or limitations." to R.drawable.persona_6
+        else -> "Invalid Persona" to R.drawable.default_image
     }
-
-    val personaIndex = listOf(
-        "Health Devotee", "Mindful Eater", "Wellness Striver",
-        "Balance Seeker", "Health Procrastinator", "Food Carefree"
-    ).indexOf(selectedPersona)
-
-    val imageName = "persona_${personaIndex + 1}" // Generates "persona_1", "persona_2", etc.
-    val context = LocalContext.current
-    val imageResId = context.resources.getIdentifier(imageName, "drawable", context.packageName)
 
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(selectedPersona) },
         text = {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Image(
                     painter = painterResource(id = imageResId),
                     contentDescription = selectedPersona,
