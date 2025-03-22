@@ -171,6 +171,7 @@ fun isLoginValid(context: Context, inputUserId: String, inputPhoneNumber: String
         sharedPreferences.edit{
             putString("user_id", inputUserId)
             putString("phone_number", inputPhoneNumber)
+            apply()
         }
 
         Toast.makeText(context,"Login Successful", Toast.LENGTH_LONG).show()
