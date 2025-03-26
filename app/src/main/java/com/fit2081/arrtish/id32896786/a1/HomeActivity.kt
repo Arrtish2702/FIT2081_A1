@@ -230,7 +230,7 @@ fun logOut(context: Context) {
 }
 
 @Composable
-private fun HideSystemBars() {
+internal fun HideSystemBars() {
     val systemUiController = rememberSystemUiController()
     systemUiController.isSystemBarsVisible = false  // Hides both status & nav bar
 }

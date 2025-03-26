@@ -59,6 +59,7 @@ class QuestionnaireActivity : ComponentActivity() {
         super.onStart()
         loadSavedPreferences()
         setContent {
+            HideSystemBars()
             A1Theme {
                 QuestionnairePage(
                     selectedCategories = selectedCategories,
