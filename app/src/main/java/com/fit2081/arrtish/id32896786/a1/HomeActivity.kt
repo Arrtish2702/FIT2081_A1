@@ -39,6 +39,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.edit
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
@@ -47,6 +48,7 @@ class HomeActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
+            HideSystemBars()
             A1Theme {
                 HomePage(modifier = Modifier.fillMaxSize())
             }
@@ -225,4 +227,10 @@ fun logOut(context: Context) {
     intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
     context.startActivity(intent)
     (context as? Activity)?.finish() // Ensure the current activity is finished
+}
+
+@Composable
+private fun HideSystemBars() {
+    val systemUiController = rememberSystemUiController()
+    systemUiController.isSystemBarsVisible = false  // Hides both status & nav bar
 }
