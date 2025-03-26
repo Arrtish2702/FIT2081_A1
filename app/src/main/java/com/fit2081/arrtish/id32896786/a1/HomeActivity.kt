@@ -164,7 +164,7 @@ fun HomePage(modifier: Modifier = Modifier) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Button(onClick = { logOut(context) }) {
+            Button(onClick = { Authentication.logout(context) }) {
                 Text(text = "Log Out")
             }
         }
@@ -216,18 +216,6 @@ fun onRouteToInsights(context: Context) {
     context.startActivity(intent)
 }
 
-fun logOut(context: Context) {
-    val sharedPreferences = context.getSharedPreferences("assignment_1", Context.MODE_PRIVATE)
-    sharedPreferences.edit {
-        putString("user_id", null)
-        putString("phone_number", null)
-    }
-
-    val intent = Intent(context, LoginActivity::class.java)
-    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
-    context.startActivity(intent)
-    (context as? Activity)?.finish() // Ensure the current activity is finished
-}
 
 @Composable
 internal fun HideSystemBars() {
