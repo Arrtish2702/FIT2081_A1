@@ -17,9 +17,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -40,29 +45,27 @@ import androidx.compose.ui.unit.dp
 import com.fit2081.arrtish.id32896786.a1.ui.theme.A1Theme
 import java.io.BufferedReader
 import java.io.InputStreamReader
-import androidx.core.content.edit
-
 
 class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        Authentication.init(this)
         setContent {
             A1Theme {
-                LoginPage(modifier = Modifier.fillMaxSize())
+                LoginPage(context = this, modifier = Modifier.fillMaxSize())
             }
         }
     }
 }
-
-@Preview(showBackground = true)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginPage(modifier: Modifier = Modifier) {
-
-    val context = LocalContext.current
-    var userId by remember { mutableStateOf("") }
+fun LoginPage(context: Context, modifier: Modifier = Modifier) {
+    var selectedUserId by remember { mutableStateOf("") }
     var phoneNumber by remember { mutableStateOf("") }
     var phoneNumberError by remember { mutableStateOf(false) }
+    val userIds = remember { extractUserIdsFromCSV(context) }
+    var expanded by remember { mutableStateOf(false) }
 
     Box(
         modifier = modifier
@@ -77,6 +80,7 @@ fun LoginPage(modifier: Modifier = Modifier) {
                 .align(Alignment.TopCenter)
                 .padding(top = 60.dp)
         )
+
         Column(
             modifier = Modifier
                 .align(Alignment.Center)
@@ -91,14 +95,40 @@ fun LoginPage(modifier: Modifier = Modifier) {
                 fontWeight = FontWeight.Bold
             )
 
-            OutlinedTextField(
-                value = userId,
-                onValueChange = { userId = it },
-                label = { Text("User Id") },
-                leadingIcon = { Icon(Icons.Default.Person, contentDescription = "User Icon") },
-                modifier = Modifier.fillMaxWidth()
-            )
+            // Exposed Dropdown for User ID with Arrow Icon
+            ExposedDropdownMenuBox(
+                expanded = expanded,
+                onExpandedChange = { expanded = !expanded }
+            ) {
+                OutlinedTextField(
+                    value = selectedUserId,
+                    onValueChange = {},
+                    label = { Text("User ID") },
+                    leadingIcon = { Icon(Icons.Default.Person, contentDescription = "User Icon") },
+                    trailingIcon = { Icon(Icons.Filled.ArrowDropDown, contentDescription = "Dropdown Arrow") }, // <-- ARROW ADDED
+                    readOnly = true,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .menuAnchor()
+                )
 
+                ExposedDropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    userIds.forEach { userId ->
+                        DropdownMenuItem(
+                            text = { Text(userId) },
+                            onClick = {
+                                selectedUserId = userId
+                                expanded = false
+                            }
+                        )
+                    }
+                }
+            }
+
+            // Phone Number Input
             OutlinedTextField(
                 value = phoneNumber,
                 onValueChange = {
@@ -120,9 +150,10 @@ fun LoginPage(modifier: Modifier = Modifier) {
                 )
             }
 
+            // Login Button
             Button(
                 onClick = {
-                    isLoginValid(context,userId,phoneNumber)
+                    Authentication.login(context, selectedUserId, phoneNumber)
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -133,31 +164,21 @@ fun LoginPage(modifier: Modifier = Modifier) {
 }
 
 
-fun isValidNumber(number: String): Boolean {
-    // Regex for Australian and Malaysian numbers
-    val aussieRegex = Regex("^(61[2-478]\\d{8})$")
-    val malaysianRegex = Regex("^(60[1-9]\\d{7,9})$")
+// Function to extract user IDs from the CSV
+fun extractUserIdsFromCSV(context: Context): List<String> {
+    val userIds = mutableListOf<String>()
 
-    return aussieRegex.matches(number) || malaysianRegex.matches(number)
-}
-
-fun isLoginValid(context: Context, inputUserId: String, inputPhoneNumber: String){
-
-    val assets = context.assets
-    var loginSuccess = false
     try {
-        val inputStream = assets.open("nutritrack_data.csv")
+        val inputStream = context.assets.open("nutritrack_data.csv")
         val reader = BufferedReader(InputStreamReader(inputStream))
 
         reader.useLines { lines ->
-            lines.drop(1).forEach { line ->  // Skip header
-                val values = line.split(",")
+            lines.drop(1).forEach { line ->  // Skip header row
+                val values = line.split(",").map { it.trim() }
                 if (values.size >= 2) {
-                    val phoneNumber = values[0].trim()
-                    val userId = values[1].trim()
-
-                    if (phoneNumber == inputPhoneNumber && userId == inputUserId) {
-                        loginSuccess = true
+                    val csvUserId = values[1]
+                    if (csvUserId.isNotEmpty()) {
+                        userIds.add(csvUserId)
                     }
                 }
             }
@@ -166,20 +187,12 @@ fun isLoginValid(context: Context, inputUserId: String, inputPhoneNumber: String
         e.printStackTrace()
     }
 
-    if (loginSuccess){
-        val sharedPreferences = context.getSharedPreferences("assignment_1", Context.MODE_PRIVATE)
-        sharedPreferences.edit{
-            putString("user_id", inputUserId)
-            putString("phone_number", inputPhoneNumber)
-        }
+    return userIds
+}
 
-        Toast.makeText(context,"Login Successful", Toast.LENGTH_LONG).show()
-
-        val intent = Intent(context, HomeActivity::class.java)
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        context.startActivity(intent)
-
-    }else{
-        Toast.makeText(context,"Incorrect Credentials", Toast.LENGTH_LONG).show()
-    }
+// Function to validate phone numbers
+fun isValidNumber(number: String): Boolean {
+    val aussieRegex = Regex("^(61[2-478]\\d{8})$")
+    val malaysianRegex = Regex("^(60[1-9]\\d{7,9})$")
+    return aussieRegex.matches(number) || malaysianRegex.matches(number)
 }

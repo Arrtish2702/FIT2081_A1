@@ -39,6 +39,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.edit
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
@@ -46,7 +47,9 @@ class HomeActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        Authentication.init(this)
         setContent {
+            HideSystemBars()
             A1Theme {
                 HomePage(modifier = Modifier.fillMaxSize())
             }
@@ -162,7 +165,7 @@ fun HomePage(modifier: Modifier = Modifier) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Button(onClick = { logOut(context) }) {
+            Button(onClick = { Authentication.logout(context) }) {
                 Text(text = "Log Out")
             }
         }
@@ -214,15 +217,8 @@ fun onRouteToInsights(context: Context) {
     context.startActivity(intent)
 }
 
-fun logOut(context: Context) {
-    val sharedPreferences = context.getSharedPreferences("assignment_1", Context.MODE_PRIVATE)
-    sharedPreferences.edit {
-        putString("user_id", null)
-        putString("phone_number", null)
-    }
-
-    val intent = Intent(context, LoginActivity::class.java)
-    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
-    context.startActivity(intent)
-    (context as? Activity)?.finish() // Ensure the current activity is finished
+@Composable
+internal fun HideSystemBars() {
+    val systemUiController = rememberSystemUiController()
+    systemUiController.isSystemBarsVisible = false  // Hides both status & nav bar
 }
