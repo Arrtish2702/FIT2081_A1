@@ -38,7 +38,7 @@ class MainActivity : ComponentActivity() {
         if (savedUserId != null && savedPhoneNumber != null) {
             // Auto-login: Navigate to HomeActivity
 
-            isLoginValid(this,savedUserId,savedPhoneNumber)
+            Authentication.login(this, savedUserId, savedPhoneNumber)
             startActivity(Intent(this, HomeActivity::class.java))
             finish()  // Close LoginActivity
         }else {
