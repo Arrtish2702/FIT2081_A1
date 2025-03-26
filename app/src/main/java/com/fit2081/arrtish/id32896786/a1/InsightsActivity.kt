@@ -16,10 +16,12 @@ import androidx.compose.ui.unit.sp
 import com.fit2081.arrtish.id32896786.a1.ui.theme.A1Theme
 import android.content.Context
 import android.content.Intent
+import android.util.Log
+import android.widget.Toast
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import java.io.BufferedReader
 import java.io.InputStreamReader
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 
 class InsightsActivity : ComponentActivity() {
@@ -33,17 +35,42 @@ class InsightsActivity : ComponentActivity() {
     }
 }
 
-@Preview(showBackground=true)
+@Preview(showBackground = true)
 @Composable
 fun InsightsScreen() {
 
     val context = LocalContext.current
+    val sharedPreferences = context.getSharedPreferences("assignment_1", Context.MODE_PRIVATE)
+    val userId = sharedPreferences.getString("user_id", null)?.toIntOrNull()
+
+    val userScores = remember { userId?.let { getUserScores(context, it) } } ?: emptyMap()
+
+    // Categories & default max scores
+    val categories = listOf(
+        "Vegetables" to 10,
+        "Fruits" to 10,
+        "Grains & Cereals" to 10,
+        "Whole Grains" to 10,
+        "Meat & Alternatives" to 10,
+        "Dairy" to 10,
+        "Water" to 5,
+        "Unsaturated Fats" to 10,
+        "Sodium" to 10,
+        "Sugar" to 10,
+        "Alcohol" to 5,
+        "Discretionary Foods" to 10
+    )
+
+    val totalScoreRaw = categories.sumOf { (category, _) -> (userScores[category] ?: 0f).toDouble() }
+    val maxScoreRaw = categories.sumOf { it.second.toDouble() }
+    val totalScore = (totalScoreRaw / maxScoreRaw) * 100
+
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
-    ){
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -53,22 +80,8 @@ fun InsightsScreen() {
         ) {
             Text(text = "Insights: Food Score", fontSize = 20.sp, modifier = Modifier.padding(bottom = 16.dp))
 
-            val categories = listOf(
-                "Vegetables" to 10,
-                "Fruits" to 10,
-                "Grains & Cereals" to 10,
-                "Whole Grains" to 10,
-                "Meat & Alternatives" to 10,
-                "Dairy" to 10,
-                "Water" to 2,
-                "Unsaturated Fats" to 10,
-                "Sodium" to 10,
-                "Sugar" to 10,
-                "Alcohol" to 2,
-                "Discretionary Foods" to 8
-            )
-
-            categories.forEach { (name, score) ->
+            categories.forEach { (name, max) ->
+                val score = userScores[name] ?: 0
                 FoodScoreItem(name, score)
             }
 
@@ -76,51 +89,58 @@ fun InsightsScreen() {
 
             Text(text = "Total Food Quality Score", fontSize = 16.sp)
             Slider(
-                value = 40f,
+                value = totalScore.toFloat(),
                 onValueChange = {},
-                valueRange = 0f..100f,
+                valueRange = 0f..100.toFloat(),
                 enabled = false,
                 colors = SliderDefaults.colors(
                     disabledThumbColor = MaterialTheme.colorScheme.primary,
                     disabledActiveTrackColor = MaterialTheme.colorScheme.primary
                 )
             )
-            Text(text = "40/100")
+            Text(text = "$totalScore/100")
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            Button(onClick = { sharingInsights(context) }, modifier = Modifier.fillMaxWidth()) {
+            Button(onClick = { sharingInsights(context, userScores, totalScore, 100) }, modifier = Modifier.fillMaxWidth()) {
                 Text(text = "Share with someone")
             }
 
             Spacer(modifier = Modifier.height(4.dp))
-            Button(onClick = { /* Navigate to NutriCoach in future */ }, modifier = Modifier.fillMaxWidth()) {
+            Button(onClick = {
+                Toast.makeText(context,"NutriCoach in Development", Toast.LENGTH_LONG).show()
+            }, modifier = Modifier.fillMaxWidth()) {
                 Text(text = "Improve my diet!")
             }
         }
-
     }
 }
 
 @Composable
-fun FoodScoreItem(name: String, score: Int) {
+fun FoodScoreItem(name: String, score: Number) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+        modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(text = name, modifier = Modifier.weight(1f))
+
+        Spacer(modifier = Modifier.width(2.dp))
+
         Slider(
             value = score.toFloat(),
             onValueChange = {},
             valueRange = 0f..10f,
             enabled = false,
-            modifier = Modifier.weight(1.5f).padding(),
+            modifier = Modifier.weight(1.2f).padding(),
             colors = SliderDefaults.colors(
                 disabledThumbColor = MaterialTheme.colorScheme.primary,
                 disabledActiveTrackColor = MaterialTheme.colorScheme.primary
             )
         )
-        Text(text = "$score/10", modifier = Modifier.padding(start = 8.dp))
+
+        Spacer(modifier = Modifier.width(2.dp))
+
+        Text(text = "${"%.2f".format(score)}/10", modifier = Modifier.padding(start = 8.dp))
     }
 }
 
@@ -132,62 +152,69 @@ fun InsightsScreenPreview() {
     }
 }
 
-
-fun sharingInsights(context: Context) {
-    val shareText = """
-        🌟 Insights: Food Score 🌟
-        Vegetables: 10/10
-        Fruits: 10/10
-        Grains & Cereals: 10/10
-        Whole Grains: 10/10
-        Meat & Alternatives: 10/10
-        Dairy: 10/10
-        Water: 2/5
-        Unsaturated Fats: 10/10
-        Sodium: 10/10
-        Sugar: 10/10
-        Alcohol: 2/5
-        Discretionary Foods: 8/10
-        
-        🏆 Total Food Quality Score: 40/100
-    """.trimIndent()
+fun sharingInsights(context: Context, userScores: Map<String, Float>, totalScore: Double, maxScore: Int) {
+    val shareText = buildString {
+        append("🌟 Insights: Food Score 🌟\n")
+        userScores.forEach { (category, score) ->
+            append("$category: $score/10\n")
+        }
+        append("\n🏆 Total Food Quality Score: $totalScore/$maxScore")
+    }
 
     val intent = Intent(Intent.ACTION_SEND).apply {
         type = "text/plain"
         putExtra(Intent.EXTRA_TEXT, shareText)
     }
 
-    // Show the chooser to let the user pick an app to share
     val chooser = Intent.createChooser(intent, "Share your insights via:")
     context.startActivity(chooser)
 }
 
-fun getUserScores(context: Context, userId: Int): Map<String, Int>? {
+fun getUserScores(context: Context, userId: Int): MutableMap<String, Float>? {
     try {
-        val inputStream = context.assets.open("nutritrack_data.csv") // Load from assets
-        val reader = InputStreamReader(inputStream)
-        val rows = csvReader().readAllWithHeader(reader)
-        inputStream.close() // Close to prevent memory leaks
+        val inputStream = context.assets.open("nutritrack_data.csv")
+        val reader = BufferedReader(InputStreamReader(inputStream))
+        val lines = reader.readLines()
 
-        // Find user row
-        val userRow = rows.find { it["User_ID"]?.toIntOrNull() == userId } ?: return null
-        val isMale = userRow["Sex"] == "Male"
+        if (lines.isEmpty()) return null // Ensure file isn't empty
 
-        // Map category names to the correct column based on gender
-        return mapOf(
-            "Vegetables" to (userRow[if (isMale) "VegetablesHEIFAscoreMale" else "VegetablesHEIFAscoreFemale"]?.toIntOrNull() ?: 0),
-            "Fruits" to (userRow[if (isMale) "FruitsHEIFAscoreMale" else "FruitsHEIFAscoreFemale"]?.toIntOrNull() ?: 0),
-            "Grains & Cereals" to (userRow[if (isMale) "GrainsHEIFAscoreMale" else "GrainsHEIFAscoreFemale"]?.toIntOrNull() ?: 0),
-            "Whole Grains" to (userRow[if (isMale) "WholeGrainsHEIFAscoreMale" else "WholeGrainsHEIFAscoreFemale"]?.toIntOrNull() ?: 0),
-            "Meat & Alternatives" to (userRow[if (isMale) "MeatHEIFAscoreMale" else "MeatHEIFAscoreFemale"]?.toIntOrNull() ?: 0),
-            "Dairy" to (userRow[if (isMale) "DairyHEIFAscoreMale" else "DairyHEIFAscoreFemale"]?.toIntOrNull() ?: 0),
-            "Water" to (userRow["WaterHEIFAscore"]?.toIntOrNull() ?: 0),
-            "Unsaturated Fats" to (userRow[if (isMale) "UnsaturatedFatHEIFAscoreMale" else "UnsaturatedFatHEIFAscoreFemale"]?.toIntOrNull() ?: 0),
-            "Sodium" to (userRow["SodiumHEIFAscore"]?.toIntOrNull() ?: 0),
-            "Sugar" to (userRow[if (isMale) "SugarHEIFAscoreMale" else "SugarHEIFAscoreFemale"]?.toIntOrNull() ?: 0),
-            "Alcohol" to (userRow["AlcoholHEIFAscore"]?.toIntOrNull() ?: 0),
-            "Discretionary Foods" to (userRow[if (isMale) "DiscretionaryHEIFAscoreMale" else "DiscretionaryHEIFAscoreFemale"]?.toIntOrNull() ?: 0)
+        val headers = lines.first().split(",").map { it.trim() } // Extract headers
+        val dataRows = lines.drop(1) // Skip header row
+
+        // Find the user's row
+        val userRow = dataRows.map { it.split(",").map { value -> value.trim() } }
+            .find { it.getOrNull(headers.indexOf("User_ID")) == userId.toString() } ?: return null
+
+        val isMale = userRow.getOrNull(headers.indexOf("Sex")) == "Male"
+
+        // Map category names to corresponding HEIFA score columns
+        val scoreMapping = mapOf(
+            "Vegetables" to "VegetablesHEIFAscore",
+            "Fruits" to "FruitHEIFAscore",
+            "Grains & Cereals" to "GrainsandcerealsHEIFAscore",
+            "Whole Grains" to "WholegrainsHEIFAscore",
+            "Meat & Alternatives" to "MeatandalternativesHEIFAscore",
+            "Dairy" to "DairyandalternativesHEIFAscore",
+            "Water" to "WaterHEIFAscore",
+            "Unsaturated Fats" to "UnsaturatedFatHEIFAscore",
+            "Sodium" to "SodiumHEIFAscore",
+            "Sugar" to "SugarHEIFAscore",
+            "Alcohol" to "AlcoholHEIFAscore",
+            "Discretionary Foods" to "DiscretionaryHEIFAscore"
         )
+
+        val scores = mutableMapOf<String, Float>()
+        for ((category, baseColumn) in scoreMapping) {
+            val columnName = if (isMale) "${baseColumn}Male" else "${baseColumn}Female"
+            val columnIndex = headers.indexOf(columnName).takeIf { it != -1 } ?: headers.indexOf(baseColumn)
+
+            scores[category] = userRow.getOrNull(columnIndex)?.toFloatOrNull() ?: 0f
+            Log.v("scores[category]", "${category}and${columnName}:${userRow.getOrNull(columnIndex)?.toFloatOrNull() ?: 0}")
+        }
+        Log.v("scores", scores.toString())
+
+        reader.close() // Close reader to prevent memory leaks
+        return scores
     } catch (e: Exception) {
         e.printStackTrace()
         return null
