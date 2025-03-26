@@ -25,7 +25,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.draw.clip
@@ -49,6 +51,7 @@ class QuestionnaireActivity : ComponentActivity() {
     private val biggestMealTime = mutableStateOf("12:00 PM")
     private val sleepTime = mutableStateOf("10:00 PM")
     private val wakeTime = mutableStateOf("6:00 AM")
+    private var selectedPersona = mutableStateOf("")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,7 +69,8 @@ class QuestionnaireActivity : ComponentActivity() {
                     personas = personas,
                     biggestMealTime = biggestMealTime,
                     sleepTime = sleepTime,
-                    wakeTime = wakeTime
+                    wakeTime = wakeTime,
+                    selectedPersona = selectedPersona
                 )
             }
         }
@@ -74,22 +78,34 @@ class QuestionnaireActivity : ComponentActivity() {
 
     private fun loadSavedPreferences() {
         val sharedPreferences = this.getSharedPreferences("assignment_1", Context.MODE_PRIVATE)
-        if(sharedPreferences.getBoolean("answered",false)){
-            // Load selected categories from SharedPreferences
+        if (sharedPreferences.getBoolean("answered", false)) {
             val savedCategories = sharedPreferences.getStringSet("selectedCategories", emptySet()) ?: emptySet()
             selectedCategories.clear()
-            selectedCategories.addAll(savedCategories) // Update mutable list
+            selectedCategories.addAll(savedCategories)
 
-            // Load other values from SharedPreferences
             biggestMealTime.value = sharedPreferences.getString("biggestMealTime", "12:00 PM") ?: "12:00 PM"
             sleepTime.value = sharedPreferences.getString("sleepTime", "10:00 PM") ?: "10:00 PM"
             wakeTime.value = sharedPreferences.getString("wakeTime", "6:00 AM") ?: "6:00 AM"
+
+            val savedPersona = sharedPreferences.getString("selectedPersona", null)
+            if (savedPersona != null && personas.contains(savedPersona)) {
+                selectedPersona.value = savedPersona // ✅ Fix: Correctly assign to MutableState<String>
+            } else {
+                selectedPersona.value = personas.firstOrNull() ?: "Select a persona"
+            }
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun QuestionnairePage(selectedCategories: MutableList<String>, personas: List<String>, biggestMealTime: MutableState<String>, sleepTime: MutableState<String>, wakeTime: MutableState<String>
+fun QuestionnairePage(
+    selectedCategories: MutableList<String>,
+    personas: List<String>,
+    biggestMealTime: MutableState<String>,
+    sleepTime: MutableState<String>,
+    wakeTime: MutableState<String>,
+    selectedPersona: MutableState<String> // Pass as String, not MutableState
 ) {
     val context = LocalContext.current
     var selectedPersonaForModal by remember { mutableStateOf<String?>(null) }
@@ -97,6 +113,9 @@ fun QuestionnairePage(selectedCategories: MutableList<String>, personas: List<St
     val calendar = Calendar.getInstance()
     val hour = calendar.get(Calendar.HOUR_OF_DAY)
     val minute = calendar.get(Calendar.MINUTE)
+    var expanded by remember { mutableStateOf(false) }
+//    var selectedPersona by remember { mutableStateOf(personas.firstOrNull() ?: "Select a persona") }
+    val scrollState = rememberScrollState() // For scrolling
 
     // Create TimePickerDialogs once
     val biggestMealTimePicker = TimePickerDialog(
@@ -126,9 +145,9 @@ fun QuestionnairePage(selectedCategories: MutableList<String>, personas: List<St
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+            .padding(16.dp)
+            .verticalScroll(scrollState),  // Enable scrolling
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text("Select Food Categories:", fontSize = 20.sp)
 
@@ -136,7 +155,9 @@ fun QuestionnairePage(selectedCategories: MutableList<String>, personas: List<St
 
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp), // Prevent infinite height from breaking scroll
             verticalArrangement = Arrangement.spacedBy(8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
@@ -159,7 +180,9 @@ fun QuestionnairePage(selectedCategories: MutableList<String>, personas: List<St
 
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp), // Ensuring proper scroll behavior
             verticalArrangement = Arrangement.spacedBy(8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
@@ -178,7 +201,42 @@ fun QuestionnairePage(selectedCategories: MutableList<String>, personas: List<St
             }
         }
 
-        //TODO: Do the DropDown for the personas
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Dropdown for persona selection
+        Box(modifier = Modifier.fillMaxWidth()) {
+            ExposedDropdownMenuBox(
+                expanded = expanded,
+                onExpandedChange = { expanded = !expanded }
+            ) {
+                TextField(
+                    value = selectedPersona.value, // Use selectedPersona.value
+                    onValueChange = {},
+                    readOnly = true,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .menuAnchor(),
+                    trailingIcon = {
+                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+                    }
+                )
+                ExposedDropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    personas.forEach { persona ->
+                        DropdownMenuItem(
+                            text = { Text(persona) },
+                            onClick = {
+                                selectedPersona.value = persona // Corrected to update MutableState
+                                expanded = false
+                            }
+                        )
+                    }
+                }
+            }
+        }
+
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -246,7 +304,7 @@ fun QuestionnairePage(selectedCategories: MutableList<String>, personas: List<St
         Spacer(modifier = Modifier.height(16.dp))
 
         Row(horizontalArrangement = Arrangement.SpaceEvenly) {
-            Button(onClick = { completeQuestionnaire(context, selectedCategories, biggestMealTime, sleepTime, wakeTime) }) {
+            Button(onClick = { completeQuestionnaire(context, selectedCategories, biggestMealTime, sleepTime, wakeTime, selectedPersona) }) {
                 Text("Save Responses")
             }
 
@@ -256,6 +314,7 @@ fun QuestionnairePage(selectedCategories: MutableList<String>, personas: List<St
                 Text("Clear Responses")
             }
         }
+        Spacer(modifier = Modifier.height(32.dp)) // Extra padding to prevent cutoff
     }
 
     // Show modal only if showModal is true
@@ -263,6 +322,7 @@ fun QuestionnairePage(selectedCategories: MutableList<String>, personas: List<St
         PersonaModal(selectedPersonaForModal!!) { showModal = false }
     }
 }
+
 
 @Composable
 fun PersonaModal(selectedPersona: String, onDismiss: () -> Unit) {
@@ -301,30 +361,39 @@ fun PersonaModal(selectedPersona: String, onDismiss: () -> Unit) {
 }
 
 
-fun completeQuestionnaire(context: Context, selectedCategories: List<String>, biggestMealTime: MutableState<String>, sleepTime: MutableState<String>, wakeTime: MutableState<String>){
+fun completeQuestionnaire(
+    context: Context,
+    selectedCategories: List<String>,
+    biggestMealTime: MutableState<String>,
+    sleepTime: MutableState<String>,
+    wakeTime: MutableState<String>,
+    selectedPersona: MutableState<String> // Pass as String, not MutableState
+) {
     val sharedPreferences = context.getSharedPreferences("assignment_1", Context.MODE_PRIVATE)
-    sharedPreferences.edit{
-        putStringSet("selectedCategories", selectedCategories.toSet()) // Convert List to Set
-        putString("biggestMealTime", biggestMealTime.value) // Extract value from MutableState
-        putString("sleepTime", sleepTime.value) // Extract value from MutableState
-        putString("wakeTime", wakeTime.value) // Extract value from MutableState
+    sharedPreferences.edit {
+        putStringSet("selectedCategories", selectedCategories.toSet())
+        putString("biggestMealTime", biggestMealTime.value)
+        putString("sleepTime", sleepTime.value)
+        putString("wakeTime", wakeTime.value)
+        putString("selectedPersona", selectedPersona.value) // ✅ Fix: Store persona correctly
         putBoolean("answered", true)
         apply()
     }
     onRouteToHome(context)
 }
 
-fun eraseQuestionnaireData(context: Context){
+fun eraseQuestionnaireData(context: Context) {
     val sharedPreferences = context.getSharedPreferences("assignment_1", Context.MODE_PRIVATE)
-    sharedPreferences.edit{
-        putStringSet("selectedCategories", null) // Convert List to Set
-        putString("biggestMealTime", null) // Extract value from MutableState
-        putString("sleepTime", null) // Extract value from MutableState
-        putString("wakeTime", null) // Extract value from MutableState
+    sharedPreferences.edit {
+        putStringSet("selectedCategories", null)
+        putString("biggestMealTime", null)
+        putString("sleepTime", null)
+        putString("wakeTime", null)
+        putString("selectedPersona", null) // ✅ Fix: Remove stored persona
         putBoolean("answered", false)
         apply()
     }
-    Toast.makeText(context,"Data Erased", Toast.LENGTH_LONG).show()
+    Toast.makeText(context, "Data Erased", Toast.LENGTH_LONG).show()
     onRouteToHome(context)
 }
 
