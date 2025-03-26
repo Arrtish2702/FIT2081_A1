@@ -50,6 +50,7 @@ class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        Authentication.init(this)
         setContent {
             A1Theme {
                 LoginPage(context = this, modifier = Modifier.fillMaxSize())

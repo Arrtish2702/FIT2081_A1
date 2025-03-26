@@ -3,12 +3,20 @@ package com.fit2081.arrtish.id32896786.a1
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.widget.Toast
 import androidx.core.content.edit
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
 object Authentication {
+    private lateinit var sharedPreferences: SharedPreferences
+
+    // Initialize SharedPreferences once
+    fun init(context: Context) {
+        sharedPreferences = context.getSharedPreferences("assignment_1", Context.MODE_PRIVATE)
+    }
+
     fun login(context: Context, userId: String, phoneNumber: String): Boolean {
         val assets = context.assets
         var isValid = false
@@ -35,7 +43,6 @@ object Authentication {
         }
 
         if (isValid) {
-            val sharedPreferences = context.getSharedPreferences("assignment_1", Context.MODE_PRIVATE)
             sharedPreferences.edit {
                 putString("user_id", userId)
                 putString("phone_number", phoneNumber)
@@ -54,10 +61,10 @@ object Authentication {
     }
 
     fun logout(context: Context) {
-        val sharedPreferences = context.getSharedPreferences("assignment_1", Context.MODE_PRIVATE)
         sharedPreferences.edit {
-            putString("user_id", null)
-            putString("phone_number", null)
+            remove("user_id")
+            remove("phone_number")
+            apply()
         }
 
         val intent = Intent(context, LoginActivity::class.java)

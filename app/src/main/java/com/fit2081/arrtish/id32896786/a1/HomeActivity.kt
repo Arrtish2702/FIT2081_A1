@@ -47,6 +47,7 @@ class HomeActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        Authentication.init(this)
         setContent {
             HideSystemBars()
             A1Theme {
@@ -215,7 +216,6 @@ fun onRouteToInsights(context: Context) {
     val intent = Intent(context, InsightsActivity::class.java)
     context.startActivity(intent)
 }
-
 
 @Composable
 internal fun HideSystemBars() {
