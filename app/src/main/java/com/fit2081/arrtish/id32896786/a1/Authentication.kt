@@ -1,10 +1,10 @@
+package com.fit2081.arrtish.id32896786.a1
+
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.util.Log
 import androidx.core.content.edit
-import com.fit2081.arrtish.id32896786.a1.HomeActivity
-import com.fit2081.arrtish.id32896786.a1.LoginActivity
 
 object Authentication {
     private lateinit var sharedPreferences: SharedPreferences
@@ -19,6 +19,7 @@ object Authentication {
         sharedPreferences.edit {
             putString("user_id", userId)
             putString("phone_number", phoneNumber)
+            putBoolean("updated", false)
         }
 
         // Initialize user preferences

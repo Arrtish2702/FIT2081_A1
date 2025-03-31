@@ -1,9 +1,10 @@
 package com.fit2081.arrtish.id32896786.a1
 
-import UserSharedPreferences
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -17,9 +18,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.fit2081.arrtish.id32896786.a1.CsvExports.getUserDetailsAndSave
 import com.fit2081.arrtish.id32896786.a1.ui.theme.A1Theme
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
@@ -29,30 +30,41 @@ class HomeActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         // Retrieve userId from Intent extras
-        val userId = intent.getStringExtra("user_id")
+        val userId = intent.getStringExtra("user_id") ?: "default_user" // Provide a default if null
+        Log.v("HomeActivity", "User ID: $userId")
+
+        val sharedPreferences = UserSharedPreferences.getPreferences(this, userId)
+        val isUpdated = sharedPreferences.getBoolean("updated", false) // Check if data has been updated
+
+        Log.v("HomeActivity", "SharedPreferences: $sharedPreferences | Updated: $isUpdated")
+
+        if (!isUpdated) { // If data has not been updated, fetch and save it
+            Log.v("HomeActivity", "Adding data to SharedPreferences for user $userId")
+            getUserDetailsAndSave(this, userId)
+        } else {
+            Log.v("HomeActivity", "Using existing SharedPreferences for user $userId")
+        }
+
+        Log.v("HomeActivity", "SharedPreferences: $sharedPreferences")
 
         setContent {
             HideSystemBars()
             A1Theme {
-                HomePage(userId,modifier = Modifier.fillMaxSize())
+                HomePage(userId,sharedPreferences,modifier = Modifier.fillMaxSize())
             }
         }
     }
 }
 
-@Preview(showBackground = true)
 @Composable
-fun HomePagePreview() {
-    HomePage(userId = "Guest",modifier = Modifier.fillMaxSize())
-}
-
-@Composable
-fun HomePage(userId: String?, modifier: Modifier = Modifier) {
+fun HomePage(userId: String?,sharedPreferences: SharedPreferences, modifier: Modifier = Modifier) {
     val context = LocalContext.current
-    val userPrefs = userId?.let { UserSharedPreferences(context, it) }
-    val foodQualityScore = userPrefs?.getUserChoices()?.get("foodScore")?.toString() ?: "0"
+
+    val foodQualityScore = sharedPreferences.getFloat("qualityScore",0f)
 
     var showDialog by remember { mutableStateOf(false) }
+
+    Log.v("HomeActivity", "Food Quality Score: $foodQualityScore")
 
     // Check if the user has answered the questionnaire
     checkForQuestionnaire(context,userId) { hasAnswered ->
@@ -133,7 +145,7 @@ fun HomePage(userId: String?, modifier: Modifier = Modifier) {
                 Text(text = "Edit Responses")
             }
 
-            Button(onClick = { onRouteToInsights(context) }) {
+            Button(onClick = { onRouteToInsights(context, userId) }) {
                 Text(text = "View Insights")
             }
 
@@ -142,7 +154,6 @@ fun HomePage(userId: String?, modifier: Modifier = Modifier) {
             }
         }
     }
-
 }
 
 fun checkForQuestionnaire(context: Context, userId: String?, callback: (Boolean) -> Unit) {
@@ -152,17 +163,20 @@ fun checkForQuestionnaire(context: Context, userId: String?, callback: (Boolean)
     }
 
     val userPreferences = UserSharedPreferences(context, userId)
-    val answeredQuestionnaire = userPreferences.getUserChoices()?.get("answered") as? Boolean ?: false
+    val answeredQuestionnaire = userPreferences.getUserChoices()?.get("answered") as? Boolean == true
     callback(answeredQuestionnaire)
 }
+
 //
 //fun onRouteToQuestionnaire(context: Context) {
 //    val intent = Intent(context, QuestionnaireActivity::class.java)
 //    context.startActivity(intent)
 //}
 
-fun onRouteToInsights(context: Context) {
-    val intent = Intent(context, InsightsActivity::class.java)
+fun onRouteToInsights(context: Context, userId: String?) {
+    val intent = Intent(context, InsightsActivity::class.java).apply{
+        putExtra("user_id", userId)
+    }
     context.startActivity(intent)
 }
 
