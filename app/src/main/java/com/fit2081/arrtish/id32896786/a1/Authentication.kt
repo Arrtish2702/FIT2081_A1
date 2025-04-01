@@ -56,12 +56,4 @@ object Authentication {
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         context.startActivity(intent)
     }
-
-    fun isLoggedIn(): Boolean {
-        return sharedPreferences.contains("user_id")
-    }
-
-    fun getUserId(): String? {
-        return sharedPreferences.getString("user_id", null)
-    }
 }

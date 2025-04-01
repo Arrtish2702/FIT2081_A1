@@ -90,7 +90,7 @@ object CsvExports {
         val updatedFlag = sharedPreferences.getBoolean("updated", false)
 
         Log.v("FIT2081-CsvExports", "✅ User $userId - Retrieved from SharedPreferences: $savedData")
-        Log.v("FIT2081-CsvExports", "✅ User $userId - Updated flag: $updatedFlag")
+        Log.v("CsvExports", "✅ User $userId - Updated flag: $updatedFlag")
     }
 
     // Helper function to convert JSONObject to a Map

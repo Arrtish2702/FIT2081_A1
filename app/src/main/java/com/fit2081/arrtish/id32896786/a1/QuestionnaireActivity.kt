@@ -347,14 +347,14 @@ fun completeQuestionnaire(
     )
 
     // Log before saving
-    Log.v("FIT2081-Questionnaire", "Saving User Preferences for User ID: ${userPrefs}")
+    Log.v("FIT2081-Questionnaire", "Saving User Preferences for User ID: $userPrefs")
     Log.v("FIT2081-Questionnaire", "Data being saved: $userChoices")
 
     // Save user preferences
     userPrefs.saveUserChoices(userChoices)
 
     // Ensure that "answered" is set to true after saving data
-    UserSharedPreferences.getPreferences(context, userId).edit() {
+    UserSharedPreferences.getPreferences(context, userId).edit {
         putBoolean("answered", true)
     }
 
@@ -368,20 +368,12 @@ fun completeQuestionnaire(
 
 
 fun eraseQuestionnaireData(context: Context, userId: String, userPrefs: UserSharedPreferences) {
-    // Create a map with default empty data for the questionnaire
-    val emptyChoices = mapOf(
-        "selectedCategories" to emptyList<String>(),
-        "biggestMealTime" to "12:00 PM",
-        "sleepTime" to "10:00 PM",
-        "wakeTime" to "6:00 AM",
-        "selectedPersona" to "Select a persona"
-    )
     // Log before clearing
-    Log.v("FIT2081-Questionnaire", "Clearing User Preferences for User ID: ${userPrefs}")
+    Log.v("FIT2081-Questionnaire", "Clearing User Preferences for User ID: $userPrefs")
     Log.v("FIT2081-Questionnaire", "Data before clearing: ${userPrefs.getUserChoices()}")
 
     userPrefs.clearUserChoices()
-    UserSharedPreferences.getPreferences(context, userId).edit() {
+    UserSharedPreferences.getPreferences(context, userId).edit {
         putBoolean("answered", false)
     }
     // Log after clearing
