@@ -11,7 +11,7 @@ object Authentication {
 
     fun init(context: Context) {
         sharedPreferences = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
-        Log.v("Authentication", "got the auth pref")
+        Log.v("FIT2081-Authentication", "got the auth pref")
     }
 
     fun login(context: Context, userId: String, phoneNumber: String): Boolean {
@@ -29,13 +29,13 @@ object Authentication {
             userPreferences.edit {
                 putBoolean("first_login", true)  // Mark first login
             }
-            Log.v("Authentication", "first time login")
+            Log.v("FIT2081-Authentication", "first time login")
         } else {
-            Log.v("Authentication", "existing user login")
+            Log.v("FIT2081-Authentication", "existing user login")
         }
 
-        Log.v("Authentication", "Routing to Home page")
-        Log.v("Authentication", "SharedPreferences reference: $userPreferences")
+        Log.v("FIT2081-Authentication", "Routing to Home page")
+        Log.v("FIT2081-Authentication", "SharedPreferences reference: $userPreferences")
 
         // Navigate to HomeActivity with userId as an extra
         val intent = Intent(context, HomeActivity::class.java).apply {
@@ -51,7 +51,7 @@ object Authentication {
             remove("user_id")
             remove("phone_number")
         }
-        Log.v("Authentication", "Routing to Login page")
+        Log.v("FIT2081-Authentication", "Routing to Login page")
         val intent = Intent(context, LoginActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         context.startActivity(intent)

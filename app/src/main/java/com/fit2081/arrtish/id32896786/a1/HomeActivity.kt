@@ -32,21 +32,21 @@ class HomeActivity : ComponentActivity() {
 
         // Retrieve userId from Intent extras
         val userId = intent.getStringExtra("user_id") ?: "default_user" // Provide a default if null
-        Log.v("HomeActivity", "User ID: $userId")
+        Log.v("FIT2081-HomeActivity", "User ID: $userId")
 
         val sharedPreferences = UserSharedPreferences.getPreferences(this, userId)
         val isUpdated = sharedPreferences.getBoolean("updated", false) // Check if data has been updated
 
-        Log.v("HomeActivity", "SharedPreferences: $sharedPreferences | Updated: $isUpdated")
+        Log.v("FIT2081-HomeActivity", "SharedPreferences: $sharedPreferences | Updated: $isUpdated")
 
         if (!isUpdated) { // If data has not been updated, fetch and save it
-            Log.v("HomeActivity", "Adding data to SharedPreferences for user $userId")
+            Log.v("FIT2081-HomeActivity", "Adding data to SharedPreferences for user $userId")
             getUserDetailsAndSave(this, userId)
         } else {
-            Log.v("HomeActivity", "Using existing SharedPreferences for user $userId")
+            Log.v("FIT2081-HomeActivity", "Using existing SharedPreferences for user $userId")
         }
 
-        Log.v("HomeActivity", "SharedPreferences: $sharedPreferences")
+        Log.v("FIT2081-HomeActivity", "SharedPreferences: $sharedPreferences")
 
         setContent {
             HideSystemBars()
@@ -69,7 +69,7 @@ fun HomePage(userId: String?,sharedPreferences: SharedPreferences, modifier: Mod
 
     var showDialog by remember { mutableStateOf(false) }
 
-    Log.v("HomeActivity", "Food Quality Score: $foodQualityScore")
+    Log.v("FIT2081-HomeActivity", "Food Quality Score: $foodQualityScore")
 
     // Check if the user has answered the questionnaire
     checkForQuestionnaire(context,userId) { hasAnswered ->
@@ -78,21 +78,26 @@ fun HomePage(userId: String?,sharedPreferences: SharedPreferences, modifier: Mod
         }
     }
 
-//    if (showDialog) {
-//        AlertDialog(
-//            onDismissRequest = { /* Prevent dismiss */ },
-//            title = { Text("Complete the Questionnaire") },
-//            text = { Text("You need to complete the questionnaire to continue using the app.") },
-//            confirmButton = {
-//                Button(onClick = {
-//                    showDialog = false
-//                    onRouteToQuestionnaire(context)
-//                }) {
-//                    Text("Complete Now")
-//                }
-//            }
-//        )
-//    }
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { /* Prevent dismiss */ },
+            title = { Text("Complete the Questionnaire") },
+            text = { Text("You need to complete the questionnaire to continue using the app.") },
+            confirmButton = {
+                Button(onClick = {
+                    showDialog = false
+                    onRouteToQuestionnaire(context, userId)
+                }) {
+                    Text("Complete Now")
+                }
+            },
+            dismissButton = {
+                Button(onClick = { Authentication.logout(context) }) {
+                    Text(text = "Log Out")
+                }
+            }
+        )
+    }
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -167,8 +172,9 @@ fun checkForQuestionnaire(context: Context, userId: String?, callback: (Boolean)
         return
     }
 
-    val userPreferences = UserSharedPreferences(context, userId)
-    val answeredQuestionnaire = userPreferences.getUserChoices()?.get("answered") as? Boolean == true
+    val sharedPreferences = UserSharedPreferences.getPreferences(context, userId)
+    val answeredQuestionnaire = sharedPreferences.getBoolean("answered", false) // Check if data has been updated
+    Log.v("FIT2081-Questionnaire", answeredQuestionnaire.toString())
     callback(answeredQuestionnaire)
 }
 

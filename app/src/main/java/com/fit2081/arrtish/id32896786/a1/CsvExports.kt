@@ -6,7 +6,6 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import androidx.core.content.edit
 import org.json.JSONObject
-
 object CsvExports {
     fun getUserDetailsAndSave(context: Context, userId: String?) {
         if (userId.isNullOrBlank()) return // Handle null/empty userId
@@ -14,7 +13,7 @@ object CsvExports {
         // ✅ Obtain existing user preferences
         val sharedPreferences = UserSharedPreferences.getPreferences(context, userId)
 
-        Log.v("CsvExports", "SharedPreferences: $sharedPreferences")
+        Log.v("FIT2081-CsvExports", "SharedPreferences: $sharedPreferences")
 
         val inputStream = context.assets.open("nutritrack_data.csv")
         val reader = BufferedReader(InputStreamReader(inputStream))
@@ -30,7 +29,7 @@ object CsvExports {
             .find { it.getOrNull(headers.indexOf("User_ID")) == userId } ?: return
 
         val isMale = userRow.getOrNull(headers.indexOf("Sex")) == "Male"
-        Log.v("CsvExports","$userRow and $isMale")
+        Log.v("FIT2081-CsvExports", "$userRow and $isMale")
 
         // Extract quality score
         val qualityScore = if (isMale) {
@@ -40,7 +39,7 @@ object CsvExports {
         }
         userInsights["qualityScore"] = qualityScore
 
-        Log.v("CsvExports", "User insights: $userInsights")
+        Log.v("FIT2081-CsvExports", "User insights: $userInsights")
 
         // HEIFA Score Mapping
         val scoreMapping = mapOf(
@@ -66,11 +65,23 @@ object CsvExports {
             userInsights[category] = score
         }
 
-        // ✅ Save user insights inside "insights" dictionary
-        val jsonString = JSONObject(userInsights).toString()
+        // ✅ Retrieve existing insights from SharedPreferences
+        val existingJson = sharedPreferences.getString("insights", "{}")
+        val existingInsights: MutableMap<String, Any> =
+            try {
+                JSONObject(existingJson).toMap().toMutableMap()
+            } catch (e: Exception) {
+                mutableMapOf()
+            }
+
+        // ✅ Merge new insights with existing ones
+        existingInsights.putAll(userInsights)
+
+        // ✅ Save merged insights
+        val updatedJsonString = JSONObject(existingInsights).toString()
 
         sharedPreferences.edit {
-            putString("insights", jsonString) // Save user dietary insights inside "insights"
+            putString("insights", updatedJsonString) // Save merged insights
             putBoolean("updated", true) // ✅ Mark as updated
         }
 
@@ -78,7 +89,18 @@ object CsvExports {
         val savedData = sharedPreferences.all
         val updatedFlag = sharedPreferences.getBoolean("updated", false)
 
-        Log.v("CsvExports", "✅ User $userId - Retrieved from SharedPreferences: $savedData")
-        Log.v("CsvExports", "✅ User $userId - Updated flag: $updatedFlag")
+        Log.v("FIT2081-CsvExports", "✅ User $userId - Retrieved from SharedPreferences: $savedData")
+        Log.v("FIT2081-CsvExports", "✅ User $userId - Updated flag: $updatedFlag")
+    }
+
+    // Helper function to convert JSONObject to a Map
+    private fun JSONObject.toMap(): Map<String, Any> {
+        val map = mutableMapOf<String, Any>()
+        val keys = keys()
+        while (keys.hasNext()) {
+            val key = keys.next()
+            map[key] = this.get(key)
+        }
+        return map
     }
 }

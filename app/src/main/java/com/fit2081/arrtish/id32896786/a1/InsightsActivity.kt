@@ -26,7 +26,7 @@ class InsightsActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         val userId = intent.getStringExtra("user_id") ?: "default_user"
-        Log.v("InsightsScreen", userId)
+        Log.v("FIT2081-InsightsScreen", userId)
 
         setContent {
             A1Theme {
@@ -48,12 +48,12 @@ fun InsightsScreen(userId: String) {
     LaunchedEffect(updatedUserId) {
         val allPrefs = userPrefs // Retrieve all shared preferences
 // Retrieve all shared preferences
-        Log.v("InsightsScreen", "Shared Preferences for User $userId: $allPrefs") // Print full shared preferences
+        Log.v("FIT2081-InsightsScreen", "Shared Preferences for User $userId: $allPrefs") // Print full shared preferences
 
         // Load the "insights" data
         userInsights = userPrefs.getInsights() // Get the "insights" data
 
-        Log.v("InsightsScreen", "Parsed User Insights: $userInsights") // Print only parsed insights data
+        Log.v("FIT2081-InsightsScreen", "Parsed User Insights: $userInsights") // Print only parsed insights data
     }
 
     val categories = listOf(

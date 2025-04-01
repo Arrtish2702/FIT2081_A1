@@ -30,6 +30,7 @@ import com.fit2081.arrtish.id32896786.a1.ui.theme.A1Theme
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+import androidx.core.content.edit
 
 class QuestionnaireActivity : ComponentActivity() {
     private lateinit var userPrefs: UserSharedPreferences
@@ -346,18 +347,25 @@ fun completeQuestionnaire(
     )
 
     // Log before saving
-    Log.v("Questionnaire", "Saving User Preferences for User ID: ${userPrefs}")
-    Log.v("Questionnaire", "Data being saved: $userChoices")
+    Log.v("FIT2081-Questionnaire", "Saving User Preferences for User ID: ${userPrefs}")
+    Log.v("FIT2081-Questionnaire", "Data being saved: $userChoices")
 
+    // Save user preferences
     userPrefs.saveUserChoices(userChoices)
+
+    // Ensure that "answered" is set to true after saving data
+    UserSharedPreferences.getPreferences(context, userId).edit() {
+        putBoolean("answered", true)
+    }
 
     // Log after saving
     val savedData = userPrefs.getUserChoices()
-    Log.v("Questionnaire", "User Preferences after saving: $savedData")
+    Log.v("FIT2081-Questionnaire", "User Preferences after saving: $savedData")
 
     Toast.makeText(context, "Responses saved!", Toast.LENGTH_SHORT).show()
     onRouteToHome(context, userId)
 }
+
 
 fun eraseQuestionnaireData(context: Context, userId: String, userPrefs: UserSharedPreferences) {
     // Create a map with default empty data for the questionnaire
@@ -369,14 +377,16 @@ fun eraseQuestionnaireData(context: Context, userId: String, userPrefs: UserShar
         "selectedPersona" to "Select a persona"
     )
     // Log before clearing
-    Log.v("Questionnaire", "Clearing User Preferences for User ID: ${userPrefs}")
-    Log.v("Questionnaire", "Data before clearing: ${userPrefs.getUserChoices()}")
+    Log.v("FIT2081-Questionnaire", "Clearing User Preferences for User ID: ${userPrefs}")
+    Log.v("FIT2081-Questionnaire", "Data before clearing: ${userPrefs.getUserChoices()}")
 
-    userPrefs.saveUserChoices(emptyChoices)
-
+    userPrefs.clearUserChoices()
+    UserSharedPreferences.getPreferences(context, userId).edit() {
+        putBoolean("answered", false)
+    }
     // Log after clearing
     val clearedData = userPrefs.getUserChoices()
-    Log.v("Questionnaire", "User Preferences after clearing: $clearedData")
+    Log.v("FIT2081-Questionnaire", "User Preferences after clearing: $clearedData")
 
     Toast.makeText(context, "Data Erased", Toast.LENGTH_LONG).show()
     onRouteToHome(context, userId)

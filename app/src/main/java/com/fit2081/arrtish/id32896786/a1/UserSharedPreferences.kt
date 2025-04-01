@@ -20,19 +20,49 @@ class UserSharedPreferences(context: Context, private val userId: String) {
         }
     }
 
-    // Save user choices with selected categories serialized to JSON
+
+    // Method to save user choices
     fun saveUserChoices(userChoices: Map<String, Any>) {
         val editor = sharedPreferences.edit()
 
-        // Serialize the selectedCategories list into a JSON string
-        val selectedCategoriesJson = gson.toJson(userChoices["selectedCategories"])
+        // Retrieve existing selected categories
+        val existingCategoriesJson = sharedPreferences.getString("selectedCategories", "[]")
+        val existingCategories: MutableList<String> =
+            gson.fromJson(existingCategoriesJson, object : TypeToken<MutableList<String>>() {}.type) ?: mutableListOf()
 
-        // Save each choice
-        editor.putString("selectedCategories", selectedCategoriesJson)
-        editor.putString("biggestMealTime", userChoices["biggestMealTime"] as String)
-        editor.putString("sleepTime", userChoices["sleepTime"] as String)
-        editor.putString("wakeTime", userChoices["wakeTime"] as String)
-        editor.putString("selectedPersona", userChoices["selectedPersona"] as String)
+        // Get new categories
+        val newCategories = userChoices["selectedCategories"] as? List<String> ?: emptyList()
+
+        // Merge new categories with existing ones (avoid duplicates)
+        existingCategories.addAll(newCategories.filter { it !in existingCategories })
+
+        // Save updated categories
+        val updatedCategoriesJson = gson.toJson(existingCategories)
+        editor.putString("selectedCategories", updatedCategoriesJson)
+
+        // Preserve old values while updating new ones
+        userChoices["biggestMealTime"]?.let { editor.putString("biggestMealTime", it as String) }
+        userChoices["sleepTime"]?.let { editor.putString("sleepTime", it as String) }
+        userChoices["wakeTime"]?.let { editor.putString("wakeTime", it as String) }
+        userChoices["selectedPersona"]?.let { editor.putString("selectedPersona", it as String) }
+
+        editor.apply()
+    }
+
+    // Method to clear all user choices and reset to defaults
+    fun clearUserChoices() {
+        val editor = sharedPreferences.edit()
+
+        // Reset all user choices to default values
+        editor.putString("selectedCategories", "[]") // Empty list of categories
+        editor.putString("biggestMealTime", "12:00 PM")
+        editor.putString("sleepTime", "10:00 PM")
+        editor.putString("wakeTime", "6:00 AM")
+        editor.putString("selectedPersona", "Select a persona")
+
+        // Optionally clear insights and answered status as well
+//        editor.remove("insights")  // Clear insights
+        editor.putBoolean("answered", false)  // Set answered to false
 
         editor.apply()
     }
@@ -70,8 +100,4 @@ class UserSharedPreferences(context: Context, private val userId: String) {
             emptyMap()  // Return empty map if no insights exist
         }
     }
-
-
-
-
 }
