@@ -27,6 +27,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fit2081.arrtish.id32896786.a1.ui.theme.A1Theme
+import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
@@ -89,6 +90,7 @@ class QuestionnaireActivity : ComponentActivity() {
 }
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QuestionnairePage(
     userId: String,
@@ -97,11 +99,14 @@ fun QuestionnairePage(
     biggestMealTime: MutableState<String>,
     sleepTime: MutableState<String>,
     wakeTime: MutableState<String>,
-    selectedPersona: MutableState<String>,
+    selectedPersona: MutableState<String>, // Keep this as a parameter
     userPrefs: UserSharedPreferences,
     context: Context
 ) {
     val scrollState = rememberScrollState()
+    // To handle dropdown visibility
+    var expanded by remember { mutableStateOf(false) }
+    var showModal by remember { mutableStateOf(false) }  // Track if modal should be shown
 
     // Function to open TimePicker
     fun openTimePicker(initialTime: String, onTimeSet: (String) -> Unit) {
@@ -158,6 +163,7 @@ fun QuestionnairePage(
         // Persona Selection Section
         Text("Select Your Persona:", fontSize = 20.sp)
 
+        // LazyVerticalGrid with persona buttons
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
             modifier = Modifier
@@ -168,12 +174,55 @@ fun QuestionnairePage(
         ) {
             items(personas) { persona ->
                 Button(
-                    onClick = { selectedPersona.value = persona },
+                    onClick = {
+                        selectedPersona.value = persona
+                        showModal = true // Open the modal when the button is clicked
+                    },
                     modifier = Modifier
                         .padding(vertical = 4.dp)
                         .size(width = 200.dp, height = 50.dp)
                 ) {
                     Text(text = persona, fontSize = 12.sp)
+                }
+            }
+        }
+
+        // Show the Persona Modal if selected
+        if (showModal) {
+            PersonaModal(selectedPersona = selectedPersona.value, onDismiss = { showModal = false })
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Persona Dropdown Section
+        ExposedDropdownMenuBox(
+            expanded = expanded,
+            onExpandedChange = { expanded = !expanded }
+        ) {
+            TextField(
+                value = selectedPersona.value, // Use selectedPersona.value directly
+                onValueChange = {},  // No need to change value on input (readonly)
+                readOnly = true,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .menuAnchor(),
+                trailingIcon = {
+                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+                }
+            )
+            ExposedDropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                personas.forEach { persona ->
+                    DropdownMenuItem(
+                        text = { Text(persona) },
+                        onClick = {
+                            selectedPersona.value =
+                                persona // Correctly update the MutableState here
+                            expanded = false
+                        }
+                    )
                 }
             }
         }
@@ -234,7 +283,7 @@ fun formatTime(hour: Int, minute: Int): String {
     calendar.set(Calendar.HOUR_OF_DAY, hour)
     calendar.set(Calendar.MINUTE, minute)
 
-    val format = java.text.SimpleDateFormat("hh:mm a", Locale.getDefault())
+    val format = SimpleDateFormat("hh:mm a", Locale.getDefault())
     return format.format(calendar.time)
 }
 
