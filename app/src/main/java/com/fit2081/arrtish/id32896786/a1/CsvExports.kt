@@ -40,7 +40,7 @@ object CsvExports {
         }
         userInsights["qualityScore"] = qualityScore
 
-        Log.v("CsvExports", "User choices: $userInsights")
+        Log.v("CsvExports", "User insights: $userInsights")
 
         // HEIFA Score Mapping
         val scoreMapping = mapOf(
@@ -66,11 +66,11 @@ object CsvExports {
             userInsights[category] = score
         }
 
-        // ✅ Save user choices inside "choices" dictionary
+        // ✅ Save user insights inside "insights" dictionary
         val jsonString = JSONObject(userInsights).toString()
 
         sharedPreferences.edit {
-            putString("insights", jsonString) // Save user dietary insights inside "choices"
+            putString("insights", jsonString) // Save user dietary insights inside "insights"
             putBoolean("updated", true) // ✅ Mark as updated
         }
 

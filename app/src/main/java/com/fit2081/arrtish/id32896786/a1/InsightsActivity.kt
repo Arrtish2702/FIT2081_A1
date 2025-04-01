@@ -26,6 +26,7 @@ class InsightsActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         val userId = intent.getStringExtra("user_id") ?: "default_user"
+        Log.v("InsightsScreen", userId)
 
         setContent {
             A1Theme {
@@ -38,23 +39,21 @@ class InsightsActivity : ComponentActivity() {
 @Composable
 fun InsightsScreen(userId: String) {
     val context = LocalContext.current
-    val userPrefs = remember { UserSharedPreferences.getPreferences(context, userId) } // Use static method
+    val userPrefs = remember { UserSharedPreferences(context, userId) } // Initialize the UserSharedPreferences
 
-    // Keep track of user choices & force recomposition
+    // Keep track of user insights & force recomposition
     var userInsights by remember { mutableStateOf(emptyMap<String, Any>()) }
     val updatedUserId by rememberUpdatedState(userId)
 
     LaunchedEffect(updatedUserId) {
-        val allPrefs = userPrefs.all // Retrieve all shared preferences
+        val allPrefs = userPrefs // Retrieve all shared preferences
+// Retrieve all shared preferences
         Log.v("InsightsScreen", "Shared Preferences for User $userId: $allPrefs") // Print full shared preferences
 
-        val choicesJson = userPrefs.getString("choices", null)
-        userInsights = choicesJson?.let {
-            val jsonObject = JSONObject(it)
-            jsonObject.keys().asSequence().associateWith { key -> jsonObject.get(key) }
-        } ?: emptyMap()
+        // Load the "insights" data
+        userInsights = userPrefs.getInsights() // Get the "insights" data
 
-        Log.v("InsightsScreen", "Parsed User Choices: $userInsights") // Print only parsed user choices
+        Log.v("InsightsScreen", "Parsed User Insights: $userInsights") // Print only parsed insights data
     }
 
     val categories = listOf(
