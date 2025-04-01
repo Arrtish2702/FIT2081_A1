@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -18,54 +18,64 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import android.widget.Toast
-import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
-import java.io.BufferedReader
-import java.io.InputStreamReader
-
+import org.json.JSONObject
 
 class InsightsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val userId = intent.getStringExtra("user_id") ?: "default_user"
+        Log.v("InsightsScreen", userId)
+
         setContent {
             A1Theme {
-                InsightsScreen()
+                InsightsScreen(userId)
             }
         }
     }
 }
 
-@Preview(showBackground = true)
 @Composable
-fun InsightsScreen() {
-
+fun InsightsScreen(userId: String) {
     val context = LocalContext.current
-    val sharedPreferences = context.getSharedPreferences("assignment_1", Context.MODE_PRIVATE)
-    val userId = sharedPreferences.getString("user_id", null)?.toIntOrNull()
+    val userPrefs = remember { UserSharedPreferences(context, userId) } // Initialize the UserSharedPreferences
 
-    val userScores = remember { userId?.let { getUserScores(context, it) } } ?: emptyMap()
+    // Keep track of user insights & force recomposition
+    var userInsights by remember { mutableStateOf(emptyMap<String, Any>()) }
+    val updatedUserId by rememberUpdatedState(userId)
 
-    // Categories & default max scores
+    LaunchedEffect(updatedUserId) {
+        val allPrefs = userPrefs // Retrieve all shared preferences
+// Retrieve all shared preferences
+        Log.v("InsightsScreen", "Shared Preferences for User $userId: $allPrefs") // Print full shared preferences
+
+        // Load the "insights" data
+        userInsights = userPrefs.getInsights() // Get the "insights" data
+
+        Log.v("InsightsScreen", "Parsed User Insights: $userInsights") // Print only parsed insights data
+    }
+
     val categories = listOf(
-        "Vegetables" to 10,
-        "Fruits" to 10,
-        "Grains & Cereals" to 10,
-        "Whole Grains" to 10,
-        "Meat & Alternatives" to 10,
-        "Dairy" to 10,
-        "Water" to 5,
-        "Unsaturated Fats" to 10,
-        "Sodium" to 10,
-        "Sugar" to 10,
-        "Alcohol" to 5,
-        "Discretionary Foods" to 10
+        "Vegetables" to 10, "Fruits" to 10, "Grains & Cereals" to 10, "Whole Grains" to 10,
+        "Meat & Alternatives" to 10, "Dairy" to 10, "Water" to 5, "Unsaturated Fats" to 10,
+        "Sodium" to 10, "Sugar" to 10, "Alcohol" to 5, "Discretionary Foods" to 10
     )
 
-    val totalScoreRaw = categories.sumOf { (category, _) -> (userScores[category] ?: 0f).toDouble() }
-    val maxScoreRaw = categories.sumOf { it.second.toDouble() }
-    val totalScore = (totalScoreRaw / maxScoreRaw) * 100
+    val userScores = categories.associate { (category, _) ->
+        category to (userInsights[category]?.toString()?.toFloatOrNull() ?: 0f)
+    }
+
+    val totalScoreRaw = userScores.values.sum()
+    val maxScoreRaw = categories.sumOf { it.second.toDouble() }.toFloat()
+    val totalScore = if (maxScoreRaw > 0) (totalScoreRaw / maxScoreRaw) * 100 else 0f
+
+    InsightsContent(userScores, totalScore, context)
+}
 
 
+@Composable
+fun InsightsContent(userScores: Map<String, Float>, totalScore: Float, context: Context) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -80,8 +90,7 @@ fun InsightsScreen() {
         ) {
             Text(text = "Insights: Food Score", fontSize = 20.sp, modifier = Modifier.padding(bottom = 16.dp))
 
-            categories.forEach { (name, max) ->
-                val score = userScores[name] ?: 0
+            userScores.forEach { (name, score) ->
                 FoodScoreItem(name, score)
             }
 
@@ -89,16 +98,16 @@ fun InsightsScreen() {
 
             Text(text = "Total Food Quality Score", fontSize = 16.sp)
             Slider(
-                value = totalScore.toFloat(),
+                value = totalScore,
                 onValueChange = {},
-                valueRange = 0f..100.toFloat(),
+                valueRange = 0f..100f,
                 enabled = false,
                 colors = SliderDefaults.colors(
                     disabledThumbColor = MaterialTheme.colorScheme.primary,
                     disabledActiveTrackColor = MaterialTheme.colorScheme.primary
                 )
             )
-            Text(text = "$totalScore/100")
+            Text(text = "%.2f/100".format(totalScore))
 
             Spacer(modifier = Modifier.height(4.dp))
 
@@ -108,7 +117,7 @@ fun InsightsScreen() {
 
             Spacer(modifier = Modifier.height(4.dp))
             Button(onClick = {
-                Toast.makeText(context,"NutriCoach in Development", Toast.LENGTH_LONG).show()
+                Toast.makeText(context, "NutriCoach in Development", Toast.LENGTH_LONG).show()
             }, modifier = Modifier.fillMaxWidth()) {
                 Text(text = "Improve my diet!")
             }
@@ -131,7 +140,9 @@ fun FoodScoreItem(name: String, score: Number) {
             onValueChange = {},
             valueRange = 0f..10f,
             enabled = false,
-            modifier = Modifier.weight(1.2f).padding(),
+            modifier = Modifier
+                .weight(1.2f)
+                .padding(),
             colors = SliderDefaults.colors(
                 disabledThumbColor = MaterialTheme.colorScheme.primary,
                 disabledActiveTrackColor = MaterialTheme.colorScheme.primary
@@ -140,7 +151,7 @@ fun FoodScoreItem(name: String, score: Number) {
 
         Spacer(modifier = Modifier.width(2.dp))
 
-        Text(text = "${"%.2f".format(score)}/10", modifier = Modifier.padding(start = 8.dp))
+        Text(text = "%.2f/10".format(score), modifier = Modifier.padding(start = 8.dp))
     }
 }
 
@@ -148,17 +159,17 @@ fun FoodScoreItem(name: String, score: Number) {
 @Composable
 fun InsightsScreenPreview() {
     A1Theme {
-        InsightsScreen()
+        InsightsContent(userScores = emptyMap(), totalScore = 0f, context = LocalContext.current)
     }
 }
 
-fun sharingInsights(context: Context, userScores: Map<String, Float>, totalScore: Double, maxScore: Int) {
+fun sharingInsights(context: Context, userScores: Map<String, Float>, totalScore: Float, maxScore: Int) {
     val shareText = buildString {
         append("🌟 Insights: Food Score 🌟\n")
         userScores.forEach { (category, score) ->
-            append("$category: $score/10\n")
+            append("$category: %.2f/10\n".format(score))
         }
-        append("\n🏆 Total Food Quality Score: $totalScore/$maxScore")
+        append("\n🏆 Total Food Quality Score: %.2f/$maxScore".format(totalScore))
     }
 
     val intent = Intent(Intent.ACTION_SEND).apply {
@@ -168,55 +179,4 @@ fun sharingInsights(context: Context, userScores: Map<String, Float>, totalScore
 
     val chooser = Intent.createChooser(intent, "Share your insights via:")
     context.startActivity(chooser)
-}
-
-fun getUserScores(context: Context, userId: Int): MutableMap<String, Float>? {
-    try {
-        val inputStream = context.assets.open("nutritrack_data.csv")
-        val reader = BufferedReader(InputStreamReader(inputStream))
-        val lines = reader.readLines()
-
-        if (lines.isEmpty()) return null // Ensure file isn't empty
-
-        val headers = lines.first().split(",").map { it.trim() } // Extract headers
-        val dataRows = lines.drop(1) // Skip header row
-
-        // Find the user's row
-        val userRow = dataRows.map { it.split(",").map { value -> value.trim() } }
-            .find { it.getOrNull(headers.indexOf("User_ID")) == userId.toString() } ?: return null
-
-        val isMale = userRow.getOrNull(headers.indexOf("Sex")) == "Male"
-
-        // Map category names to corresponding HEIFA score columns
-        val scoreMapping = mapOf(
-            "Vegetables" to "VegetablesHEIFAscore",
-            "Fruits" to "FruitHEIFAscore",
-            "Grains & Cereals" to "GrainsandcerealsHEIFAscore",
-            "Whole Grains" to "WholegrainsHEIFAscore",
-            "Meat & Alternatives" to "MeatandalternativesHEIFAscore",
-            "Dairy" to "DairyandalternativesHEIFAscore",
-            "Water" to "WaterHEIFAscore",
-            "Unsaturated Fats" to "UnsaturatedFatHEIFAscore",
-            "Sodium" to "SodiumHEIFAscore",
-            "Sugar" to "SugarHEIFAscore",
-            "Alcohol" to "AlcoholHEIFAscore",
-            "Discretionary Foods" to "DiscretionaryHEIFAscore"
-        )
-
-        val scores = mutableMapOf<String, Float>()
-        for ((category, baseColumn) in scoreMapping) {
-            val columnName = if (isMale) "${baseColumn}Male" else "${baseColumn}Female"
-            val columnIndex = headers.indexOf(columnName).takeIf { it != -1 } ?: headers.indexOf(baseColumn)
-
-            scores[category] = userRow.getOrNull(columnIndex)?.toFloatOrNull() ?: 0f
-            Log.v("scores[category]", "${category}and${columnName}:${userRow.getOrNull(columnIndex)?.toFloatOrNull() ?: 0}")
-        }
-        Log.v("scores", scores.toString())
-
-        reader.close() // Close reader to prevent memory leaks
-        return scores
-    } catch (e: Exception) {
-        e.printStackTrace()
-        return null
-    }
 }

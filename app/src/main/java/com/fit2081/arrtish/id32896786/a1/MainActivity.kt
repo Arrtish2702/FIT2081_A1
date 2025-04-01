@@ -29,27 +29,21 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        Authentication.init(this)
-        // Check saved data
-        val sharedPreferences = getSharedPreferences("assignment_1", Context.MODE_PRIVATE)
-        val savedUserId = sharedPreferences.getString("user_id", null)
-        val savedPhoneNumber = sharedPreferences.getString("phone_number", null)
 
-        if (savedUserId != null && savedPhoneNumber != null) {
-            // Auto-login: Navigate to HomeActivity
 
-            Authentication.login(this, savedUserId, savedPhoneNumber)
-            startActivity(Intent(this, HomeActivity::class.java))
-            finish()  // Close LoginActivity
-        }else {
-            setContent {
-                A1Theme {
-                    WelcomePage(
-                        modifier = Modifier.fillMaxSize(),
-                    )
-                }
+//        if (Authentication.isLoggedIn()) {
+//            // Auto-login the user
+//            val intent = Intent(this, HomeActivity::class.java)
+//            startActivity(intent)
+//        } else {
+        setContent {
+            A1Theme {
+                WelcomePage(
+                    modifier = Modifier.fillMaxSize(),
+                )
             }
         }
+//        }
     }
 }
 
