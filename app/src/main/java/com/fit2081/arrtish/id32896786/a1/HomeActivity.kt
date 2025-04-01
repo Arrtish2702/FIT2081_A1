@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.sp
 import com.fit2081.arrtish.id32896786.a1.CsvExports.getUserDetailsAndSave
 import com.fit2081.arrtish.id32896786.a1.ui.theme.A1Theme
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import org.json.JSONObject
 
 class HomeActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -60,7 +61,11 @@ class HomeActivity : ComponentActivity() {
 fun HomePage(userId: String?,sharedPreferences: SharedPreferences, modifier: Modifier = Modifier) {
     val context = LocalContext.current
 
-    val foodQualityScore = sharedPreferences.getFloat("qualityScore",0f)
+    // ✅ Retrieve the "choices" JSON string and parse it
+    val detailsJson = sharedPreferences.getString("insights", "{}") ?: "{}"
+    val userDetails = JSONObject(detailsJson)
+
+    val foodQualityScore = userDetails.optDouble("qualityScore", 0.0).toFloat() // ✅ Extract score correctly
 
     var showDialog by remember { mutableStateOf(false) }
 
@@ -140,7 +145,7 @@ fun HomePage(userId: String?,sharedPreferences: SharedPreferences, modifier: Mod
 
             // Buttons
             Button(onClick = {
-//            onRouteToQuestionnaire(context)
+            onRouteToQuestionnaire(context, userId)
             }) {
                 Text(text = "Edit Responses")
             }
@@ -167,11 +172,13 @@ fun checkForQuestionnaire(context: Context, userId: String?, callback: (Boolean)
     callback(answeredQuestionnaire)
 }
 
-//
-//fun onRouteToQuestionnaire(context: Context) {
-//    val intent = Intent(context, QuestionnaireActivity::class.java)
-//    context.startActivity(intent)
-//}
+
+fun onRouteToQuestionnaire(context: Context, userId: String?) {
+    val intent = Intent(context, QuestionnaireActivity::class.java).apply{
+        putExtra("user_id", userId)
+    }
+    context.startActivity(intent)
+}
 
 fun onRouteToInsights(context: Context, userId: String?) {
     val intent = Intent(context, InsightsActivity::class.java).apply{

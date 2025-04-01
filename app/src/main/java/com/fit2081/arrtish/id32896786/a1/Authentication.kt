@@ -23,22 +23,24 @@ object Authentication {
         }
 
         // Initialize user preferences
-        val userPreferences = UserSharedPreferences(context, userId)
-        if (!userPreferences.doesUserPrefsExist()) {
-            userPreferences.saveUserChoices(mapOf("first_login" to true))  // Mark first login
+        val userPreferences = UserSharedPreferences.getPreferences(context, userId)
 
+        if (!userPreferences.contains("first_login")) { // Store first_login in root
+            userPreferences.edit {
+                putBoolean("first_login", true)  // Mark first login
+            }
             Log.v("Authentication", "first time login")
-        }else{
+        } else {
             Log.v("Authentication", "existing user login")
         }
 
         Log.v("Authentication", "Routing to Home page")
-        Log.v("Authentication", "$userPreferences")
+        Log.v("Authentication", "SharedPreferences reference: $userPreferences")
 
         // Navigate to HomeActivity with userId as an extra
         val intent = Intent(context, HomeActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            putExtra("user_id", userId)  // Passing userId to HomeActivity
+            putExtra("user_id", userId)
         }
         context.startActivity(intent)
         return true

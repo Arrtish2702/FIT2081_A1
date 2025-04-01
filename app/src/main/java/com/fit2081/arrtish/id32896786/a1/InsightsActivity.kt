@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -18,11 +18,8 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import android.widget.Toast
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
-
+import org.json.JSONObject
 
 class InsightsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,45 +37,46 @@ class InsightsActivity : ComponentActivity() {
 
 @Composable
 fun InsightsScreen(userId: String) {
-
     val context = LocalContext.current
-    val userPrefs = remember { UserSharedPreferences(context, userId) }
+    val userPrefs = remember { UserSharedPreferences.getPreferences(context, userId) } // Use static method
 
-    // Attempt to load user choices
-    val userChoices by remember {
-        mutableStateOf(userPrefs.getUserChoices() ?: emptyMap())
+    // Keep track of user choices & force recomposition
+    var userInsights by remember { mutableStateOf(emptyMap<String, Any>()) }
+    val updatedUserId by rememberUpdatedState(userId)
+
+    LaunchedEffect(updatedUserId) {
+        val allPrefs = userPrefs.all // Retrieve all shared preferences
+        Log.v("InsightsScreen", "Shared Preferences for User $userId: $allPrefs") // Print full shared preferences
+
+        val choicesJson = userPrefs.getString("choices", null)
+        userInsights = choicesJson?.let {
+            val jsonObject = JSONObject(it)
+            jsonObject.keys().asSequence().associateWith { key -> jsonObject.get(key) }
+        } ?: emptyMap()
+
+        Log.v("InsightsScreen", "Parsed User Choices: $userInsights") // Print only parsed user choices
     }
 
-    Log.v("InsightsScreen", "User Choices: $userChoices") // Debugging
-
-    // Categories & default max scores
     val categories = listOf(
-        "Vegetables" to 10,
-        "Fruits" to 10,
-        "Grains & Cereals" to 10,
-        "Whole Grains" to 10,
-        "Meat & Alternatives" to 10,
-        "Dairy" to 10,
-        "Water" to 5,
-        "Unsaturated Fats" to 10,
-        "Sodium" to 10,
-        "Sugar" to 10,
-        "Alcohol" to 5,
-        "Discretionary Foods" to 10
+        "Vegetables" to 10, "Fruits" to 10, "Grains & Cereals" to 10, "Whole Grains" to 10,
+        "Meat & Alternatives" to 10, "Dairy" to 10, "Water" to 5, "Unsaturated Fats" to 10,
+        "Sodium" to 10, "Sugar" to 10, "Alcohol" to 5, "Discretionary Foods" to 10
     )
 
-    // Extract scores safely
     val userScores = categories.associate { (category, _) ->
-        category to (userChoices[category]?.toString()?.toFloatOrNull() ?: 0f)
+        category to (userInsights[category]?.toString()?.toFloatOrNull() ?: 0f)
     }
 
-    val totalScoreRaw = userScores.values.sum() // Sum of user scores
-    val maxScoreRaw = categories.sumOf { it.second.toDouble() }.toFloat() // Convert max scores safely
-
+    val totalScoreRaw = userScores.values.sum()
+    val maxScoreRaw = categories.sumOf { it.second.toDouble() }.toFloat()
     val totalScore = if (maxScoreRaw > 0) (totalScoreRaw / maxScoreRaw) * 100 else 0f
 
+    InsightsContent(userScores, totalScore, context)
+}
 
 
+@Composable
+fun InsightsContent(userScores: Map<String, Float>, totalScore: Float, context: Context) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -93,8 +91,7 @@ fun InsightsScreen(userId: String) {
         ) {
             Text(text = "Insights: Food Score", fontSize = 20.sp, modifier = Modifier.padding(bottom = 16.dp))
 
-            categories.forEach { (name, max) ->
-                val score = userScores[name] ?: 0
+            userScores.forEach { (name, score) ->
                 FoodScoreItem(name, score)
             }
 
@@ -102,16 +99,16 @@ fun InsightsScreen(userId: String) {
 
             Text(text = "Total Food Quality Score", fontSize = 16.sp)
             Slider(
-                value = totalScore.toFloat(),
+                value = totalScore,
                 onValueChange = {},
-                valueRange = 0f..100.toFloat(),
+                valueRange = 0f..100f,
                 enabled = false,
                 colors = SliderDefaults.colors(
                     disabledThumbColor = MaterialTheme.colorScheme.primary,
                     disabledActiveTrackColor = MaterialTheme.colorScheme.primary
                 )
             )
-            Text(text = "$totalScore/100")
+            Text(text = "%.2f/100".format(totalScore))
 
             Spacer(modifier = Modifier.height(4.dp))
 
@@ -121,7 +118,7 @@ fun InsightsScreen(userId: String) {
 
             Spacer(modifier = Modifier.height(4.dp))
             Button(onClick = {
-                Toast.makeText(context,"NutriCoach in Development", Toast.LENGTH_LONG).show()
+                Toast.makeText(context, "NutriCoach in Development", Toast.LENGTH_LONG).show()
             }, modifier = Modifier.fillMaxWidth()) {
                 Text(text = "Improve my diet!")
             }
@@ -144,7 +141,9 @@ fun FoodScoreItem(name: String, score: Number) {
             onValueChange = {},
             valueRange = 0f..10f,
             enabled = false,
-            modifier = Modifier.weight(1.2f).padding(),
+            modifier = Modifier
+                .weight(1.2f)
+                .padding(),
             colors = SliderDefaults.colors(
                 disabledThumbColor = MaterialTheme.colorScheme.primary,
                 disabledActiveTrackColor = MaterialTheme.colorScheme.primary
@@ -153,7 +152,7 @@ fun FoodScoreItem(name: String, score: Number) {
 
         Spacer(modifier = Modifier.width(2.dp))
 
-        Text(text = "${"%.2f".format(score)}/10", modifier = Modifier.padding(start = 8.dp))
+        Text(text = "%.2f/10".format(score), modifier = Modifier.padding(start = 8.dp))
     }
 }
 
@@ -161,7 +160,7 @@ fun FoodScoreItem(name: String, score: Number) {
 @Composable
 fun InsightsScreenPreview() {
     A1Theme {
-        InsightsScreen(userId = "0")
+        InsightsContent(userScores = emptyMap(), totalScore = 0f, context = LocalContext.current)
     }
 }
 
@@ -169,9 +168,9 @@ fun sharingInsights(context: Context, userScores: Map<String, Float>, totalScore
     val shareText = buildString {
         append("🌟 Insights: Food Score 🌟\n")
         userScores.forEach { (category, score) ->
-            append("$category: $score/10\n")
+            append("$category: %.2f/10\n".format(score))
         }
-        append("\n🏆 Total Food Quality Score: $totalScore/$maxScore")
+        append("\n🏆 Total Food Quality Score: %.2f/$maxScore".format(totalScore))
     }
 
     val intent = Intent(Intent.ACTION_SEND).apply {
