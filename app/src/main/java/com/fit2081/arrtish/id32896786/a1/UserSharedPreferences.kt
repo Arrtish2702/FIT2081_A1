@@ -23,22 +23,9 @@ class UserSharedPreferences(context: Context, userId: String) {
     fun saveUserChoices(userChoices: Map<String, Any>) {
         sharedPreferences.edit {
 
-            // Retrieve existing selected categories
-            val existingCategoriesJson = sharedPreferences.getString("selectedCategories", "[]")
-            val existingCategories: MutableList<String> =
-                gson.fromJson(
-                    existingCategoriesJson,
-                    object : TypeToken<MutableList<String>>() {}.type
-                ) ?: mutableListOf()
-
-            // Get new categories
+            // Replace existing selected categories with new ones
             val newCategories = userChoices["selectedCategories"] as? List<String> ?: emptyList()
-
-            // Merge new categories with existing ones (avoid duplicates)
-            existingCategories.addAll(newCategories.filter { it !in existingCategories })
-
-            // Save updated categories
-            val updatedCategoriesJson = gson.toJson(existingCategories)
+            val updatedCategoriesJson = gson.toJson(newCategories)
             putString("selectedCategories", updatedCategoriesJson)
 
             // Preserve old values while updating new ones
