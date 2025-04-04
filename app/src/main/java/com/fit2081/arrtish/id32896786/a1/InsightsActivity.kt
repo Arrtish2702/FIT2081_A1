@@ -24,12 +24,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -46,6 +41,7 @@ class InsightsActivity : ComponentActivity() {
         Log.v("FIT2081-InsightsScreen", userId)
 
         setContent {
+            ShowSystemBars()
             A1Theme {
                 InsightsScreen(userId)
             }
@@ -56,9 +52,8 @@ class InsightsActivity : ComponentActivity() {
 @Composable
 fun InsightsScreen(userId: String) {
     val context = LocalContext.current
-    val userPrefs = remember { UserSharedPreferences(context, userId) } // Initialize the UserSharedPreferences
+    val userPrefs = remember { UserSharedPreferences(context, userId) }
 
-    // Keep track of user insights & force recomposition
     var userInsights = userPrefs.getInsights()
     
     val categories = listOf(

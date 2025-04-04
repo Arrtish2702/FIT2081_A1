@@ -121,7 +121,7 @@ fun HomePage(userId: String?,sharedPreferences: SharedPreferences, modifier: Mod
                 ),
                 contentDescription = "Food Quality Score",
                 modifier = Modifier
-                    .size(300.dp)
+                    .size(275.dp)
                     .align(Alignment.CenterHorizontally) // Ensures image is centered
             )
 
@@ -143,8 +143,9 @@ fun HomePage(userId: String?,sharedPreferences: SharedPreferences, modifier: Mod
 
             // Description
             Text(
-                text = "This score represents the overall quality of your food choices based on your responses.",
-                fontSize = 16.sp,
+                text = "Your Food Quality Score provides a snapshot of how well your eating patterns align with established food guidelines, helping you identify both strengths and opportunities for improvement in your diet.\n" +
+                        "This personalized measurement considers various food groups, including vegetables, fruits, whole grains, and proteins, to give you practical insights for making healthier food choices.\n",
+                fontSize = 12.sp,
                 textAlign = TextAlign.Center
             )
 
@@ -197,4 +198,10 @@ fun onRouteToInsights(context: Context, userId: String?) {
 internal fun HideSystemBars() {
     val systemUiController = rememberSystemUiController()
     systemUiController.isSystemBarsVisible = false  // Hides both status & nav bar
+}
+
+@Composable
+internal fun ShowSystemBars() {
+    val systemUiController = rememberSystemUiController()
+    systemUiController.isSystemBarsVisible = true  // Shows both status & nav bar
 }

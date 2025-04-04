@@ -7,53 +7,51 @@ import android.util.Log
 import androidx.core.content.edit
 
 object Authentication {
-    private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var authPrefs: SharedPreferences
 
     fun init(context: Context) {
-        sharedPreferences = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
-        Log.v("FIT2081-Authentication", "got the auth pref")
+        authPrefs = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
+        Log.v("FIT2081-Authentication", "Loaded auth_prefs for login validation")
     }
 
     fun login(context: Context, userId: String, phoneNumber: String): Boolean {
-        // Save login info
-        sharedPreferences.edit {
-            putString("user_id", userId)
-            putString("phone_number", phoneNumber)
-            putBoolean("updated", false)
+        // Validate credentials
+        val storedPhone = authPrefs.getString(userId, null)
+        if (storedPhone == null || storedPhone != phoneNumber) {
+            Log.v("FIT2081-Authentication", "Login failed: invalid credentials")
+            return false
         }
 
-        // Initialize user preferences
+        Log.v("FIT2081-Authentication", "Login successful for userId: $userId")
+
+        // Initialize user-specific preferences
         val userPreferences = UserSharedPreferences.getPreferences(context, userId)
 
-        if (!userPreferences.contains("first_login")) { // Store first_login in root
+        if (!userPreferences.contains("first_login")) {
             userPreferences.edit {
-                putBoolean("first_login", true)  // Mark first login
+                putBoolean("first_login", true)
             }
-            Log.v("FIT2081-Authentication", "first time login")
+            Log.v("FIT2081-Authentication", "First time login for $userId")
         } else {
-            Log.v("FIT2081-Authentication", "existing user login")
+            Log.v("FIT2081-Authentication", "Returning user login for $userId")
         }
 
+        // Route to HomeActivity with userId
         Log.v("FIT2081-Authentication", "Routing to Home page")
-        Log.v("FIT2081-Authentication", "SharedPreferences reference: $userPreferences")
-
-        // Navigate to HomeActivity with userId as an extra
         val intent = Intent(context, HomeActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             putExtra("user_id", userId)
         }
         context.startActivity(intent)
+
         return true
     }
 
     fun logout(context: Context) {
-        sharedPreferences.edit {
-            remove("user_id")
-            remove("phone_number")
-        }
         Log.v("FIT2081-Authentication", "Routing to Login page")
-        val intent = Intent(context, LoginActivity::class.java)
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        val intent = Intent(context, LoginActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
         context.startActivity(intent)
     }
 }

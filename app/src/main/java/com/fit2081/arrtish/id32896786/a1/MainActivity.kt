@@ -126,7 +126,7 @@ fun WelcomePage(
 }
 
 private fun openMonashClinic(context: Context) {
-    val url = "https://www.monash.edu/medicine/scs/nutrition-clinic"
+    val url = "https://www.monash.edu/medicine/scs/nutrition/clinics/nutrition"
     val intent = Intent(Intent.ACTION_VIEW, url.toUri())
     context.startActivity(intent)
 }

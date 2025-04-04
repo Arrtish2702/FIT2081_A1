@@ -38,6 +38,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.fit2081.arrtish.id32896786.a1.CsvExports.extractUserIdsFromCSV
 import com.fit2081.arrtish.id32896786.a1.ui.theme.A1Theme
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -146,28 +147,6 @@ fun LoginPage(context: Context, modifier: Modifier = Modifier) {
             }
         }
     }
-}
-
-fun extractUserIdsFromCSV(context: Context): List<String> {
-    val userIds = mutableListOf<String>()
-    try {
-        val inputStream = context.assets.open("nutritrack_data.csv")
-        val reader = BufferedReader(InputStreamReader(inputStream))
-        reader.useLines { lines ->
-            lines.drop(1).forEach { line ->
-                val values = line.split(",").map { it.trim() }
-                if (values.size >= 2) {
-                    val csvUserId = values[1]
-                    if (csvUserId.isNotEmpty()) {
-                        userIds.add(csvUserId)
-                    }
-                }
-            }
-        }
-    } catch (e: Exception) {
-        e.printStackTrace()
-    }
-    return userIds
 }
 
 fun isValidNumber(number: String): Boolean {

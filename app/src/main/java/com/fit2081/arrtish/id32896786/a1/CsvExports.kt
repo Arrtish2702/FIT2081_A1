@@ -90,7 +90,7 @@ object CsvExports {
         val updatedFlag = sharedPreferences.getBoolean("updated", false)
 
         Log.v("FIT2081-CsvExports", "✅ User $userId - Retrieved from SharedPreferences: $savedData")
-        Log.v("CsvExports", "✅ User $userId - Updated flag: $updatedFlag")
+        Log.v("FIT2081-CsvExports", "✅ User $userId - Updated flag: $updatedFlag")
     }
 
     // Helper function to convert JSONObject to a Map
@@ -103,4 +103,45 @@ object CsvExports {
         }
         return map
     }
+
+    fun extractUserIdsFromCSV(context: Context): List<String> {
+        val userIds = mutableListOf<String>()
+        try {
+            val inputStream = context.assets.open("nutritrack_data.csv")
+            val reader = BufferedReader(InputStreamReader(inputStream))
+
+            val sharedPreferences = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
+            val editor = sharedPreferences.edit()
+            editor.clear() // Optional: clear old entries before saving new ones
+
+            reader.useLines { lines ->
+                lines.drop(1).forEach { line ->
+                    val values = line.split(",").map { it.trim() }
+                    if (values.size >= 2) {
+                        val phoneNumber = values[0]
+                        val userId = values[1]
+                        if (userId.isNotEmpty() && phoneNumber.isNotEmpty()) {
+                            userIds.add(userId)
+                            editor.putString(userId, phoneNumber)
+                        }
+                    }
+                }
+            }
+
+            editor.apply() // Save all entries asynchronously
+
+            val allEntries = sharedPreferences.all
+
+            Log.v("FIT2081-CsvExports", "---- auth_prefs contents ----")
+            for ((key, value) in allEntries) {
+                Log.v("FIT2081-CsvExports", "UserID: $key → PhoneNumber: $value")
+            }
+            Log.v("FIT2081-CsvExports", "------------------------------")
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return userIds
+    }
+
 }

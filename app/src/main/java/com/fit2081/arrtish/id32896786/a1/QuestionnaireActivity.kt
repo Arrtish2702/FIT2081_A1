@@ -63,6 +63,7 @@ class QuestionnaireActivity : ComponentActivity() {
         loadSavedPreferences()
 
         setContent {
+            ShowSystemBars()
             A1Theme {
                 QuestionnairePage(
                     userId = userId,
