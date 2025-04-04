@@ -32,6 +32,7 @@ import java.util.Locale
 import androidx.core.content.edit
 import kotlin.String
 
+// QuestionnaireActivity for the questionnaire form
 class QuestionnaireActivity : ComponentActivity() {
     private lateinit var userPrefs: UserSharedPreferences
 
