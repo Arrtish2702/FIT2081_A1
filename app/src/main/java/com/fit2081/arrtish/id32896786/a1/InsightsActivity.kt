@@ -59,20 +59,8 @@ fun InsightsScreen(userId: String) {
     val userPrefs = remember { UserSharedPreferences(context, userId) } // Initialize the UserSharedPreferences
 
     // Keep track of user insights & force recomposition
-    var userInsights by remember { mutableStateOf(emptyMap<String, Any>()) }
-    val updatedUserId by rememberUpdatedState(userId)
-
-    LaunchedEffect(updatedUserId) {
-        val allPrefs = userPrefs // Retrieve all shared preferences
-// Retrieve all shared preferences
-        Log.v("FIT2081-InsightsScreen", "Shared Preferences for User $userId: $allPrefs") // Print full shared preferences
-
-        // Load the "insights" data
-        userInsights = userPrefs.getInsights() // Get the "insights" data
-
-        Log.v("FIT2081-InsightsScreen", "Parsed User Insights: $userInsights") // Print only parsed insights data
-    }
-
+    var userInsights = userPrefs.getInsights()
+    
     val categories = listOf(
         "Vegetables" to 10, "Fruits" to 10, "Grains & Cereals" to 10, "Whole Grains" to 10,
         "Meat & Alternatives" to 10, "Dairy" to 10, "Water" to 5, "Unsaturated Fats" to 10,

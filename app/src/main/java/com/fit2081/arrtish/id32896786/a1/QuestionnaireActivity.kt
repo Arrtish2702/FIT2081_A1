@@ -22,8 +22,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fit2081.arrtish.id32896786.a1.ui.theme.A1Theme
@@ -31,6 +33,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 import androidx.core.content.edit
+import kotlin.String
 
 class QuestionnaireActivity : ComponentActivity() {
     private lateinit var userPrefs: UserSharedPreferences
@@ -136,15 +139,15 @@ fun QuestionnairePage(
         // Food Categories Section
         Text("Select Food Categories:", fontSize = 20.sp)
 
-        val foodCategories = listOf("Fruits", "Vegetables", "Grains", "Proteins", "Dairy", "Fats")
+        val foodCategories = listOf("Fruits", "Vegetables", "Grains", "Red Meat", "Seafood", "Poultry", "Fish", "Eggs","Nuts/Seeds")
 
         LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
+            columns = GridCells.Fixed(3),
             modifier = Modifier
                 .fillMaxWidth()
                 .height(200.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             items(foodCategories) { category ->
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -154,7 +157,7 @@ fun QuestionnairePage(
                             if (it) selectedCategories.add(category) else selectedCategories.remove(category)
                         }
                     )
-                    Text(text = category)
+                    Text(text = category, fontSize = 12.sp)
                 }
             }
         }
