@@ -8,7 +8,6 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -22,10 +21,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fit2081.arrtish.id32896786.a1.ui.theme.A1Theme
@@ -38,31 +35,29 @@ import kotlin.String
 class QuestionnaireActivity : ComponentActivity() {
     private lateinit var userPrefs: UserSharedPreferences
 
-    private val selectedCategories = mutableStateListOf<String>()
+    private val selectedCategories = mutableStateListOf<String>()  // List to hold selected food categories
     private val personas = listOf(
         "Health Devotee", "Mindful Eater", "Wellness Striver",
         "Balance Seeker", "Health Procrastinator", "Food Carefree"
-    )
+    )  // Predefined list of personas
 
-    private val biggestMealTime = mutableStateOf("12:00 PM")
-    private val sleepTime = mutableStateOf("10:00 PM")
-    private val wakeTime = mutableStateOf("6:00 AM")
-    private val selectedPersona = mutableStateOf("")
+    private val biggestMealTime = mutableStateOf("12:00 PM")  // State to store biggest meal time
+    private val sleepTime = mutableStateOf("10:00 PM")  // State to store sleep time
+    private val wakeTime = mutableStateOf("6:00 AM")  // State to store wake time
+    private val selectedPersona = mutableStateOf("")  // State to store selected persona
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        val userId = intent.getStringExtra("user_id") ?: "default_user"  // Get user ID from intent or use default
+        Log.v("Questionnaire", userId)  // Log user ID
 
+        userPrefs = UserSharedPreferences(this, userId)  // Initialize UserSharedPreferences for the user
 
-        val userId = intent.getStringExtra("user_id") ?: "default_user"
-        Log.v("Questionnaire", userId)
-
-        userPrefs = UserSharedPreferences(this, userId)
-
-        loadSavedPreferences()
+        loadSavedPreferences()  // Load saved preferences if they exist
 
         setContent {
-            ShowSystemBars()
-            A1Theme {
+            ShowSystemBars()  // Ensure system bars are visible
+            A1Theme {  // Apply app theme
                 QuestionnairePage(
                     userId = userId,
                     selectedCategories = selectedCategories,
@@ -78,20 +73,20 @@ class QuestionnaireActivity : ComponentActivity() {
         }
     }
 
+    // Function to load saved preferences from UserSharedPreferences
     private fun loadSavedPreferences() {
-        val savedChoices = userPrefs.getUserChoices()
+        val savedChoices = userPrefs.getUserChoices()  // Retrieve saved user choices
         if (savedChoices != null) {
             selectedCategories.clear()
-            selectedCategories.addAll(savedChoices["selectedCategories"] as List<String>)
+            selectedCategories.addAll(savedChoices["selectedCategories"] as List<String>)  // Load selected categories
 
-            biggestMealTime.value = savedChoices["biggestMealTime"] as String
-            sleepTime.value = savedChoices["sleepTime"] as String
-            wakeTime.value = savedChoices["wakeTime"] as String
-            selectedPersona.value = savedChoices["selectedPersona"] as String
+            biggestMealTime.value = savedChoices["biggestMealTime"] as String  // Load biggest meal time
+            sleepTime.value = savedChoices["sleepTime"] as String  // Load sleep time
+            wakeTime.value = savedChoices["wakeTime"] as String  // Load wake time
+            selectedPersona.value = savedChoices["selectedPersona"] as String  // Load selected persona
         }
     }
 }
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -106,40 +101,41 @@ fun QuestionnairePage(
     userPrefs: UserSharedPreferences,
     context: Context
 ) {
-    val scrollState = rememberScrollState()
+    val scrollState = rememberScrollState()  // Scroll state for vertical scrolling
 
-    var expanded by remember { mutableStateOf(false) }
-    var showModal by remember { mutableStateOf(false) }
+    var expanded by remember { mutableStateOf(false) }  // State for dropdown menu expansion
+    var showModal by remember { mutableStateOf(false) }  // State for modal dialog visibility
 
-
+    // Function to open a time picker dialog and set the time
     fun openTimePicker(initialTime: String, onTimeSet: (String) -> Unit) {
-        val calendar = Calendar.getInstance()
-        val initialHour = calendar.get(Calendar.HOUR_OF_DAY)
-        val initialMinute = calendar.get(Calendar.MINUTE)
+        val calendar = Calendar.getInstance()  // Get current calendar instance
+        val initialHour = calendar.get(Calendar.HOUR_OF_DAY)  // Initial hour of the day
+        val initialMinute = calendar.get(Calendar.MINUTE)  // Initial minute of the day
 
+        // Create and show time picker dialog
         val timePickerDialog = TimePickerDialog(
             context,
             { _, hourOfDay, minute ->
-                val time = formatTime(hourOfDay, minute)
-                onTimeSet(time)
+                val time = formatTime(hourOfDay, minute)  // Format time
+                onTimeSet(time)  // Set the chosen time
             },
             initialHour, initialMinute, false
         )
-        timePickerDialog.show()
+        timePickerDialog.show()  // Show time picker dialog
     }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
-            .verticalScroll(scrollState),
+            .verticalScroll(scrollState),  // Make column scrollable
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Text("Select Food Categories:", fontSize = 20.sp)  // Label for food categories selection
 
-        Text("Select Food Categories:", fontSize = 20.sp)
+        val foodCategories = listOf("Fruits", "Vegetables", "Grains", "Red Meat", "Seafood", "Poultry", "Fish", "Eggs","Nuts/Seeds")  // Food categories list
 
-        val foodCategories = listOf("Fruits", "Vegetables", "Grains", "Red Meat", "Seafood", "Poultry", "Fish", "Eggs","Nuts/Seeds")
-
+        // Display food categories in a grid layout with checkboxes
         LazyVerticalGrid(
             columns = GridCells.Fixed(3),
             modifier = Modifier
@@ -150,21 +146,23 @@ fun QuestionnairePage(
         ) {
             items(foodCategories) { category ->
                 Row(verticalAlignment = Alignment.CenterVertically) {
+                    // Checkbox for each food category
                     Checkbox(
                         checked = selectedCategories.contains(category),
                         onCheckedChange = {
-                            if (it) selectedCategories.add(category) else selectedCategories.remove(category)
+                            if (it) selectedCategories.add(category) else selectedCategories.remove(category)  // Add or remove category
                         }
                     )
-                    Text(text = category, fontSize = 12.sp)
+                    Text(text = category, fontSize = 12.sp)  // Display category name
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(16.dp))  // Spacer for layout spacing
 
-        Text("Select Your Persona:", fontSize = 20.sp)
+        Text("Select Your Persona:", fontSize = 20.sp)  // Label for persona selection
 
+        // Display personas as buttons
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
             modifier = Modifier
@@ -176,27 +174,29 @@ fun QuestionnairePage(
             items(personas) { persona ->
                 Button(
                     onClick = {
-                        selectedPersona.value = persona
-                        showModal = true
+                        selectedPersona.value = persona  // Set selected persona
+                        showModal = true  // Show persona modal
                     },
                     modifier = Modifier
                         .padding(vertical = 4.dp)
                         .size(width = 200.dp, height = 50.dp)
                 ) {
-                    Text(text = persona, fontSize = 12.sp)
+                    Text(text = persona, fontSize = 12.sp)  // Display persona name
                 }
             }
         }
 
+        // Show persona modal dialog if `showModal` is true
         if (showModal) {
             PersonaModal(selectedPersona = selectedPersona.value, onDismiss = { showModal = false })
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(16.dp))  // Spacer for layout spacing
 
+        // Exposed dropdown menu for selecting persona
         ExposedDropdownMenuBox(
             expanded = expanded,
-            onExpandedChange = { expanded = !expanded }
+            onExpandedChange = { expanded = !expanded }  // Toggle dropdown visibility
         ) {
             TextField(
                 value = selectedPersona.value,
@@ -204,86 +204,87 @@ fun QuestionnairePage(
                 readOnly = true,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .menuAnchor(),
+                    .menuAnchor(),  // Display the persona name in a read-only text field
                 trailingIcon = {
                     ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
                 }
             )
             ExposedDropdownMenu(
                 expanded = expanded,
-                onDismissRequest = { expanded = false }
+                onDismissRequest = { expanded = false }  // Close dropdown on dismiss
             ) {
                 personas.forEach { persona ->
                     DropdownMenuItem(
                         text = { Text(persona) },
                         onClick = {
-                            selectedPersona.value = persona
-                            expanded = false
+                            selectedPersona.value = persona  // Set selected persona
+                            expanded = false  // Close dropdown menu
                         }
                     )
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(16.dp))  // Spacer for layout spacing
 
-        Text("Select Your Meal Time:", fontSize = 20.sp)
+        Text("Select Your Meal Time:", fontSize = 20.sp)  // Label for meal time selection
         Button(
-            onClick = { openTimePicker(biggestMealTime.value) { biggestMealTime.value = it } }
+            onClick = { openTimePicker(biggestMealTime.value) { biggestMealTime.value = it } }  // Open time picker for biggest meal time
         ) {
-            Text(biggestMealTime.value)
+            Text(biggestMealTime.value)  // Display selected meal time
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(8.dp))  // Spacer for layout spacing
 
-        Text("Select Your Sleep Time:", fontSize = 20.sp)
+        Text("Select Your Sleep Time:", fontSize = 20.sp)  // Label for sleep time selection
         Button(
-            onClick = { openTimePicker(sleepTime.value) { sleepTime.value = it } }
+            onClick = { openTimePicker(sleepTime.value) { sleepTime.value = it } }  // Open time picker for sleep time
         ) {
-            Text(sleepTime.value)
+            Text(sleepTime.value)  // Display selected sleep time
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(8.dp))  // Spacer for layout spacing
 
-        Text("Select Your Wake Time:", fontSize = 20.sp)
+        Text("Select Your Wake Time:", fontSize = 20.sp)  // Label for wake time selection
         Button(
-            onClick = { openTimePicker(wakeTime.value) { wakeTime.value = it } }
+            onClick = { openTimePicker(wakeTime.value) { wakeTime.value = it } }  // Open time picker for wake time
         ) {
-            Text(wakeTime.value)
+            Text(wakeTime.value)  // Display selected wake time
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(16.dp))  // Spacer for layout spacing
 
+        // Row with save and clear buttons
         Row(horizontalArrangement = Arrangement.SpaceEvenly) {
             Button(onClick = {
                 completeQuestionnaire(
                     userId, context, selectedCategories, biggestMealTime, sleepTime, wakeTime, selectedPersona, userPrefs
                 )
             }) {
-                Text("Save Responses")
+                Text("Save Responses")  // Save button
             }
 
-            Spacer(modifier = Modifier.width(4.dp))
+            Spacer(modifier = Modifier.width(4.dp))  // Spacer for layout spacing
 
             Button(onClick = { eraseQuestionnaireData(context, userId, userPrefs) }) {
-                Text("Clear Responses")
+                Text("Clear Responses")  // Clear button
             }
         }
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(32.dp))  // Spacer for layout spacing
     }
 }
 
+// Function to format time to "hh:mm a" format
 fun formatTime(hour: Int, minute: Int): String {
     val calendar = Calendar.getInstance()
     calendar.set(Calendar.HOUR_OF_DAY, hour)
     calendar.set(Calendar.MINUTE, minute)
 
-    val format = SimpleDateFormat("hh:mm a", Locale.getDefault())
-    return format.format(calendar.time)
+    val format = SimpleDateFormat("hh:mm a", Locale.getDefault())  // Date format for time
+    return format.format(calendar.time)  // Return formatted time
 }
 
-
-
+// Modal to display selected persona details
 @Composable
 fun PersonaModal(selectedPersona: String, onDismiss: () -> Unit) {
     val (textInput, imageResId) = when (selectedPersona) {
@@ -297,30 +298,30 @@ fun PersonaModal(selectedPersona: String, onDismiss: () -> Unit) {
     }
 
     AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(selectedPersona) },
+        onDismissRequest = onDismiss,  // Dismiss modal on request
+        title = { Text(selectedPersona) },  // Display selected persona's name
         text = {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Image(
-                    painter = painterResource(id = imageResId),
+                    painter = painterResource(id = imageResId),  // Display persona image
                     contentDescription = selectedPersona,
                     modifier = Modifier
                         .size(150.dp)
                         .clip(RoundedCornerShape(10.dp))
                 )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(textInput, textAlign = TextAlign.Center)
+                Spacer(modifier = Modifier.height(8.dp))  // Spacer for layout
+                Text(textInput, textAlign = TextAlign.Center)  // Display persona description
             }
         },
         confirmButton = {
             Button(onClick = onDismiss) {
-                Text("Close")
+                Text("Close")  // Close button to dismiss modal
             }
         }
     )
 }
 
-
+// Function to complete and save the questionnaire data
 fun completeQuestionnaire(
     userId: String,
     context: Context,
@@ -342,8 +343,9 @@ fun completeQuestionnaire(
     Log.v("FIT2081-Questionnaire", "Saving User Preferences for User ID: $userPrefs")
     Log.v("FIT2081-Questionnaire", "Data being saved: $userChoices")
 
-    userPrefs.saveUserChoices(userChoices)
+    userPrefs.saveUserChoices(userChoices)  // Save the user's questionnaire responses
 
+    // Mark the questionnaire as completed in shared preferences
     UserSharedPreferences.getPreferences(context, userId).edit {
         putBoolean("answered", true)
     }
@@ -351,33 +353,32 @@ fun completeQuestionnaire(
     val savedData = userPrefs.getUserChoices()
     Log.v("FIT2081-Questionnaire", "User Preferences after saving: $savedData")
 
-    Toast.makeText(context, "Responses saved!", Toast.LENGTH_SHORT).show()
-    onRouteToHome(context, userId)
+    Toast.makeText(context, "Responses saved!", Toast.LENGTH_SHORT).show()  // Show toast on successful save
+    onRouteToHome(context, userId)  // Navigate to home screen
 }
 
-
+// Function to erase questionnaire data
 fun eraseQuestionnaireData(context: Context, userId: String, userPrefs: UserSharedPreferences) {
-
     Log.v("FIT2081-Questionnaire", "Clearing User Preferences for User ID: $userPrefs")
     Log.v("FIT2081-Questionnaire", "Data before clearing: ${userPrefs.getUserChoices()}")
 
-    userPrefs.clearUserChoices()
+    userPrefs.clearUserChoices()  // Clear saved choices
     UserSharedPreferences.getPreferences(context, userId).edit {
-        putBoolean("answered", false)
+        putBoolean("answered", false)  // Mark questionnaire as not answered
     }
 
     val clearedData = userPrefs.getUserChoices()
     Log.v("FIT2081-Questionnaire", "User Preferences after clearing: $clearedData")
 
-    Toast.makeText(context, "Data Erased", Toast.LENGTH_LONG).show()
-    onRouteToHome(context, userId)
+    Toast.makeText(context, "Data Erased", Toast.LENGTH_LONG).show()  // Show toast on successful data erase
+    onRouteToHome(context, userId)  // Navigate to home screen
 }
 
-
+// Function to navigate back to the home screen
 fun onRouteToHome(context: Context, userId: String?) {
     val intent = Intent(context, HomeActivity::class.java).apply {
         flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        putExtra("user_id", userId)
+        putExtra("user_id", userId)  // Pass user ID to HomeActivity
     }
-    context.startActivity(intent)
+    context.startActivity(intent)  // Start HomeActivity
 }
