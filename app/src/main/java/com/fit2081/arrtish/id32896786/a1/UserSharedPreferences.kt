@@ -12,23 +12,18 @@ class UserSharedPreferences(context: Context, userId: String) {
     private val gson = Gson()
 
     companion object {
-        // Static method to retrieve SharedPreferences object
         fun getPreferences(context: Context, userId: String): SharedPreferences {
             return context.getSharedPreferences("${userId}_prefs", Context.MODE_PRIVATE)
         }
     }
 
-
-    // Method to save user choices
     fun saveUserChoices(userChoices: Map<String, Any>) {
         sharedPreferences.edit {
 
-            // Replace existing selected categories with new ones
             val newCategories = userChoices["selectedCategories"] as? List<String> ?: emptyList()
             val updatedCategoriesJson = gson.toJson(newCategories)
             putString("selectedCategories", updatedCategoriesJson)
 
-            // Preserve old values while updating new ones
             userChoices["biggestMealTime"]?.let { putString("biggestMealTime", it as String) }
             userChoices["sleepTime"]?.let { putString("sleepTime", it as String) }
             userChoices["wakeTime"]?.let { putString("wakeTime", it as String) }
@@ -37,25 +32,20 @@ class UserSharedPreferences(context: Context, userId: String) {
         }
     }
 
-    // Method to clear all user choices and reset to defaults
     fun clearUserChoices() {
         sharedPreferences.edit {
 
-            // Reset all user choices to default values
-            putString("selectedCategories", "[]") // Empty list of categories
+            putString("selectedCategories", "[]")
             putString("biggestMealTime", "12:00 PM")
             putString("sleepTime", "10:00 PM")
             putString("wakeTime", "6:00 AM")
             putString("selectedPersona", "Select a persona")
 
-            // Optionally clear insights and answered status as well
-//        editor.remove("insights")  // Clear insights
-            putBoolean("answered", false)  // Set answered to false
+            putBoolean("answered", false)
 
         }
     }
 
-    // Retrieve the user choices
     fun getUserChoices(): Map<String, Any>? {
         val selectedCategoriesJson = sharedPreferences.getString("selectedCategories", null)
         val biggestMealTime = sharedPreferences.getString("biggestMealTime", "12:00 PM")
@@ -63,11 +53,9 @@ class UserSharedPreferences(context: Context, userId: String) {
         val wakeTime = sharedPreferences.getString("wakeTime", "6:00 AM")
         val selectedPersona = sharedPreferences.getString("selectedPersona", "Select a persona")
 
-        // Deserialize the selectedCategories JSON back to a List<String>
         val selectedCategoriesType = object : TypeToken<List<String>>() {}.type
         val selectedCategories = gson.fromJson<List<String>>(selectedCategoriesJson, selectedCategoriesType) ?: emptyList()
 
-        // Return the saved choices as a map
         return mapOf(
             "selectedCategories" to selectedCategories,
             "biggestMealTime" to (biggestMealTime ?: "12:00 PM"),
@@ -77,15 +65,13 @@ class UserSharedPreferences(context: Context, userId: String) {
         )
     }
 
-    // Method to get the insights data (sub-dictionary under "insights")
     fun getInsights(): Map<String, Any> {
         val insightsJson = sharedPreferences.getString("insights", null)
         return if (insightsJson != null) {
-            // Deserialize the JSON string to a Map
             val type = object : TypeToken<Map<String, Any>>() {}.type
             gson.fromJson(insightsJson, type)
         } else {
-            emptyMap()  // Return empty map if no insights exist
+            emptyMap()
         }
     }
 }

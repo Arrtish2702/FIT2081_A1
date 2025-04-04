@@ -15,7 +15,6 @@ object Authentication {
     }
 
     fun login(context: Context, userId: String, phoneNumber: String): Boolean {
-        // Validate credentials
         val storedPhone = authPrefs.getString(userId, null)
         if (storedPhone == null || storedPhone != phoneNumber) {
             Log.v("FIT2081-Authentication", "Login failed: invalid credentials")
@@ -24,7 +23,7 @@ object Authentication {
 
         Log.v("FIT2081-Authentication", "Login successful for userId: $userId")
 
-        // Initialize user-specific preferences
+
         val userPreferences = UserSharedPreferences.getPreferences(context, userId)
 
         if (!userPreferences.contains("first_login")) {
@@ -36,7 +35,6 @@ object Authentication {
             Log.v("FIT2081-Authentication", "Returning user login for $userId")
         }
 
-        // Route to HomeActivity with userId
         Log.v("FIT2081-Authentication", "Routing to Home page")
         val intent = Intent(context, HomeActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK

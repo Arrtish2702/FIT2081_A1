@@ -40,14 +40,13 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.fit2081.arrtish.id32896786.a1.CsvExports.extractUserIdsFromCSV
 import com.fit2081.arrtish.id32896786.a1.ui.theme.A1Theme
-import java.io.BufferedReader
-import java.io.InputStreamReader
+
 
 class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        Authentication.init(this) // Initialize auth system
+        Authentication.init(this)
         setContent {
             A1Theme {
                 LoginPage(context = this, modifier = Modifier.fillMaxSize())

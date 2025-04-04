@@ -30,16 +30,16 @@ class HomeActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        // Retrieve userId from Intent extras
-        val userId = intent.getStringExtra("user_id") ?: "default_user" // Provide a default if null
+
+        val userId = intent.getStringExtra("user_id") ?: "default_user"
         Log.v("FIT2081-HomeActivity", "User ID: $userId")
 
         val sharedPreferences = UserSharedPreferences.getPreferences(this, userId)
-        val isUpdated = sharedPreferences.getBoolean("updated", false) // Check if data has been updated
+        val isUpdated = sharedPreferences.getBoolean("updated", false)
 
         Log.v("FIT2081-HomeActivity", "SharedPreferences: $sharedPreferences | Updated: $isUpdated")
 
-        if (!isUpdated) { // If data has not been updated, fetch and save it
+        if (!isUpdated) {
             Log.v("FIT2081-HomeActivity", "Adding data to SharedPreferences for user $userId")
             getUserDetailsAndSave(this, userId)
         } else {
@@ -61,17 +61,16 @@ class HomeActivity : ComponentActivity() {
 fun HomePage(userId: String?,sharedPreferences: SharedPreferences, modifier: Modifier = Modifier) {
     val context = LocalContext.current
 
-    // ✅ Retrieve the "choices" JSON string and parse it
+
     val detailsJson = sharedPreferences.getString("insights", "{}") ?: "{}"
     val userDetails = JSONObject(detailsJson)
 
-    val foodQualityScore = userDetails.optDouble("qualityScore", 0.0).toFloat() // ✅ Extract score correctly
+    val foodQualityScore = userDetails.optDouble("qualityScore", 0.0).toFloat()
 
     var showDialog by remember { mutableStateOf(false) }
 
     Log.v("FIT2081-HomeActivity", "Food Quality Score: $foodQualityScore")
 
-    // Check if the user has answered the questionnaire
     checkForQuestionnaire(context,userId) { hasAnswered ->
         if (!hasAnswered) {
             showDialog = true
@@ -102,30 +101,30 @@ fun HomePage(userId: String?,sharedPreferences: SharedPreferences, modifier: Mod
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
-        contentAlignment = Alignment.TopCenter // Ensures everything is stacked top-down
+        contentAlignment = Alignment.TopCenter
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp),
             modifier = Modifier.fillMaxSize()
         ) {
-            // Image at the top
+
             Image(
                 painter = painterResource(
                     id = when {
                         foodQualityScore.toInt() >= 80 -> R.drawable.high_score_picture_removebg_preview
                         foodQualityScore.toInt() >= 40 -> R.drawable.medium_score_picture_removebg_preview
                         foodQualityScore.toInt() >= 0 -> R.drawable.low_score_picture_removebg_preview
-                        else -> 0 // Invalid case (Won't render)
+                        else -> 0
                     }
                 ),
                 contentDescription = "Food Quality Score",
                 modifier = Modifier
                     .size(275.dp)
-                    .align(Alignment.CenterHorizontally) // Ensures image is centered
+                    .align(Alignment.CenterHorizontally)
             )
 
-            // User Info
+
             Text(
                 text = "Hello, ${userId ?: "Guest"}!",
                 fontSize = 24.sp,
@@ -133,7 +132,7 @@ fun HomePage(userId: String?,sharedPreferences: SharedPreferences, modifier: Mod
                 textAlign = TextAlign.Center
             )
 
-            // Score Display
+
             Text(
                 text = "Your Food Quality Score: $foodQualityScore",
                 fontSize = 20.sp,
@@ -141,7 +140,7 @@ fun HomePage(userId: String?,sharedPreferences: SharedPreferences, modifier: Mod
                 textAlign = TextAlign.Center
             )
 
-            // Description
+
             Text(
                 text = "Your Food Quality Score provides a snapshot of how well your eating patterns align with established food guidelines, helping you identify both strengths and opportunities for improvement in your diet.\n" +
                         "This personalized measurement considers various food groups, including vegetables, fruits, whole grains, and proteins, to give you practical insights for making healthier food choices.\n",
@@ -149,7 +148,7 @@ fun HomePage(userId: String?,sharedPreferences: SharedPreferences, modifier: Mod
                 textAlign = TextAlign.Center
             )
 
-            // Buttons
+
             Button(onClick = {
             onRouteToQuestionnaire(context, userId)
             }) {
@@ -169,12 +168,12 @@ fun HomePage(userId: String?,sharedPreferences: SharedPreferences, modifier: Mod
 
 fun checkForQuestionnaire(context: Context, userId: String?, callback: (Boolean) -> Unit) {
     if (userId == null) {
-        callback(false) // Default to false if userId is null
+        callback(false)
         return
     }
 
     val sharedPreferences = UserSharedPreferences.getPreferences(context, userId)
-    val answeredQuestionnaire = sharedPreferences.getBoolean("answered", false) // Check if data has been updated
+    val answeredQuestionnaire = sharedPreferences.getBoolean("answered", false)
     Log.v("FIT2081-Questionnaire", answeredQuestionnaire.toString())
     callback(answeredQuestionnaire)
 }
@@ -197,11 +196,11 @@ fun onRouteToInsights(context: Context, userId: String?) {
 @Composable
 internal fun HideSystemBars() {
     val systemUiController = rememberSystemUiController()
-    systemUiController.isSystemBarsVisible = false  // Hides both status & nav bar
+    systemUiController.isSystemBarsVisible = false
 }
 
 @Composable
 internal fun ShowSystemBars() {
     val systemUiController = rememberSystemUiController()
-    systemUiController.isSystemBarsVisible = true  // Shows both status & nav bar
+    systemUiController.isSystemBarsVisible = true
 }

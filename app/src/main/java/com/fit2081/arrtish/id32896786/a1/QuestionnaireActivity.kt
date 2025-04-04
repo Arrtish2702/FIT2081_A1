@@ -52,14 +52,12 @@ class QuestionnaireActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        // Retrieve userId from Intent
+
         val userId = intent.getStringExtra("user_id") ?: "default_user"
         Log.v("Questionnaire", userId)
 
-        // Initialize UserSharedPreferences
         userPrefs = UserSharedPreferences(this, userId)
 
-        // Call loadSavedPreferences here instead of onStart
         loadSavedPreferences()
 
         setContent {
@@ -104,16 +102,16 @@ fun QuestionnairePage(
     biggestMealTime: MutableState<String>,
     sleepTime: MutableState<String>,
     wakeTime: MutableState<String>,
-    selectedPersona: MutableState<String>, // Keep this as a parameter
+    selectedPersona: MutableState<String>,
     userPrefs: UserSharedPreferences,
     context: Context
 ) {
     val scrollState = rememberScrollState()
-    // To handle dropdown visibility
-    var expanded by remember { mutableStateOf(false) }
-    var showModal by remember { mutableStateOf(false) }  // Track if modal should be shown
 
-    // Function to open TimePicker
+    var expanded by remember { mutableStateOf(false) }
+    var showModal by remember { mutableStateOf(false) }
+
+
     fun openTimePicker(initialTime: String, onTimeSet: (String) -> Unit) {
         val calendar = Calendar.getInstance()
         val initialHour = calendar.get(Calendar.HOUR_OF_DAY)
@@ -137,7 +135,7 @@ fun QuestionnairePage(
             .verticalScroll(scrollState),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Food Categories Section
+
         Text("Select Food Categories:", fontSize = 20.sp)
 
         val foodCategories = listOf("Fruits", "Vegetables", "Grains", "Red Meat", "Seafood", "Poultry", "Fish", "Eggs","Nuts/Seeds")
@@ -165,10 +163,8 @@ fun QuestionnairePage(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Persona Selection Section
         Text("Select Your Persona:", fontSize = 20.sp)
 
-        // LazyVerticalGrid with persona buttons
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
             modifier = Modifier
@@ -181,7 +177,7 @@ fun QuestionnairePage(
                 Button(
                     onClick = {
                         selectedPersona.value = persona
-                        showModal = true // Open the modal when the button is clicked
+                        showModal = true
                     },
                     modifier = Modifier
                         .padding(vertical = 4.dp)
@@ -192,21 +188,19 @@ fun QuestionnairePage(
             }
         }
 
-        // Show the Persona Modal if selected
         if (showModal) {
             PersonaModal(selectedPersona = selectedPersona.value, onDismiss = { showModal = false })
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Persona Dropdown Section
         ExposedDropdownMenuBox(
             expanded = expanded,
             onExpandedChange = { expanded = !expanded }
         ) {
             TextField(
-                value = selectedPersona.value, // Use selectedPersona.value directly
-                onValueChange = {},  // No need to change value on input (readonly)
+                value = selectedPersona.value,
+                onValueChange = {},
                 readOnly = true,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -223,8 +217,7 @@ fun QuestionnairePage(
                     DropdownMenuItem(
                         text = { Text(persona) },
                         onClick = {
-                            selectedPersona.value =
-                                persona // Correctly update the MutableState here
+                            selectedPersona.value = persona
                             expanded = false
                         }
                     )
@@ -234,7 +227,6 @@ fun QuestionnairePage(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Time Selection Sections
         Text("Select Your Meal Time:", fontSize = 20.sp)
         Button(
             onClick = { openTimePicker(biggestMealTime.value) { biggestMealTime.value = it } }
@@ -262,7 +254,6 @@ fun QuestionnairePage(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Save & Clear Buttons
         Row(horizontalArrangement = Arrangement.SpaceEvenly) {
             Button(onClick = {
                 completeQuestionnaire(
@@ -278,11 +269,10 @@ fun QuestionnairePage(
                 Text("Clear Responses")
             }
         }
-        Spacer(modifier = Modifier.height(32.dp)) // Extra padding to prevent cutoff
+        Spacer(modifier = Modifier.height(32.dp))
     }
 }
 
-// Format time as HH:mm AM/PM
 fun formatTime(hour: Int, minute: Int): String {
     val calendar = Calendar.getInstance()
     calendar.set(Calendar.HOUR_OF_DAY, hour)
@@ -341,7 +331,6 @@ fun completeQuestionnaire(
     selectedPersona: MutableState<String>,
     userPrefs: UserSharedPreferences,
 ) {
-    // Construct a map with the questionnaire data
     val userChoices = mapOf(
         "selectedCategories" to selectedCategories,
         "biggestMealTime" to biggestMealTime.value,
@@ -350,19 +339,15 @@ fun completeQuestionnaire(
         "selectedPersona" to selectedPersona.value
     )
 
-    // Log before saving
     Log.v("FIT2081-Questionnaire", "Saving User Preferences for User ID: $userPrefs")
     Log.v("FIT2081-Questionnaire", "Data being saved: $userChoices")
 
-    // Save user preferences
     userPrefs.saveUserChoices(userChoices)
 
-    // Ensure that "answered" is set to true after saving data
     UserSharedPreferences.getPreferences(context, userId).edit {
         putBoolean("answered", true)
     }
 
-    // Log after saving
     val savedData = userPrefs.getUserChoices()
     Log.v("FIT2081-Questionnaire", "User Preferences after saving: $savedData")
 
@@ -372,7 +357,7 @@ fun completeQuestionnaire(
 
 
 fun eraseQuestionnaireData(context: Context, userId: String, userPrefs: UserSharedPreferences) {
-    // Log before clearing
+
     Log.v("FIT2081-Questionnaire", "Clearing User Preferences for User ID: $userPrefs")
     Log.v("FIT2081-Questionnaire", "Data before clearing: ${userPrefs.getUserChoices()}")
 
@@ -380,7 +365,7 @@ fun eraseQuestionnaireData(context: Context, userId: String, userPrefs: UserShar
     UserSharedPreferences.getPreferences(context, userId).edit {
         putBoolean("answered", false)
     }
-    // Log after clearing
+
     val clearedData = userPrefs.getUserChoices()
     Log.v("FIT2081-Questionnaire", "User Preferences after clearing: $clearedData")
 

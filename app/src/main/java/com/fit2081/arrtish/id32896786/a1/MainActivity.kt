@@ -29,13 +29,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-
-
-//        if (Authentication.isLoggedIn()) {
-//            // Auto-login the user
-//            val intent = Intent(this, HomeActivity::class.java)
-//            startActivity(intent)
-//        } else {
         setContent {
             A1Theme {
                 WelcomePage(
@@ -43,7 +36,6 @@ class MainActivity : ComponentActivity() {
                 )
             }
         }
-//        }
     }
 }
 
@@ -60,14 +52,12 @@ fun WelcomePage(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // App Logo
         Image(
             painter = painterResource(id = R.drawable.logo_for_an_app_called_nutritrack),
             contentDescription = "NutriTrack Logo",
             modifier = Modifier.size(150.dp)
         )
 
-        // App Name
         Text(
             text = "NutriTrack",
             fontSize = 28.sp,
@@ -77,7 +67,6 @@ fun WelcomePage(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Disclaimer
         Text(
             text = "This app provides general health and nutrition information for educational purposes only. It is not intended as medical advice, diagnosis, or treatment. Always consult a qualified healthcare professional before making any changes to your diet, exercise, or health regimen. Use this app at your own risk. If you’d like to an Accredited Practicing Dietitian (APD), please visit the Monash Nutrition/Dietetics Clinic (discounted rates for students):",
             fontSize = 14.sp,
@@ -87,7 +76,6 @@ fun WelcomePage(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // External Link to Monash Nutrition Clinic
         Text(
             text = "Visit Monash Nutrition Clinic",
             fontSize = 16.sp,
@@ -100,7 +88,6 @@ fun WelcomePage(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Login Button
         Button(
             onClick = {
                 context.startActivity(Intent(context, LoginActivity::class.java))
@@ -115,7 +102,6 @@ fun WelcomePage(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Student Name + ID
         Text(
             text = "Arrtish Suthan (32896786)",
             fontSize = 16.sp,
