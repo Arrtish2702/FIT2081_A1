@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.core.content.edit
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -18,12 +19,14 @@ import com.fit2081.arrtish.id32896786.a1.databases.patientdb.Patient
 import com.fit2081.arrtish.id32896786.a1.databases.patientdb.PatientRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.firstOrNull
 
 class AuthenticationViewModel(application: Application) : ViewModel() {
 
     private val patientDao = AppDataBase.getDatabase(application).patientDao()
     private val repository = PatientRepository(patientDao)
-
+    var registrationSuccessful = mutableStateOf(false)
+        private set
 
 //    // Using liveData to collect Flow and expose as LiveData
 //    val patientIds: LiveData<List<Int>> = liveData {
@@ -86,10 +89,30 @@ class AuthenticationViewModel(application: Application) : ViewModel() {
         return true  // Login successful
     }
 
+    fun register(selectedId: String, phone: String, password: String, confirmPassword: String) {
+        Log.d("AuthenticationViewModel", "attempting register")
+        viewModelScope.launch {
+            val patientId = selectedId.toIntOrNull() ?: return@launch
+            val patient = repository.getPatientById(patientId)
 
+            if (patient == null || patient.patientPhoneNumber != phone) {
+                // Show error: ID not found or phone doesn't match
+                Log.d("AuthenticationViewModel", "no patient/wrong hp no")
+                return@launch
+            }
 
-    fun register(selectedId: String, phone: String, password: String, confirmPassword: String){
+            if (password != confirmPassword) {
+                // Show error: passwords don't match
+                Log.d("AuthenticationViewModel", "pw mismatch")
+                return@launch
+            }
 
+            val updated = patient.copy(patientPassword = password)
+            repository.updatePatient(updated)
+            Log.d("AuthenticationViewModel", "update done")
+            // Optionally notify UI of success
+            registrationSuccessful.value = true // ✅ Trigger navigation
+        }
     }
 
     class AuthenticationViewModelFactory(private val context: Context) : ViewModelProvider.Factory {

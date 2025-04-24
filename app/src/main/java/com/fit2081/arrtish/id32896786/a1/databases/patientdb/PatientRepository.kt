@@ -9,5 +9,13 @@ class PatientRepository(private val patientDao: PatientDao) {
         return patientDao.getAllPatientIds() // Return the Flow directly
     }
 
+    suspend fun getPatientById(id: Int): Patient? {
+        return patientDao.findPatientById(id)
+    }
+
+    suspend fun updatePatient(patient: Patient) {
+        patientDao.updatePatient(patient)
+    }
+
     // Add more methods to wrap DAO calls as needed
 }

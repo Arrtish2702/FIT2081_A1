@@ -18,6 +18,9 @@ interface PatientDao {
     @Delete
     suspend fun deletePatient(patient: Patient)
 
+    @Query("SELECT * FROM patients WHERE patientId = :id")
+    suspend fun findPatientById(id: Int): Patient?
+
     // Get all patients from the database
     @Query("SELECT * FROM patients")
     fun getAllPatients(): Flow<List<Patient>> // No suspend modifier here

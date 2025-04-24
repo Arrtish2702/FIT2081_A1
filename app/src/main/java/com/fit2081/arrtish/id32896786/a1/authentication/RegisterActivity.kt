@@ -7,6 +7,9 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
@@ -44,11 +47,21 @@ fun RegisterPage(
     navController: NavController,
     viewModel: AuthenticationViewModel = viewModel(factory = AuthenticationViewModelFactory(LocalContext.current))
 ) {
-    val idOptions = listOf("012345", "678910", "111213")
-    var selectedId by remember { mutableStateOf(idOptions[0]) }
+//    val idOptions = listOf("012345", "678910", "111213")
+//    var selectedId by remember { mutableStateOf(idOptions[0]) }
+    var selectedUserId by remember { mutableStateOf("") } // State to store selected user ID
+    val userIds by viewModel.patientIds.collectAsState(initial = emptyList())
     var phone by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
+
+    if (viewModel.registrationSuccessful.value) {
+        LaunchedEffect(Unit) {
+            navController.navigate("login") {
+                popUpTo("register") { inclusive = true } // optional: removes register from back stack
+            }
+        }
+    }
 
     Column(
         modifier = modifier
@@ -65,32 +78,28 @@ fun RegisterPage(
 
         // Dropdown for ID
         var expanded by remember { mutableStateOf(false) }
+
+        // Exposed dropdown menu for user selection
         ExposedDropdownMenuBox(
             expanded = expanded,
-            onExpandedChange = { expanded = !expanded }
-        ) {
-            TextField(
-                value = selectedId,
-                onValueChange = {},
-                readOnly = true,
-                label = { Text("My ID (Provided by your Clinician)") },
-                trailingIcon = {
-                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
-                },
-                modifier = Modifier.fillMaxWidth()
+            onExpandedChange = { expanded = !expanded }) { // Toggle dropdown expansion on click
+            OutlinedTextField(
+                value = selectedUserId, // Bind selected user ID to text field
+                onValueChange = {}, // No action on value change, read-only field
+                label = { Text("User ID") }, // Label for the input
+                leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) }, // Person icon
+                trailingIcon = { Icon(Icons.Filled.ArrowDropDown, contentDescription = null) }, // Dropdown icon
+                readOnly = true, // Make the field read-only
+                modifier = Modifier.fillMaxWidth().menuAnchor() // Full width and position dropdown
             )
-            ExposedDropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false }
-            ) {
-                idOptions.forEach { id ->
-                    DropdownMenuItem(
-                        text = { Text(id) },
-                        onClick = {
-                            selectedId = id
-                            expanded = false
-                        }
-                    )
+
+            // Dropdown menu that shows all user IDs
+            ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                userIds.forEach { userId -> // Loop through user IDs
+                    DropdownMenuItem(text = { Text(userId.toString()) }, onClick = {
+                        selectedUserId = userId.toString() // Set selected user ID
+                        expanded = false // Close dropdown
+                    })
                 }
             }
         }
@@ -142,7 +151,7 @@ fun RegisterPage(
         Spacer(modifier = Modifier.height(24.dp))
 
         Button(
-            onClick = { viewModel.register(selectedId, phone, password, confirmPassword) },
+            onClick = { viewModel.register(selectedUserId, phone, password, confirmPassword) },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp)
         ) {
