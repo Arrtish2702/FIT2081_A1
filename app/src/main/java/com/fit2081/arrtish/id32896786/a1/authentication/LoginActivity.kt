@@ -1,6 +1,7 @@
-package com.fit2081.arrtish.id32896786.a1
+package com.fit2081.arrtish.id32896786.a1.authentication
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -14,12 +15,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -34,11 +37,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import com.fit2081.arrtish.id32896786.a1.Authentication
 import com.fit2081.arrtish.id32896786.a1.CsvExports.extractUserIdsFromCSV
+import com.fit2081.arrtish.id32896786.a1.HomeActivity
+import com.fit2081.arrtish.id32896786.a1.R
+import com.fit2081.arrtish.id32896786.a1.authentication.AuthenticationViewModel.AuthenticationViewModelFactory
 import com.fit2081.arrtish.id32896786.a1.ui.theme.A1Theme
 
 // Main Activity for Login
@@ -46,19 +57,24 @@ class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge() // Enables edge-to-edge display (no status bar)
-        Authentication.init(this) // Initialize authentication object
-        setContent {
-            A1Theme { // Apply the app's theme to the login page
-                LoginPage(context = this, modifier = Modifier.fillMaxSize()) // Display the login page
-            }
-        }
+//        Authentication.init(this) // Initialize authentication object
+//        setContent {
+//            A1Theme { // Apply the app's theme to the login page
+//                LoginPage(context = this, modifier = Modifier.fillMaxSize()) // Display the login page
+//            }
+//        }
     }
 }
 
 // Composable function for the login page UI
 @OptIn(ExperimentalMaterial3Api::class) // Opt-in to use new Material3 components
 @Composable
-fun LoginPage(context: Context, modifier: Modifier = Modifier) {
+fun LoginPage(
+    modifier: Modifier = Modifier,
+    navController: NavController,
+    viewModel: AuthenticationViewModel = viewModel(factory = AuthenticationViewModelFactory(LocalContext.current))
+){
+    var context = LocalContext.current
     var selectedUserId by remember { mutableStateOf("") } // State to store selected user ID
     var phoneNumber by remember { mutableStateOf("") } // State to store entered phone number
     var phoneNumberError by remember { mutableStateOf(false) } // State to track phone number validity
@@ -122,7 +138,7 @@ fun LoginPage(context: Context, modifier: Modifier = Modifier) {
                 value = phoneNumber, // Bind entered phone number
                 onValueChange = {
                     phoneNumber = it
-                    phoneNumberError = !isValidNumber(it) // Validate phone number
+                    phoneNumberError = !viewModel.isValidNumber(it) // Validate phone number
                 },
                 label = { Text("Phone Number") }, // Label for phone input
                 leadingIcon = { Icon(Icons.Default.Phone, contentDescription = null) }, // Phone icon
@@ -143,7 +159,13 @@ fun LoginPage(context: Context, modifier: Modifier = Modifier) {
             // Login button that triggers authentication
             Button(onClick = {
                 if (selectedUserId.isNotEmpty() && phoneNumber.isNotEmpty()) {
-                    Authentication.login(context, selectedUserId, phoneNumber) // Perform login
+                    if(viewModel.login(context, selectedUserId, phoneNumber)){
+                        val intent = Intent(context, HomeActivity::class.java).apply {
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK  // Clear previous activities
+                            putExtra("user_id", selectedUserId)  // Pass userId to the HomeActivity
+                        }
+                        context.startActivity(intent)
+                    }
                 } else {
                     Toast.makeText(
                         context,
@@ -154,13 +176,19 @@ fun LoginPage(context: Context, modifier: Modifier = Modifier) {
             }, modifier = Modifier.fillMaxWidth()) {
                 Text("Login") // Button label
             }
+
+            Button(
+                onClick = {
+                    navController.navigate("register") {
+                        popUpTo("login") { inclusive = true }
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6C29FC))
+            ) {
+                Text("Register", color = Color.White)
+            }
         }
     }
-}
-
-// Function to validate phone number (supports Australian and Malaysian numbers)
-fun isValidNumber(number: String): Boolean {
-    val aussieRegex = Regex("^(61[2-478]\\d{8})$") // Australian phone number regex
-    val malaysianRegex = Regex("^(60[1-9]\\d{7,9})$") // Malaysian phone number regex
-    return aussieRegex.matches(number) || malaysianRegex.matches(number) // Return true if valid
 }

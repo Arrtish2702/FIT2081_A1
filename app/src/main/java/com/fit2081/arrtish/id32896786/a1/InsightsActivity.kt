@@ -40,20 +40,20 @@ class InsightsActivity : ComponentActivity() {
 
         // Get user ID from intent or set default
         val userId = intent.getStringExtra("user_id") ?: "default_user"
-        Log.v("FIT2081-InsightsScreen", userId)
+        Log.v("FIT2081-InsightsPage", userId)
 
         setContent {
-            ShowSystemBars()  // Show system bars (status and navigation)
+//            ShowSystemBars()  // Show system bars (status and navigation)
             A1Theme {  // Apply app's theme
-                InsightsScreen(userId)  // Pass user ID to InsightsScreen composable
+                InsightsPage(userId)  // Pass user ID to InsightsPage composable
             }
         }
     }
 }
 
-// InsightsScreen composable - Displays the user's food insights
+// InsightsPage composable - Displays the user's food insights
 @Composable
-fun InsightsScreen(userId: String) {
+fun InsightsPage(userId: String) {
     val context = LocalContext.current  // Get current context
     val userPrefs = remember { UserSharedPreferences(context, userId) }  // Initialize shared preferences for user
 
@@ -176,7 +176,7 @@ fun FoodScoreItem(name: String, score: Number) {
     }
 }
 
-// Preview of InsightsScreen composable (for UI design testing)
+// Preview of InsightsPage composable (for UI design testing)
 @Preview(showBackground = true)
 @Composable
 fun InsightsScreenPreview() {

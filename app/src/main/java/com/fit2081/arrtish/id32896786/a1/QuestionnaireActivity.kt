@@ -57,7 +57,7 @@ class QuestionnaireActivity : ComponentActivity() {
         loadSavedPreferences()  // Load saved preferences if they exist
 
         setContent {
-            ShowSystemBars()  // Ensure system bars are visible
+//            ShowSystemBars()  // Ensure system bars are visible
             A1Theme {  // Apply app theme
                 QuestionnairePage(
                     userId = userId,

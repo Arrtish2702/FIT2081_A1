@@ -12,6 +12,21 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.A1">
         <activity
+            android:name=".nutricoach.NutriCoachActivity"
+            android:exported="false"
+            android:label="@string/title_activity_nutri_coach"
+            android:theme="@style/Theme.A1" />
+        <activity
+            android:name=".settings.SettingsActivity"
+            android:exported="false"
+            android:label="@string/title_activity_settings"
+            android:theme="@style/Theme.A1" />
+        <activity
+            android:name=".authentication.RegisterActivity"
+            android:exported="false"
+            android:label="@string/title_activity_register"
+            android:theme="@style/Theme.A1" />
+        <activity
             android:name=".HomeActivity"
             android:exported="false"
             android:label="@string/title_activity_home"
@@ -27,7 +42,7 @@
             android:label="@string/title_activity_questionnaire"
             android:theme="@style/Theme.A1" />
         <activity
-            android:name=".LoginActivity"
+            android:name=".authentication.LoginActivity"
             android:exported="false"
             android:label="@string/title_activity_login"
             android:theme="@style/Theme.A1" />

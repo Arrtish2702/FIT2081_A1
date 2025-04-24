@@ -6,6 +6,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -19,35 +20,69 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fit2081.arrtish.id32896786.a1.ui.theme.A1Theme
 import androidx.core.net.toUri
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.fit2081.arrtish.id32896786.a1.authentication.LoginPage
+import com.fit2081.arrtish.id32896786.a1.authentication.RegisterPage
+import androidx.lifecycle.ViewModelProvider
 
-// Main Activity for the app
+
 class MainActivity : ComponentActivity() {
+
+    // Create MainViewModel using ViewModelProvider
+    private val viewModel: MainViewModel by lazy {
+        ViewModelProvider(this).get(MainViewModel::class.java)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Calling the loadAndInsertData method of MainViewModel
+        viewModel.loadAndInsertData(this)
+
         // Enables edge-to-edge display (immersive mode) for better UI experience
         enableEdgeToEdge()
+
         // Set the content of the screen to the WelcomePage Composable
         setContent {
             A1Theme {
                 // Display the WelcomePage composable with modifier to fill the screen
-                WelcomePage(
-                    modifier = Modifier.fillMaxSize(),
-                )
+                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                    AppNavigation(modifier = Modifier.padding(innerPadding))
+                }
             }
         }
     }
 }
 
+
+@Composable
+fun AppNavigation(modifier: Modifier) {
+    val navController = rememberNavController()
+
+    // Define the NavHost with the start destination and routes
+    NavHost(navController = navController, startDestination = "welcome") {
+        composable("welcome") { WelcomePage(modifier, navController) }
+        composable("login") { LoginPage(modifier, navController) }
+        composable("register") { RegisterPage(modifier, navController) }
+    }
+}
+
 // Preview function for the WelcomePage Composable
-@Preview(showBackground = true)
+//@Preview(showBackground = true)
 @Composable
 fun WelcomePage(
     modifier: Modifier = Modifier,
+    navController: NavController
 ) {
     // Get the current context to use it for navigation actions
     val context = LocalContext.current
@@ -106,7 +141,9 @@ fun WelcomePage(
         // Display a button to navigate to the LoginActivity
         Button(
             onClick = {
-                context.startActivity(Intent(context, LoginActivity::class.java)) // Start LoginActivity when clicked
+                navController.navigate("login") {
+                    popUpTo("welcome") { inclusive = true }
+                }  // Start LoginActivity when clicked
             },
             modifier = Modifier
                 .fillMaxWidth(0.8f) // Fill 80% of the screen width
