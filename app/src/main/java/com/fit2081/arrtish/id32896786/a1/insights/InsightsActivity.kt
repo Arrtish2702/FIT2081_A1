@@ -1,10 +1,7 @@
 package com.fit2081.arrtish.id32896786.a1.insights
 
 
-import android.content.Context
-import android.content.Intent
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Box
@@ -33,6 +30,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import com.fit2081.arrtish.id32896786.a1.databases.AppDataBase
 import com.fit2081.arrtish.id32896786.a1.databases.patientdb.PatientRepository
 
@@ -48,7 +46,7 @@ class InsightsActivity : ComponentActivity() {
 }
 
 @Composable
-fun InsightsPage(userId: Int, modifier: Modifier = Modifier) {
+fun InsightsPage(userId: Int, modifier: Modifier = Modifier, navController: NavHostController) {
     val context = LocalContext.current
     val db = AppDataBase.getDatabase(context)
     val repository = PatientRepository(db.patientDao())
@@ -135,8 +133,7 @@ fun InsightsPage(userId: Int, modifier: Modifier = Modifier) {
 
                 Button(
                     onClick = {
-                        Toast.makeText(context, "NutriCoach in Development", Toast.LENGTH_LONG)
-                            .show()
+                        navController.navigate("nutricoach")
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {

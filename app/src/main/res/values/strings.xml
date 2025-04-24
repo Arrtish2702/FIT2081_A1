@@ -7,4 +7,5 @@
     <string name="title_activity_register">RegisterActivity</string>
     <string name="title_activity_settings">SettingsActivity</string>
     <string name="title_activity_nutri_coach">NutriCoachActivity</string>
+    <string name="title_activity_clinician">ClinicianActivity</string>
 </resources>

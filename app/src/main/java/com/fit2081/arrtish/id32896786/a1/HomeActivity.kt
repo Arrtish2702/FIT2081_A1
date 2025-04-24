@@ -1,6 +1,5 @@
 package com.fit2081.arrtish.id32896786.a1
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -11,7 +10,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
@@ -74,36 +72,14 @@ fun MyTopAppBar(navController: NavHostController) {
     // Track the current route
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route ?: "Home"
 
-    // State to manage the menu's visibility
-    var expanded by remember { mutableStateOf(false) }
+//    // State to manage the menu's visibility
+//    var expanded by remember { mutableStateOf(false) }
 
     // Get context from LocalContext
     val context = LocalContext.current
 
     TopAppBar(
         title = { Text(currentRoute.replaceFirstChar { it.uppercase() }) }, // Display the route name as title
-        actions = {
-            IconButton(onClick = { expanded = !expanded }) {
-                Icon(Icons.Filled.MoreVert, contentDescription = "More options")
-            }
-
-            // Dropdown menu for the log out option
-            DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false }
-            ) {
-                DropdownMenuItem(
-                    onClick = {
-                        val intent = Intent(context, MainActivity::class.java).apply {
-                            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                        }
-                        context.startActivity(intent)
-                        expanded = false
-                    },
-                    text = { Text("Log out") }
-                )
-            }
-        }
     )
 }
 
@@ -125,7 +101,7 @@ fun MyNavHost(navController: NavHostController, userId: Int) {
         }
 
         composable("insights") {
-            InsightsPage(userId, modifier)
+            InsightsPage(userId, modifier, navController)
         }
 
         composable("nutricoach") {
@@ -133,7 +109,15 @@ fun MyNavHost(navController: NavHostController, userId: Int) {
         }
 
         composable("settings") {
-            SettingsPage(userId, modifier)
+            SettingsPage(userId, modifier, navController)
+        }
+
+        composable("clinicianlogin") {
+            ClinicianLogin(userId, modifier, navController)
+        }
+
+        composable("clinician") {
+            ClinicianPage(userId, modifier, navController)
         }
     }
 }

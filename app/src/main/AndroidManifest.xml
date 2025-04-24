@@ -12,6 +12,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.A1">
         <activity
+            android:name=".ClinicianActivity"
+            android:exported="false"
+            android:label="@string/title_activity_clinician"
+            android:theme="@style/Theme.A1" />
+        <activity
             android:name=".nutricoach.NutriCoachActivity"
             android:exported="false"
             android:label="@string/title_activity_nutri_coach"
