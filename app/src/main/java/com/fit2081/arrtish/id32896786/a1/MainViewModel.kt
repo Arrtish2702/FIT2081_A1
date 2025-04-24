@@ -7,7 +7,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.fit2081.arrtish.id32896786.a1.databases.patientdb.Patient
 import com.fit2081.arrtish.id32896786.a1.databases.AppDataBase
-import com.fit2081.arrtish.id32896786.a1.databases.scoresdb.HeifaScores
+import com.fit2081.arrtish.id32896786.a1.databases.patientdb.PatientRepository
 
 import kotlinx.coroutines.Dispatchers
 
@@ -16,14 +16,25 @@ import kotlinx.coroutines.launch
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.util.Date
+import androidx.core.content.edit
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val patientDao = AppDataBase.getDatabase(application).patientDao()
-    private val scoresDao = AppDataBase.getDatabase(application).heifaScoreDao()
+    private val repository = PatientRepository(patientDao)
 
     fun loadAndInsertData(context: Context) {
+        // Check if the data has already been loaded by reading SharedPreferences
+        val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
+        val isDataLoaded = sharedPreferences.getBoolean("isDataLoaded", false)
 
+        // If data has already been loaded, return early
+        if (isDataLoaded) {
+            Log.v("MainViewModel", "Data already loaded. Skipping CSV insertion.")
+            return
+        }
+
+        Log.v("MainViewModel", "Getting csv data")
         val currentDate = Date()
         println("Current Date object: $currentDate")
 
@@ -40,26 +51,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 val patientId = tokens[1].trim().toInt()
                 val name = ""
                 val sex = tokens[2]
-                val password = "password"
+                val password = ""
+                val isMale = sex.equals("Male", ignoreCase = true)
 
                 val patient = Patient(
                     patientId = patientId,
                     patientName = name,
                     patientSex = sex,
                     patientPassword = password,
-                    patientPhoneNumber = phone
-                )
-
-                val generatedId = patientDao.insertPatient(patient)
-
-                Log.d("MainViewModel", "Inserted patient with internalId = $generatedId")
-
-
-                val isMale = sex.equals("Male", ignoreCase = true)
-
-                val scores = HeifaScores(
-                    internalId = generatedId,
-                    timestamp = currentDate,
+                    patientPhoneNumber = phone,
                     vegetables = tokens[if (isMale) 8 else 9].toFloat(),
                     fruits = tokens[if (isMale) 19 else 20].toFloat(),
                     grainsAndCereals = tokens[if (isMale) 28 else 29].toFloat(),
@@ -74,9 +74,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     discretionaryFoods = tokens[if (isMale) 5 else 6].toFloat(),
                     totalScore = tokens[if (isMale) 3 else 4].toFloat()
                 )
-
-                scoresDao.insertHeifaScores(scores)
+                repository.safeInsert(patient)
             }
+
+            // After data insertion, set the flag in SharedPreferences
+            sharedPreferences.edit() {
+                putBoolean("isDataLoaded", true)
+            }
+
+            Log.v("MainViewModel", "Data loaded and inserted successfully.")
         }
     }
+
 }

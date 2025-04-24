@@ -6,14 +6,12 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.fit2081.arrtish.id32896786.a1.databases.patientdb.PatientDao
 import com.fit2081.arrtish.id32896786.a1.databases.patientdb.Patient
-import com.fit2081.arrtish.id32896786.a1.databases.scoresdb.HeifaScores
-import com.fit2081.arrtish.id32896786.a1.databases.scoresdb.HeifaScoresDao
 
-@Database(entities = [Patient::class, HeifaScores::class], version = 1)
+@Database(entities = [Patient::class], version = 1)
 abstract class AppDataBase : RoomDatabase() {
 
     abstract fun patientDao(): PatientDao
-    abstract fun heifaScoreDao(): HeifaScoresDao
+
 
     companion object {
         @Volatile private var INSTANCE: AppDataBase? = null

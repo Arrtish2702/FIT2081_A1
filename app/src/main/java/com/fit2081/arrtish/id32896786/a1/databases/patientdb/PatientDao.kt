@@ -8,7 +8,7 @@ interface PatientDao {
 
     // Insert a new patient into the database
     @Insert
-    suspend fun insertPatient(patient: Patient): Long
+    suspend fun insertPatient(patient: Patient)
 
     // Update an existing patient's data
     @Update

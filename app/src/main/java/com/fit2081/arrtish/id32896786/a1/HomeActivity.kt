@@ -42,26 +42,7 @@ class HomeActivity : ComponentActivity() {
 
 //        // Get user ID passed from the previous activity, default to "default_user" if not available
         val userId = intent.getStringExtra("user_id") ?: "default_user"
-//        Log.v("FIT2081-HomeActivity", "User ID: $userId")
-//
-//        // Get shared preferences specific to the user
-//        val sharedPreferences = UserSharedPreferences.getPreferences(this, userId)
-//        // Check if the user data is updated in the shared preferences
-//        val isUpdated = sharedPreferences.getBoolean("updated", false)
-//
-//        Log.v("FIT2081-HomeActivity", "SharedPreferences: $sharedPreferences | Updated: $isUpdated")
-//
-//        // If data is not updated, fetch user details and save it
-//        if (!isUpdated) {
-//            Log.v("FIT2081-HomeActivity", "Adding data to SharedPreferences for user $userId")
-//            getUserDetailsAndSave(this, userId)
-//        } else {
-//            Log.v("FIT2081-HomeActivity", "Using existing SharedPreferences for user $userId")
-//        }
-//
-//        Log.v("FIT2081-HomeActivity", "SharedPreferences: $sharedPreferences")
 
-        // Set up the UI content for the Home page
         setContent {
 //            HideSystemBars() // Hide system bars for a full-screen experience
             A1Theme { // Apply the app's theme
@@ -196,46 +177,10 @@ fun MyBottomAppBar(navController: NavHostController) {
 fun HomePage(userId: String?, modifier: Modifier = Modifier, viewModel: HomeViewModel = viewModel()) {
     val context = LocalContext.current // Get the current context
 
-    // Retrieve the user's insights data (food quality score)
     val detailsJson = ""
-//    val userDetails = JSONObject(detailsJson)
-
-    // Extract food quality score from the JSON (default to 0.0 if not found)
-//    val foodQualityScore = userDetails.optDouble("qualityScore", 0.0).toFloat()
     val foodQualityScore = 80
 
     var showDialog by remember { mutableStateOf(false) } // State to control dialog visibility
-
-//    Log.v("FIT2081-HomeActivity", "Food Quality Score: $foodQualityScore")
-
-//    // Check if the user has completed the questionnaire
-//    checkForQuestionnaire(context, userId) { hasAnswered ->
-//        if (!hasAnswered) {
-//            showDialog = true // Show dialog if questionnaire has not been answered
-//        }
-//    }
-
-//    // Display dialog prompting the user to complete the questionnaire if needed
-//    if (showDialog) {
-//        AlertDialog(
-//            onDismissRequest = { /* Prevent dismiss */ },
-//            title = { Text("Complete the Questionnaire") },
-//            text = { Text("You need to complete the questionnaire to continue using the app.") },
-//            confirmButton = {
-//                Button(onClick = {
-//                    showDialog = false // Close dialog
-//                    onRouteToQuestionnaire(context, userId) // Navigate to questionnaire
-//                }) {
-//                    Text("Complete Now")
-//                }
-//            },
-//            dismissButton = {
-//                Button(onClick = { Authentication.logout(context) }) {
-//                    Text(text = "Log Out") // Log out button
-//                }
-//            }
-//        )
-//    }
 
     // Box layout to hold all UI elements
     Box(
@@ -296,60 +241,6 @@ fun HomePage(userId: String?, modifier: Modifier = Modifier, viewModel: HomeView
             }) {
                 Text(text = "Edit Responses")
             }
-
-//            // Button to view insights
-//            Button(onClick = { navController.navigate("insights") }) {
-//                Text(text = "View Insights")
-//            }
-
-//            // Button to log out
-//            Button(onClick = { viewModel.logout(context) }) {
-//                Text(text = "Log Out")
-//            }
         }
     }
 }
-//
-//// Function to check if the user has answered the questionnaire
-//fun checkForQuestionnaire(context: Context, userId: String?, callback: (Boolean) -> Unit) {
-//    if (userId == null) {
-//        callback(false) // Return false if no user ID is available
-//        return
-//    }
-//
-//    // Retrieve shared preferences for the specific user
-//    val sharedPreferences = UserSharedPreferences.getPreferences(context, userId)
-//    val answeredQuestionnaire = sharedPreferences.getBoolean("answered", false) // Check if questionnaire is answered
-//    Log.v("FIT2081-Questionnaire", answeredQuestionnaire.toString())
-//    callback(answeredQuestionnaire) // Return the result to the callback
-//}
-//
-//// Function to navigate to the questionnaire activity
-//fun onRouteToQuestionnaire(context: Context, userId: String?) {
-//    val intent = Intent(context, QuestionnaireActivity::class.java).apply {
-//        putExtra("user_id", userId) // Pass user ID to the next activity
-//    }
-//    context.startActivity(intent) // Start the activity
-//}
-//
-//// Function to navigate to the insights activity
-//fun onRouteToInsights(context: Context, userId: String?) {
-//    val intent = Intent(context, InsightsActivity::class.java).apply {
-//        putExtra("user_id", userId) // Pass user ID to the next activity
-//    }
-//    context.startActivity(intent) // Start the activity
-//}
-//
-//// Composable function to hide system bars
-//@Composable
-//internal fun HideSystemBars() {
-//    val systemUiController = rememberSystemUiController() // Get system UI controller
-//    systemUiController.isSystemBarsVisible = false // Hide the system bars
-//}
-//
-//// Composable function to show system bars
-//@Composable
-//internal fun ShowSystemBars() {
-//    val systemUiController = rememberSystemUiController() // Get system UI controller
-//    systemUiController.isSystemBarsVisible = true // Show the system bars
-//}

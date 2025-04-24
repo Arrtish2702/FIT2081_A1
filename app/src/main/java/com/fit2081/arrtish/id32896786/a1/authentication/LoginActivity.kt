@@ -8,6 +8,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,6 +24,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -31,6 +33,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -43,6 +46,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -50,6 +54,7 @@ import com.fit2081.arrtish.id32896786.a1.HomeActivity
 import com.fit2081.arrtish.id32896786.a1.R
 import com.fit2081.arrtish.id32896786.a1.authentication.AuthenticationViewModel.AuthenticationViewModelFactory
 import com.fit2081.arrtish.id32896786.a1.ui.theme.A1Theme
+import kotlinx.coroutines.delay
 
 
 // Main Activity for Login
@@ -70,10 +75,36 @@ fun LoginPage(
 ){
     var context = LocalContext.current
     var selectedUserId by remember { mutableStateOf("") } // State to store selected user ID
-    var phoneNumber by remember { mutableStateOf("") } // State to store entered phone number
-    var phoneNumberError by remember { mutableStateOf(false) } // State to track phone number validity
     val userIds by viewModel.patientIds.collectAsState(initial = emptyList())
     var expanded by remember { mutableStateOf(false) } // State to control dropdown menu expansion
+    var password by remember { mutableStateOf("") }
+
+    val loginSuccess = viewModel.loginSuccessful.value
+    val isLoading = viewModel.isLoading.value
+
+    if (isLoading) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.8f)), // Optional dim
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
+        }
+    }
+
+    LaunchedEffect(loginSuccess) {
+        if (loginSuccess == true) {
+            viewModel.setLoading(true) // Show spinner
+
+            delay(500) // Optional: let spinner show briefly before jump
+            val intent = Intent(context, HomeActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                putExtra("user_id", selectedUserId)
+            }
+            context.startActivity(intent)
+        }
+    }
 
     Box(
         modifier = modifier
@@ -127,45 +158,27 @@ fun LoginPage(
                 }
             }
 
-            // Outlined text field for phone number input
             OutlinedTextField(
-                value = phoneNumber, // Bind entered phone number
-                onValueChange = {
-                    phoneNumber = it
-                    phoneNumberError = !viewModel.isValidNumber(it) // Validate phone number
-                },
-                label = { Text("Phone Number") }, // Label for phone input
-                leadingIcon = { Icon(Icons.Default.Phone, contentDescription = null) }, // Phone icon
-                modifier = Modifier.fillMaxWidth(), // Full width for input field
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone), // Phone number keyboard
-                isError = phoneNumberError, // Show error if phone number is invalid
-                singleLine = true // Single line input
+                value = password,
+                onValueChange = { password = it },
+                label = { Text("Password") },
+                placeholder = { Text("Enter your password") },
+                visualTransformation = PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                modifier = Modifier.fillMaxWidth()
             )
-            // Display error message if phone number is invalid
-            if (phoneNumberError) {
-                Text(
-                    "Invalid Phone Number",
-                    color = MaterialTheme.colorScheme.error, // Use error color
-                    modifier = Modifier.padding(start = 16.dp, top = 4.dp) // Apply padding for the message
-                )
-            }
 
             // Login button that triggers authentication
             Button(onClick = {
-                if (selectedUserId.isNotEmpty() && phoneNumber.isNotEmpty()) {
-                    if(viewModel.login(context, selectedUserId, phoneNumber)){
-                        val intent = Intent(context, HomeActivity::class.java).apply {
-                            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK  // Clear previous activities
-                            putExtra("user_id", selectedUserId)  // Pass userId to the HomeActivity
-                        }
-                        context.startActivity(intent)
-                    }
+                if (selectedUserId.isNotEmpty() && password.isNotEmpty()) {
+                    viewModel.loginSuccessful.value = false
+                    viewModel.login(selectedUserId, password)
                 } else {
                     Toast.makeText(
                         context,
                         "Please select a user ID and enter a phone number",
                         Toast.LENGTH_SHORT
-                    ).show() // Show error if fields are empty
+                    ).show()
                 }
             }, modifier = Modifier.fillMaxWidth()) {
                 Text("Login") // Button label
