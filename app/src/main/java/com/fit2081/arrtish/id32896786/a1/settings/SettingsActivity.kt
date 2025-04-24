@@ -115,7 +115,7 @@ fun SettingsPage(userId: Int, modifier: Modifier = Modifier, navController: NavH
         Spacer(modifier = Modifier.height(12.dp))
 
         Button(
-            onClick = { navController.navigate("clinicianlogin") },
+            onClick = { navController.navigate("clinician login") },
             modifier = Modifier.fillMaxWidth()
         ) {
             Icon(Icons.Default.AccountBox, contentDescription = null)

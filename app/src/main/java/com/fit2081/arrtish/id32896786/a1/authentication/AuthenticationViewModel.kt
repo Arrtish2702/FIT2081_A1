@@ -78,7 +78,7 @@ class AuthenticationViewModel(application: Application) : ViewModel() {
     }
 
 
-    fun register(selectedId: String, phone: String, password: String, confirmPassword: String) {
+    fun register(selectedId: String, name: String, phone: String, password: String, confirmPassword: String) {
 
         Log.d("AuthenticationViewModel", "attempting register")
         viewModelScope.launch {
@@ -101,7 +101,7 @@ class AuthenticationViewModel(application: Application) : ViewModel() {
                 return@launch
             }
 
-            val updated = patient.copy(patientPassword = password)
+            val updated = patient.copy(patientName = name,patientPassword = password)
             repository.updatePatient(updated)
             registrationSuccessful.value = true
             registrationMessage.value = "Registration successful!"

@@ -33,41 +33,38 @@ class ClinicianActivity : ComponentActivity() {
 fun ClinicianLogin(
     userId: Int, modifier: Modifier = Modifier, navController: NavHostController
 ) {
-    @Composable
-    fun ClinicianLoginScreen() {
-        var clinicianKey by remember { mutableStateOf("") }
+    var clinicianKey by remember { mutableStateOf("dollar-entry-apples") }
 
-        Column(
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text("Clinician Login", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        OutlinedTextField(
+            value = clinicianKey,
+            onValueChange = { clinicianKey = it },
+            label = { Text("Enter your clinician key") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Button(
+            onClick = { navController.navigate("clinician") },
             modifier = Modifier
-                .fillMaxSize()
-                .padding(24.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+                .fillMaxWidth()
+                .height(48.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6A1B9A))
         ) {
-            Text("Clinician Login", fontSize = 24.sp, fontWeight = FontWeight.Bold)
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            OutlinedTextField(
-                value = clinicianKey,
-                onValueChange = { clinicianKey = it },
-                label = { Text("Enter your clinician key") },
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Button(
-                onClick = { navController.navigate("clinician") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6A1B9A))
-            ) {
-                Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = null, tint = Color.White)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Clinician Login", color = Color.White)
-            }
+            Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = null, tint = Color.White)
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("Clinician Login", color = Color.White)
         }
     }
 }
@@ -76,57 +73,54 @@ fun ClinicianLogin(
 fun ClinicianPage(
     userId: Int, modifier: Modifier = Modifier, navController: NavHostController
 ) {
-    @Composable
-    fun ClinicianDashboardScreen() {
-        val maleScore = 25.5f
-        val femaleScore = 30.1f
+    val maleScore = 25.5f
+    val femaleScore = 30.1f
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(24.dp)
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp)
+    ) {
+        Text("Clinician Dashboard", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text("Average HEIFA (Male): $maleScore", fontSize = 16.sp)
+        Text("Average HEIFA (Female): $femaleScore", fontSize = 16.sp)
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Button(
+            onClick = { /* trigger data pattern generation */ },
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6A1B9A))
         ) {
-            Text("Clinician Dashboard", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+            Text("Find Data Pattern", color = Color.White)
+        }
 
-            Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
-            Text("Average HEIFA (Male): $maleScore", fontSize = 16.sp)
-            Text("Average HEIFA (Female): $femaleScore", fontSize = 16.sp)
+        // Dummy AI results
+        val insights = listOf(
+            "Variable Water Intake: Consumption of water varies greatly among users...",
+            "Low Wholegrain Consumption: Intake of wholegrains appears generally low...",
+            "Potential Gender Difference in HEIFA Scoring: The data includes columns for both..."
+        )
 
-            Spacer(modifier = Modifier.height(24.dp))
+        insights.forEach { insight ->
+            Text("• $insight", fontSize = 14.sp, modifier = Modifier.padding(bottom = 12.dp))
+        }
 
-            Button(
-                onClick = { /* trigger data pattern generation */ },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6A1B9A))
-            ) {
-                Text("Find Data Pattern", color = Color.White)
-            }
+        Spacer(modifier = Modifier.weight(1f))
 
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Dummy AI results
-            val insights = listOf(
-                "Variable Water Intake: Consumption of water varies greatly among users...",
-                "Low Wholegrain Consumption: Intake of wholegrains appears generally low...",
-                "Potential Gender Difference in HEIFA Scoring: The data includes columns for both..."
-            )
-
-            insights.forEach { insight ->
-                Text("• $insight", fontSize = 14.sp, modifier = Modifier.padding(bottom = 12.dp))
-            }
-
-            Spacer(modifier = Modifier.weight(1f))
-
-            Button(
-                onClick = { /* handle done click */ },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
-            ) {
-                Text("Done", color = Color.White)
-            }
+        Button(
+            onClick = { navController.navigate("home") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(48.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
+        ) {
+            Text("Done", color = Color.White)
         }
     }
 }

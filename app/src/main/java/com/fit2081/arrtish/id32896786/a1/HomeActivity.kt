@@ -27,7 +27,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.fit2081.arrtish.id32896786.a1.databases.AppDataBase
+import com.fit2081.arrtish.id32896786.a1.databases.patientdb.PatientRepository
 import com.fit2081.arrtish.id32896786.a1.insights.InsightsPage
+import com.fit2081.arrtish.id32896786.a1.insights.InsightsViewModel
 import com.fit2081.arrtish.id32896786.a1.nutricoach.NutriCoachPage
 import com.fit2081.arrtish.id32896786.a1.settings.SettingsPage
 
@@ -112,7 +115,7 @@ fun MyNavHost(navController: NavHostController, userId: Int) {
             SettingsPage(userId, modifier, navController)
         }
 
-        composable("clinicianlogin") {
+        composable("clinician login") {
             ClinicianLogin(userId, modifier, navController)
         }
 
@@ -173,72 +176,85 @@ fun MyBottomAppBar(navController: NavHostController) {
 }
 
 @Composable
-fun HomePage(userId: Int, modifier: Modifier = Modifier, viewModel: HomeViewModel = viewModel()) {
+fun HomePage(userId: Int, modifier: Modifier = Modifier) {
     val context = LocalContext.current // Get the current context
 
-    val detailsJson = ""
-    val foodQualityScore = 80
+    val db = AppDataBase.getDatabase(context)
+    val repository = PatientRepository(db.patientDao())
 
-    var showDialog by remember { mutableStateOf(false) } // State to control dialog visibility
+    val viewModel: HomeViewModel = viewModel(
+        factory = HomeViewModel.HomeViewModelFactory(repository)
+    )
 
-    // Box layout to hold all UI elements
-    Box(
-        modifier = Modifier
-            .fillMaxSize() // Fill the screen
-            .padding(16.dp), // Add padding
-        contentAlignment = Alignment.TopCenter // Align content to the top center
-    ) {
-        // Column to arrange elements vertically
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp), // Space between elements
-            modifier = Modifier.fillMaxSize()
+    LaunchedEffect(Unit) {
+        viewModel.loadPatientDataById(userId)
+    }
+
+    val patient by viewModel.patient.collectAsState()
+
+    patient?.let { patientData ->
+        val foodQualityScore = patientData.totalScore
+        val name = patientData.patientName
+
+        // Box layout to hold all UI elements
+        Box(
+            modifier = Modifier
+                .fillMaxSize() // Fill the screen
+                .padding(16.dp), // Add padding
+            contentAlignment = Alignment.TopCenter // Align content to the top center
         ) {
-            // Display image based on food quality score
-            Image(
-                painter = painterResource(
-                    id = when {
-                        foodQualityScore.toInt() >= 80 -> R.drawable.high_score_picture_removebg_preview
-                        foodQualityScore.toInt() >= 40 -> R.drawable.medium_score_picture_removebg_preview
-                        foodQualityScore.toInt() >= 0 -> R.drawable.low_score_picture_removebg_preview
-                        else -> 0 // Default image if no match
-                    }
-                ),
-                contentDescription = "Food Quality Score", // Image description
-                modifier = Modifier
-                    .size(275.dp) // Set image size
-                    .align(Alignment.CenterHorizontally) // Center align the image
-            )
+            // Column to arrange elements vertically
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp), // Space between elements
+                modifier = Modifier.fillMaxSize()
+            ) {
+                // Display image based on food quality score
+                Image(
+                    painter = painterResource(
+                        id = when {
+                            foodQualityScore.toInt() >= 80 -> R.drawable.high_score_picture_removebg_preview
+                            foodQualityScore.toInt() >= 40 -> R.drawable.medium_score_picture_removebg_preview
+                            foodQualityScore.toInt() >= 0 -> R.drawable.low_score_picture_removebg_preview
+                            else -> 0 // Default image if no match
+                        }
+                    ),
+                    contentDescription = "Food Quality Score", // Image description
+                    modifier = Modifier
+                        .size(275.dp) // Set image size
+                        .align(Alignment.CenterHorizontally) // Center align the image
+                )
 
-            // Display greeting with the user's ID
-            Text(
-                text = "Hello, ${userId ?: "Guest"}!", // If userId is null, show "Guest"
-                fontSize = 24.sp, // Font size for greeting
-                style = MaterialTheme.typography.titleMedium,
-                textAlign = TextAlign.Center // Center align the text
-            )
+                // Display greeting with the user's ID
+                Text(
+                    text = "Hello, ${name ?: "Guest"}!", // If userId is null, show "Guest"
+                    fontSize = 24.sp, // Font size for greeting
+                    style = MaterialTheme.typography.titleMedium,
+                    textAlign = TextAlign.Center // Center align the text
+                )
 
-            // Display food quality score
-            Text(
-                text = "Your Food Quality Score: $foodQualityScore",
-                fontSize = 20.sp, // Font size for score display
-                style = MaterialTheme.typography.titleMedium,
-                textAlign = TextAlign.Center
-            )
+                // Display food quality score
+                Text(
+                    text = "Your Food Quality Score: $foodQualityScore",
+                    fontSize = 20.sp, // Font size for score display
+                    style = MaterialTheme.typography.titleMedium,
+                    textAlign = TextAlign.Center
+                )
 
-            // Provide detailed explanation about the food quality score
-            Text(
-                text = "Your Food Quality Score provides a snapshot of how well your eating patterns align with established food guidelines, helping you identify both strengths and opportunities for improvement in your diet.\n" +
-                        "This personalized measurement considers various food groups, including vegetables, fruits, whole grains, and proteins, to give you practical insights for making healthier food choices.\n",
-                fontSize = 12.sp, // Font size for explanation
-                textAlign = TextAlign.Center
-            )
+                // Provide detailed explanation about the food quality score
+                Text(
+                    text = "Your Food Quality Score provides a snapshot of how well your eating patterns align with established food guidelines, helping you identify both strengths and opportunities for improvement in your diet.\n" +
+                            "This personalized measurement considers various food groups, including vegetables, fruits, whole grains, and proteins, to give you practical insights for making healthier food choices.\n",
+                    fontSize = 12.sp, // Font size for explanation
+                    textAlign = TextAlign.Center
+                )
 
-            // Button to edit questionnaire responses
-            Button(onClick = {
-//                onRouteToQuestionnaire(context, userId) // Navigate to questionnaire
-            }) {
-                Text(text = "Edit Responses")
+                // Button to edit questionnaire responses
+                Button(onClick = {
+    //                onRouteToQuestionnaire(context, userId) // Navigate to questionnaire
+                }) {
+                    Text(text = "Edit Responses")
+                }
             }
         }
     }
