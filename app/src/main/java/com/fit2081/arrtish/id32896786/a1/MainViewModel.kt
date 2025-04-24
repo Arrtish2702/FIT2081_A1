@@ -102,12 +102,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             // Fetch all patients and their scores and log them
             val allPatients = patientDao.getAllPatients()
 //            val allScores = scoresDao.getAllHeifaScores()
-
-            // Log Patients data
-            Log.d("MainViewModel", "---- All Patients ----")
-            allPatients.forEach { patient ->
-                Log.d("MainViewModel", "Patient: $patient")
-            }
+//
+//            // Log Patients data
+//            Log.d("MainViewModel", "---- All Patients ----")
+//            allPatients.forEach { patient ->
+//                Log.d("MainViewModel", "Patient: $patient")
+//            }
 
 //            // Log HeifaScores data
 //            Log.d("MainViewModel", "---- All Heifa Scores ----")

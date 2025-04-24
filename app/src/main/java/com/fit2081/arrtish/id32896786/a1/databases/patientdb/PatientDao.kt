@@ -1,6 +1,7 @@
 package com.fit2081.arrtish.id32896786.a1.databases.patientdb
 
 import androidx.room.*
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface PatientDao {
@@ -19,17 +20,21 @@ interface PatientDao {
 
     // Get all patients from the database
     @Query("SELECT * FROM patients")
-    suspend fun getAllPatients(): List<Patient>
+    fun getAllPatients(): Flow<List<Patient>> // No suspend modifier here
 
     // Get a patient by ID
     @Query("SELECT * FROM patients WHERE patientId = :id")
-    suspend fun getPatientById(id: Int): Patient?
+    fun getPatientById(id: Int): Flow<Patient?> // No suspend modifier here
 
     // Get a patient by phone number
     @Query("SELECT * FROM patients WHERE patientPhoneNumber = :phoneNumber")
-    suspend fun getPatientByPhoneNumber(phoneNumber: String): Patient?
+    fun getPatientByPhoneNumber(phoneNumber: String): Flow<Patient?> // No suspend modifier here
 
     // Get patients based on their sex
     @Query("SELECT * FROM patients WHERE patientSex = :sex")
-    suspend fun getPatientsBySex(sex: String): List<Patient>
+    fun getPatientsBySex(sex: String): Flow<List<Patient>> // No suspend modifier here
+
+    // Get only all patient IDs
+    @Query("SELECT patientId FROM patients")
+    fun getAllPatientIds(): Flow<List<Int>> // No suspend modifier here
 }

@@ -4,13 +4,37 @@ import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import androidx.compose.runtime.collectAsState
 import androidx.core.content.edit
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.liveData
+import androidx.lifecycle.viewModelScope
 import com.fit2081.arrtish.id32896786.a1.HomeActivity
-import com.fit2081.arrtish.id32896786.a1.UserSharedPreferences
+import com.fit2081.arrtish.id32896786.a1.databases.AppDataBase
+import com.fit2081.arrtish.id32896786.a1.databases.patientdb.Patient
+import com.fit2081.arrtish.id32896786.a1.databases.patientdb.PatientRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
 
 class AuthenticationViewModel(application: Application) : ViewModel() {
+
+    private val patientDao = AppDataBase.getDatabase(application).patientDao()
+    private val repository = PatientRepository(patientDao)
+
+
+//    // Using liveData to collect Flow and expose as LiveData
+//    val patientIds: LiveData<List<Int>> = liveData {
+//        // Collecting the Flow and emitting values to LiveData
+//        repository.allPatientIds().collect { patientIds ->
+//            emit(patientIds) // Emit the list of patient IDs to LiveData
+//        }
+//    } // This is correct now
+
+    val patientIds: Flow<List<Int>> = repository.allPatientIds()
+
 
     // Function to validate phone number (supports Australian and Malaysian numbers)
     fun isValidNumber(number: String): Boolean {

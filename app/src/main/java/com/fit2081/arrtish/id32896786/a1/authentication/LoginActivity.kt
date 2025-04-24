@@ -31,6 +31,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,24 +46,17 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.fit2081.arrtish.id32896786.a1.Authentication
-import com.fit2081.arrtish.id32896786.a1.CsvExports.extractUserIdsFromCSV
 import com.fit2081.arrtish.id32896786.a1.HomeActivity
 import com.fit2081.arrtish.id32896786.a1.R
 import com.fit2081.arrtish.id32896786.a1.authentication.AuthenticationViewModel.AuthenticationViewModelFactory
 import com.fit2081.arrtish.id32896786.a1.ui.theme.A1Theme
+
 
 // Main Activity for Login
 class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge() // Enables edge-to-edge display (no status bar)
-//        Authentication.init(this) // Initialize authentication object
-//        setContent {
-//            A1Theme { // Apply the app's theme to the login page
-//                LoginPage(context = this, modifier = Modifier.fillMaxSize()) // Display the login page
-//            }
-//        }
     }
 }
 
@@ -78,7 +72,7 @@ fun LoginPage(
     var selectedUserId by remember { mutableStateOf("") } // State to store selected user ID
     var phoneNumber by remember { mutableStateOf("") } // State to store entered phone number
     var phoneNumberError by remember { mutableStateOf(false) } // State to track phone number validity
-    val userIds = remember { extractUserIdsFromCSV(context) } // Get user IDs from CSV file
+    val userIds by viewModel.patientIds.collectAsState(initial = emptyList())
     var expanded by remember { mutableStateOf(false) } // State to control dropdown menu expansion
 
     Box(
@@ -125,8 +119,8 @@ fun LoginPage(
                 // Dropdown menu that shows all user IDs
                 ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                     userIds.forEach { userId -> // Loop through user IDs
-                        DropdownMenuItem(text = { Text(userId) }, onClick = {
-                            selectedUserId = userId // Set selected user ID
+                        DropdownMenuItem(text = { Text(userId.toString()) }, onClick = {
+                            selectedUserId = userId.toString() // Set selected user ID
                             expanded = false // Close dropdown
                         })
                     }

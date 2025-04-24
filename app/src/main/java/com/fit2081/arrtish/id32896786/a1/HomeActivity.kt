@@ -31,10 +31,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.fit2081.arrtish.id32896786.a1.CsvExports.getUserDetailsAndSave
+
 import com.fit2081.arrtish.id32896786.a1.ui.theme.A1Theme
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import org.json.JSONObject
 
 // Home Activity for the app home page
 class HomeActivity : ComponentActivity() {
