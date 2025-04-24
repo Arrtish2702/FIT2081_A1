@@ -38,7 +38,7 @@ class SettingsActivity : ComponentActivity() {
 }
 
 @Composable
-fun SettingsPage(userId: Int?, modifier: Modifier = Modifier, viewModel: SettingsViewModel = viewModel()) {
+fun SettingsPage(userId: Int, modifier: Modifier = Modifier, viewModel: SettingsViewModel = viewModel()) {
     // Mock user data (replace with real data or ViewModel state later)
     val userName = remember { mutableStateOf("") }
     val phoneNumber = remember { mutableStateOf("") }

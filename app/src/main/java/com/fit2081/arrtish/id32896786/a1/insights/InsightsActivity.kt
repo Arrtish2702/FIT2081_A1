@@ -1,5 +1,6 @@
 package com.fit2081.arrtish.id32896786.a1.insights
 
+
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -23,14 +24,17 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.fit2081.arrtish.id32896786.a1.databases.AppDataBase
+import com.fit2081.arrtish.id32896786.a1.databases.patientdb.PatientRepository
 
 // InsightsActivity class - Activity for displaying food insights
 class InsightsActivity : ComponentActivity() {
@@ -38,94 +42,106 @@ class InsightsActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-//            ShowSystemBars()  // Show system bars (status and navigation)
-//            A1Theme {  // Apply app's theme
-//                InsightsPage(userId)  // Pass user ID to InsightsPage composable
-//            }
+
         }
     }
 }
+
 @Composable
-fun InsightsPage(userId: Int?, modifier: Modifier = Modifier, viewModel: InsightsViewModel = viewModel()) {
+fun InsightsPage(userId: Int, modifier: Modifier = Modifier) {
     val context = LocalContext.current
+    val db = AppDataBase.getDatabase(context)
+    val repository = PatientRepository(db.patientDao())
 
-    // Placeholder mock data
-    val userId = remember { mutableStateOf("012345") }
+    val viewModel: InsightsViewModel = viewModel(
+        factory = InsightsViewModel.InsightsViewModelFactory(repository)
+    )
 
-    val userScores = remember {
-        mutableStateOf(
-            mapOf(
-                "Fruits" to 80f,
-                "Vegetables" to 65f,
-                "Grains" to 75f,
-                "Proteins" to 70f
-            )
+    val patient by viewModel.patient.collectAsState()
+
+    LaunchedEffect(userId) {
+        viewModel.loadPatientScoresById(userId)
+    }
+
+    patient?.let { patientData ->
+        val userScores = mapOf(
+            "Vegetables" to patientData.vegetables,
+            "Fruits" to patientData.fruits,
+            "Grains & Cereals" to patientData.grainsAndCereals,
+            "Whole Grains" to patientData.wholeGrains,
+            "Meat & Alternatives" to patientData.meatAndAlternatives,
+            "Dairy & Alternatives" to patientData.dairyAndAlternatives,
+            "Water" to patientData.water,
+            "Unsaturated Fats" to patientData.unsaturatedFats,
+            "Sodium" to patientData.sodium,
+            "Sugar" to patientData.sugar,
+            "Alcohol" to patientData.alcohol,
+            "Discretionary Foods" to patientData.discretionaryFoods
         )
-    }
 
-    val totalScore = remember {
-        userScores.value.values.average().toFloat()
-    }
+        val totalScore = patientData.totalScore
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp)
-                .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                text = "Insights: Food Score",
-                fontSize = 20.sp,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
-
-            userScores.value.forEach { (name, score) ->
-                FoodScoreItem(name, score)
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(text = "Total Food Quality Score", fontSize = 16.sp)
-
-            Slider(
-                value = totalScore,
-                onValueChange = {}, // Read-only
-                valueRange = 0f..100f,
-                enabled = false,
-                colors = SliderDefaults.colors(
-                    disabledThumbColor = MaterialTheme.colorScheme.primary,
-                    disabledActiveTrackColor = MaterialTheme.colorScheme.primary
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Insights: Food Score",
+                    fontSize = 20.sp,
+                    modifier = Modifier.padding(bottom = 16.dp)
                 )
-            )
 
-            Text(text = "%.2f/100".format(totalScore))
+                userScores.forEach { (name, score) ->
+                    FoodScoreItem(name, score)
+                }
 
-            Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-            Button(
-                onClick = {
-                    sharingInsights(context, userScores.value, totalScore, 100)
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(text = "Share with someone")
-            }
+                Text(text = "Total Food Quality Score", fontSize = 16.sp)
 
-            Spacer(modifier = Modifier.height(4.dp))
+                Slider(
+                    value = totalScore,
+                    onValueChange = {}, // Read-only
+                    valueRange = 0f..100f,
+                    enabled = false,
+                    colors = SliderDefaults.colors(
+                        disabledThumbColor = MaterialTheme.colorScheme.primary,
+                        disabledActiveTrackColor = MaterialTheme.colorScheme.primary
+                    )
+                )
 
-            Button(
-                onClick = {
-                    Toast.makeText(context, "NutriCoach in Development", Toast.LENGTH_LONG).show()
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(text = "Improve my diet!")
+                Text(text = "%.2f / 100".format(totalScore))
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Button(
+                    onClick = {
+                        viewModel.sharingInsights(context, userScores, totalScore, 100f)
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(text = "Share with someone")
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Button(
+                    onClick = {
+                        Toast.makeText(context, "NutriCoach in Development", Toast.LENGTH_LONG)
+                            .show()
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(text = "Improve my diet!")
+                }
             }
         }
     }
@@ -163,35 +179,4 @@ fun FoodScoreItem(name: String, score: Number) {
         // Display category score text (formatted to 2 decimal places)
         Text(text = "%.2f/10".format(score), modifier = Modifier.padding(start = 8.dp))
     }
-}
-
-//// Preview of InsightsPage composable (for UI design testing)
-//@Preview(showBackground = true)
-//@Composable
-//fun InsightsScreenPreview() {
-//    A1Theme {
-//        InsightsContent(userScores = emptyMap(), totalScore = 0f, context = LocalContext.current)  // Show empty preview
-//    }
-//}
-
-// sharingInsights function - Creates a shareable text of the user's insights and launches share intent
-fun sharingInsights(context: Context, userScores: Map<String, Float>, totalScore: Float, maxScore: Int) {
-    // Build the text to share
-    val shareText = buildString {
-        append("🌟 Insights: Food Score 🌟\n")
-        userScores.forEach { (category, score) ->  // Append each category and score
-            append("$category: %.2f/10\n".format(score))
-        }
-        append("\n🏆 Total Food Quality Score: %.2f/$maxScore".format(totalScore))  // Append total score
-    }
-
-//    // Create an intent to share the insights text
-//    val intent = Intent(Intent.ACTION_SEND).apply {
-//        Intent.setType = "text/plain"  // Define the share type
-//        putExtra(Intent.EXTRA_TEXT, shareText)  // Attach the insights text to the intent
-//    }
-
-//    // Start the chooser intent to select sharing app
-//    val chooser = Intent.createChooser(intent, "Share your insights via:")
-//    context.startActivity(chooser)  // Launch the chooser
 }

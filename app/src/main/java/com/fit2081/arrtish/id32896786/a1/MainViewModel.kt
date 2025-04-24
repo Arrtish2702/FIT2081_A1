@@ -85,5 +85,4 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             Log.v("MainViewModel", "Data loaded and inserted successfully.")
         }
     }
-
 }

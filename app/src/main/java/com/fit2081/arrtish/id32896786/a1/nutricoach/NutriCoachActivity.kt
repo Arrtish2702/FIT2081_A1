@@ -30,7 +30,7 @@ class NutriCoachActivity : ComponentActivity() {
 }
 
 @Composable
-fun NutriCoachPage(userId: Int?, modifier: Modifier = Modifier, viewModel: NutriCoachViewModel = viewModel()) {
+fun NutriCoachPage(userId: Int, modifier: Modifier = Modifier, viewModel: NutriCoachViewModel = viewModel()) {
     var fruitName by remember { mutableStateOf("") }
     var motivationalMessage by remember { mutableStateOf("") }
 

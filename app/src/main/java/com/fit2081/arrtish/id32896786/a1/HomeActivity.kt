@@ -10,8 +10,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -40,7 +42,7 @@ class HomeActivity : ComponentActivity() {
         enableEdgeToEdge() // Enable edge-to-edge display (no status bar)
 
 //        // Get user ID passed from the previous activity, default to "default_user" if not available
-        val userId = intent.getStringExtra("user_id")?.toInt()
+        val userId: Int = intent.getStringExtra("user_id")?.toIntOrNull() ?: 0
 
         setContent {
 //            HideSystemBars() // Hide system bars for a full-screen experience
@@ -108,7 +110,7 @@ fun MyTopAppBar(navController: NavHostController) {
 
 // MyNavHost Composable function for navigation within the app
 @Composable
-fun MyNavHost(navController: NavHostController, userId: Int?) {
+fun MyNavHost(navController: NavHostController, userId: Int) {
     // NavHost composable to define the navigation graph
     val modifier = Modifier
     NavHost(
@@ -130,7 +132,7 @@ fun MyNavHost(navController: NavHostController, userId: Int?) {
             NutriCoachPage(userId, modifier)
         }
 
-        composable("home") {
+        composable("settings") {
             SettingsPage(userId, modifier)
         }
     }
@@ -147,6 +149,8 @@ fun MyBottomAppBar(navController: NavHostController) {
     val items = listOf(
         "home",
         "insights",
+        "nutricoach",
+        "settings"
     )
 
     // NavigationBar composable to define the bottom navigation bar.
@@ -162,6 +166,10 @@ fun MyBottomAppBar(navController: NavHostController) {
                         "home" -> Icon(Icons.Filled.Home, contentDescription = "Home")
 
                         "insights" -> Icon(Icons.Filled.Person, contentDescription = "Insights")
+
+                        "nutricoach" -> Icon(Icons.Filled.Info, contentDescription = "NutriCoach")
+
+                        "settings" -> Icon(Icons.Filled.Settings, contentDescription = "Settings")
                     }
                 },
                 // Display the item's name as the label.
@@ -181,7 +189,7 @@ fun MyBottomAppBar(navController: NavHostController) {
 }
 
 @Composable
-fun HomePage(userId: Int?, modifier: Modifier = Modifier, viewModel: HomeViewModel = viewModel()) {
+fun HomePage(userId: Int, modifier: Modifier = Modifier, viewModel: HomeViewModel = viewModel()) {
     val context = LocalContext.current // Get the current context
 
     val detailsJson = ""
