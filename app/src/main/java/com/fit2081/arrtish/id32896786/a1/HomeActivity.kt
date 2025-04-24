@@ -1,16 +1,17 @@
 package com.fit2081.arrtish.id32896786.a1
 
-import android.content.Context
-import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,175 +21,241 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.fit2081.arrtish.id32896786.a1.CsvExports.getUserDetailsAndSave
-import com.fit2081.arrtish.id32896786.a1.ui.theme.A1Theme
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import org.json.JSONObject
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import com.fit2081.arrtish.id32896786.a1.databases.AppDataBase
+import com.fit2081.arrtish.id32896786.a1.databases.patientdb.PatientRepository
+import com.fit2081.arrtish.id32896786.a1.insights.InsightsPage
+import com.fit2081.arrtish.id32896786.a1.insights.InsightsViewModel
+import com.fit2081.arrtish.id32896786.a1.nutricoach.NutriCoachPage
+import com.fit2081.arrtish.id32896786.a1.settings.SettingsPage
 
+import com.fit2081.arrtish.id32896786.a1.ui.theme.A1Theme
+
+// Home Activity for the app home page
 class HomeActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        enableEdgeToEdge() // Enable edge-to-edge display (no status bar)
 
-        // Retrieve userId from Intent extras
-        val userId = intent.getStringExtra("user_id") ?: "default_user" // Provide a default if null
-        Log.v("HomeActivity", "User ID: $userId")
-
-        val sharedPreferences = UserSharedPreferences.getPreferences(this, userId)
-        val isUpdated = sharedPreferences.getBoolean("updated", false) // Check if data has been updated
-
-        Log.v("HomeActivity", "SharedPreferences: $sharedPreferences | Updated: $isUpdated")
-
-        if (!isUpdated) { // If data has not been updated, fetch and save it
-            Log.v("HomeActivity", "Adding data to SharedPreferences for user $userId")
-            getUserDetailsAndSave(this, userId)
-        } else {
-            Log.v("HomeActivity", "Using existing SharedPreferences for user $userId")
-        }
-
-        Log.v("HomeActivity", "SharedPreferences: $sharedPreferences")
+//        // Get user ID passed from the previous activity, default to "default_user" if not available
+        val userId: Int = intent.getStringExtra("user_id")?.toIntOrNull() ?: 0
 
         setContent {
-            HideSystemBars()
-            A1Theme {
-                HomePage(userId,sharedPreferences,modifier = Modifier.fillMaxSize())
+//            HideSystemBars() // Hide system bars for a full-screen experience
+            A1Theme { // Apply the app's theme
+                val navController: NavHostController = rememberNavController()
+                Scaffold(
+                    topBar = {
+                        MyTopAppBar(navController)
+                    },
+                    modifier = Modifier.fillMaxSize(),
+                    bottomBar = {
+                        MyBottomAppBar(navController)
+                    }
+                ) { innerPadding ->
+                    Column(
+                        modifier = Modifier.padding(innerPadding)
+                    ){
+                        MyNavHost(navController, userId)
+                    }
+                }
             }
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomePage(userId: String?,sharedPreferences: SharedPreferences, modifier: Modifier = Modifier) {
+fun MyTopAppBar(navController: NavHostController) {
+    // Track the current route
+    val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route ?: "Home"
+
+//    // State to manage the menu's visibility
+//    var expanded by remember { mutableStateOf(false) }
+
+    // Get context from LocalContext
     val context = LocalContext.current
 
-    // ✅ Retrieve the "choices" JSON string and parse it
-    val detailsJson = sharedPreferences.getString("insights", "{}") ?: "{}"
-    val userDetails = JSONObject(detailsJson)
+    TopAppBar(
+        title = { Text(currentRoute.replaceFirstChar { it.uppercase() }) }, // Display the route name as title
+    )
+}
 
-    val foodQualityScore = userDetails.optDouble("qualityScore", 0.0).toFloat() // ✅ Extract score correctly
 
-    var showDialog by remember { mutableStateOf(false) }
-
-    Log.v("HomeActivity", "Food Quality Score: $foodQualityScore")
-
-    // Check if the user has answered the questionnaire
-    checkForQuestionnaire(context,userId) { hasAnswered ->
-        if (!hasAnswered) {
-            showDialog = true
-        }
-    }
-
-//    if (showDialog) {
-//        AlertDialog(
-//            onDismissRequest = { /* Prevent dismiss */ },
-//            title = { Text("Complete the Questionnaire") },
-//            text = { Text("You need to complete the questionnaire to continue using the app.") },
-//            confirmButton = {
-//                Button(onClick = {
-//                    showDialog = false
-//                    onRouteToQuestionnaire(context)
-//                }) {
-//                    Text("Complete Now")
-//                }
-//            }
-//        )
-//    }
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        contentAlignment = Alignment.TopCenter // Ensures everything is stacked top-down
+// MyNavHost Composable function for navigation within the app
+@Composable
+fun MyNavHost(navController: NavHostController, userId: Int) {
+    // NavHost composable to define the navigation graph
+    val modifier = Modifier
+    NavHost(
+        // Use the provided NavHostController
+        navController = navController,
+        // Set the starting destination to "dice"
+        startDestination = "home"
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            modifier = Modifier.fillMaxSize()
-        ) {
-            // Image at the top
-            Image(
-                painter = painterResource(
-                    id = when {
-                        foodQualityScore.toInt() >= 80 -> R.drawable.high_score_picture_removebg_preview
-                        foodQualityScore.toInt() >= 40 -> R.drawable.medium_score_picture_removebg_preview
-                        foodQualityScore.toInt() >= 0 -> R.drawable.low_score_picture_removebg_preview
-                        else -> 0 // Invalid case (Won't render)
-                    }
-                ),
-                contentDescription = "Food Quality Score",
-                modifier = Modifier
-                    .size(300.dp)
-                    .align(Alignment.CenterHorizontally) // Ensures image is centered
-            )
+        // Define the composable for the "dice" route
+        composable("home") {
+            HomePage(userId, modifier)
+        }
 
-            // User Info
-            Text(
-                text = "Hello, ${userId ?: "Guest"}!",
-                fontSize = 24.sp,
-                style = MaterialTheme.typography.titleMedium,
-                textAlign = TextAlign.Center
-            )
+        composable("insights") {
+            InsightsPage(userId, modifier, navController)
+        }
 
-            // Score Display
-            Text(
-                text = "Your Food Quality Score: $foodQualityScore",
-                fontSize = 20.sp,
-                style = MaterialTheme.typography.titleMedium,
-                textAlign = TextAlign.Center
-            )
+        composable("nutricoach") {
+            NutriCoachPage(userId, modifier)
+        }
 
-            // Description
-            Text(
-                text = "This score represents the overall quality of your food choices based on your responses.",
-                fontSize = 16.sp,
-                textAlign = TextAlign.Center
-            )
+        composable("settings") {
+            SettingsPage(userId, modifier, navController)
+        }
 
-            // Buttons
-            Button(onClick = {
-            onRouteToQuestionnaire(context, userId)
-            }) {
-                Text(text = "Edit Responses")
-            }
+        composable("clinician login") {
+            ClinicianLogin(userId, modifier, navController)
+        }
 
-            Button(onClick = { onRouteToInsights(context, userId) }) {
-                Text(text = "View Insights")
-            }
-
-            Button(onClick = { Authentication.logout(context) }) {
-                Text(text = "Log Out")
-            }
+        composable("clinician") {
+            ClinicianPage(userId, modifier, navController)
         }
     }
 }
 
-fun checkForQuestionnaire(context: Context, userId: String?, callback: (Boolean) -> Unit) {
-    if (userId == null) {
-        callback(false) // Default to false if userId is null
-        return
+
+// Composable function for creating the bottom navigation bar.
+@Composable
+fun MyBottomAppBar(navController: NavHostController) {
+    // State to track the currently selected item in the bottom navigation bar.
+    var selectedItem by remember { mutableStateOf(0) }
+
+    // List of navigation items: "home", "reports", "settings".
+    val items = listOf(
+        "home",
+        "insights",
+        "nutricoach",
+        "settings"
+    )
+
+    // NavigationBar composable to define the bottom navigation bar.
+    NavigationBar {
+        // Iterate through each item in the 'items' list along with its index.
+        items.forEachIndexed { index, item ->
+            // NavigationBarItem for each item in the list.
+            NavigationBarItem(
+                // Define the icon based on the item's name.
+                icon = {
+                    when (item) {
+                        // If the item is "home", show the Home icon.
+                        "home" -> Icon(Icons.Filled.Home, contentDescription = "Home")
+
+                        "insights" -> Icon(Icons.Filled.Person, contentDescription = "Insights")
+
+                        "nutricoach" -> Icon(Icons.Filled.Info, contentDescription = "NutriCoach")
+
+                        "settings" -> Icon(Icons.Filled.Settings, contentDescription = "Settings")
+                    }
+                },
+                // Display the item's name as the label.
+                label = { Text(item) },
+                // Determine if this item is currently selected.
+                selected = selectedItem == index,
+                // Actions to perform when this item is clicked.
+                onClick = {
+                    // Update the selectedItem state to the current index.
+                    selectedItem = index
+                    // Navigate to the corresponding screen based on the item's name.
+                    navController.navigate(item)
+                }
+            )
+        }
     }
-
-    val userPreferences = UserSharedPreferences(context, userId)
-    val answeredQuestionnaire = userPreferences.getUserChoices()?.get("answered") as? Boolean == true
-    callback(answeredQuestionnaire)
-}
-
-
-fun onRouteToQuestionnaire(context: Context, userId: String?) {
-    val intent = Intent(context, QuestionnaireActivity::class.java).apply{
-        putExtra("user_id", userId)
-    }
-    context.startActivity(intent)
-}
-
-fun onRouteToInsights(context: Context, userId: String?) {
-    val intent = Intent(context, InsightsActivity::class.java).apply{
-        putExtra("user_id", userId)
-    }
-    context.startActivity(intent)
 }
 
 @Composable
-internal fun HideSystemBars() {
-    val systemUiController = rememberSystemUiController()
-    systemUiController.isSystemBarsVisible = false  // Hides both status & nav bar
+fun HomePage(userId: Int, modifier: Modifier = Modifier) {
+    val context = LocalContext.current // Get the current context
+
+    val db = AppDataBase.getDatabase(context)
+    val repository = PatientRepository(db.patientDao())
+
+    val viewModel: HomeViewModel = viewModel(
+        factory = HomeViewModel.HomeViewModelFactory(repository)
+    )
+
+    LaunchedEffect(Unit) {
+        viewModel.loadPatientDataById(userId)
+    }
+
+    val patient by viewModel.patient.collectAsState()
+
+    patient?.let { patientData ->
+        val foodQualityScore = patientData.totalScore
+        val name = patientData.patientName
+
+        // Box layout to hold all UI elements
+        Box(
+            modifier = Modifier
+                .fillMaxSize() // Fill the screen
+                .padding(16.dp), // Add padding
+            contentAlignment = Alignment.TopCenter // Align content to the top center
+        ) {
+            // Column to arrange elements vertically
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp), // Space between elements
+                modifier = Modifier.fillMaxSize()
+            ) {
+                // Display image based on food quality score
+                Image(
+                    painter = painterResource(
+                        id = when {
+                            foodQualityScore.toInt() >= 80 -> R.drawable.high_score_picture_removebg_preview
+                            foodQualityScore.toInt() >= 40 -> R.drawable.medium_score_picture_removebg_preview
+                            foodQualityScore.toInt() >= 0 -> R.drawable.low_score_picture_removebg_preview
+                            else -> 0 // Default image if no match
+                        }
+                    ),
+                    contentDescription = "Food Quality Score", // Image description
+                    modifier = Modifier
+                        .size(275.dp) // Set image size
+                        .align(Alignment.CenterHorizontally) // Center align the image
+                )
+
+                // Display greeting with the user's ID
+                Text(
+                    text = "Hello, ${name ?: "Guest"}!", // If userId is null, show "Guest"
+                    fontSize = 24.sp, // Font size for greeting
+                    style = MaterialTheme.typography.titleMedium,
+                    textAlign = TextAlign.Center // Center align the text
+                )
+
+                // Display food quality score
+                Text(
+                    text = "Your Food Quality Score: $foodQualityScore",
+                    fontSize = 20.sp, // Font size for score display
+                    style = MaterialTheme.typography.titleMedium,
+                    textAlign = TextAlign.Center
+                )
+
+                // Provide detailed explanation about the food quality score
+                Text(
+                    text = "Your Food Quality Score provides a snapshot of how well your eating patterns align with established food guidelines, helping you identify both strengths and opportunities for improvement in your diet.\n" +
+                            "This personalized measurement considers various food groups, including vegetables, fruits, whole grains, and proteins, to give you practical insights for making healthier food choices.\n",
+                    fontSize = 12.sp, // Font size for explanation
+                    textAlign = TextAlign.Center
+                )
+
+                // Button to edit questionnaire responses
+                Button(onClick = {
+    //                onRouteToQuestionnaire(context, userId) // Navigate to questionnaire
+                }) {
+                    Text(text = "Edit Responses")
+                }
+            }
+        }
+    }
 }
