@@ -1,10 +1,7 @@
 package com.fit2081.arrtish.id32896786.a1
 
-import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -25,12 +22,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.fit2081.arrtish.id32896786.a1.insights.InsightsPage
+import com.fit2081.arrtish.id32896786.a1.nutricoach.NutriCoachPage
+import com.fit2081.arrtish.id32896786.a1.settings.SettingsPage
 
 import com.fit2081.arrtish.id32896786.a1.ui.theme.A1Theme
 
@@ -41,7 +40,7 @@ class HomeActivity : ComponentActivity() {
         enableEdgeToEdge() // Enable edge-to-edge display (no status bar)
 
 //        // Get user ID passed from the previous activity, default to "default_user" if not available
-        val userId = intent.getStringExtra("user_id") ?: "default_user"
+        val userId = intent.getStringExtra("user_id")?.toInt()
 
         setContent {
 //            HideSystemBars() // Hide system bars for a full-screen experience
@@ -109,7 +108,7 @@ fun MyTopAppBar(navController: NavHostController) {
 
 // MyNavHost Composable function for navigation within the app
 @Composable
-fun MyNavHost(navController: NavHostController, userId: String?) {
+fun MyNavHost(navController: NavHostController, userId: Int?) {
     // NavHost composable to define the navigation graph
     val modifier = Modifier
     NavHost(
@@ -124,7 +123,15 @@ fun MyNavHost(navController: NavHostController, userId: String?) {
         }
 
         composable("insights") {
-            InsightsPage(userId.toString())
+            InsightsPage(userId, modifier)
+        }
+
+        composable("nutricoach") {
+            NutriCoachPage(userId, modifier)
+        }
+
+        composable("home") {
+            SettingsPage(userId, modifier)
         }
     }
 }
@@ -174,7 +181,7 @@ fun MyBottomAppBar(navController: NavHostController) {
 }
 
 @Composable
-fun HomePage(userId: String?, modifier: Modifier = Modifier, viewModel: HomeViewModel = viewModel()) {
+fun HomePage(userId: Int?, modifier: Modifier = Modifier, viewModel: HomeViewModel = viewModel()) {
     val context = LocalContext.current // Get the current context
 
     val detailsJson = ""

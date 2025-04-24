@@ -32,7 +32,7 @@
             android:label="@string/title_activity_home"
             android:theme="@style/Theme.A1" />
         <activity
-            android:name=".InsightsActivity"
+            android:name=".insights.InsightsActivity"
             android:exported="false"
             android:label="@string/title_activity_insights"
             android:theme="@style/Theme.A1" />

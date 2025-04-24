@@ -6,7 +6,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.viewModels
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -24,16 +23,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fit2081.arrtish.id32896786.a1.ui.theme.A1Theme
 import androidx.core.net.toUri
-import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.datastore.preferences.preferencesDataStore
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.lifecycle.ViewModelProvider
 import com.fit2081.arrtish.id32896786.a1.authentication.LoginPage
 import com.fit2081.arrtish.id32896786.a1.authentication.RegisterPage
-import androidx.lifecycle.ViewModelProvider
 
 
 class MainActivity : ComponentActivity() {

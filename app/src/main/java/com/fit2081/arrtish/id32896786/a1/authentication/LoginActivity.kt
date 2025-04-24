@@ -1,11 +1,9 @@
 package com.fit2081.arrtish.id32896786.a1.authentication
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -21,7 +19,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -53,7 +50,6 @@ import androidx.navigation.NavController
 import com.fit2081.arrtish.id32896786.a1.HomeActivity
 import com.fit2081.arrtish.id32896786.a1.R
 import com.fit2081.arrtish.id32896786.a1.authentication.AuthenticationViewModel.AuthenticationViewModelFactory
-import com.fit2081.arrtish.id32896786.a1.ui.theme.A1Theme
 import kotlinx.coroutines.delay
 
 
