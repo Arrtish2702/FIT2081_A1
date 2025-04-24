@@ -1,6 +1,7 @@
 package com.fit2081.arrtish.id32896786.a1.authentication
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -47,21 +48,30 @@ fun RegisterPage(
     navController: NavController,
     viewModel: AuthenticationViewModel = viewModel(factory = AuthenticationViewModelFactory(LocalContext.current))
 ) {
-//    val idOptions = listOf("012345", "678910", "111213")
-//    var selectedId by remember { mutableStateOf(idOptions[0]) }
     var selectedUserId by remember { mutableStateOf("") } // State to store selected user ID
     val userIds by viewModel.patientIds.collectAsState(initial = emptyList())
     var phone by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
 
+    val context = LocalContext.current
+    val message = viewModel.registrationMessage.value
+
+    LaunchedEffect(message) {
+        message?.let {
+            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+            viewModel.registrationMessage.value = null // reset so it doesn’t keep showing
+        }
+    }
+
     if (viewModel.registrationSuccessful.value) {
         LaunchedEffect(Unit) {
             navController.navigate("login") {
-                popUpTo("register") { inclusive = true } // optional: removes register from back stack
+                popUpTo("register") { inclusive = true }
             }
         }
     }
+
 
     Column(
         modifier = modifier

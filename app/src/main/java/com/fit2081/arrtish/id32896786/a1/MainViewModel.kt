@@ -15,8 +15,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.BufferedReader
 import java.io.InputStreamReader
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import java.util.Date
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
@@ -33,11 +31,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             val inputStream = context.assets.open("nutritrack_data.csv")
             val reader = BufferedReader(InputStreamReader(inputStream))
             val lines = reader.readLines()
-
-            // List to store inserted patient and score objects for logging later
-            val patientsInserted = mutableListOf<Patient>()
-            val scoresInserted = mutableListOf<HeifaScores>()
-
             // Loop through each line in the CSV, skipping the header (first row)
             for (line in lines.drop(1)) {
                 val tokens = line.split(",")
@@ -67,19 +60,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 val scores = HeifaScores(
                     internalId = generatedId,
                     timestamp = currentDate,
-//                    vegetables = "1".toFloat(),
-//                    fruits = "1".toFloat(),
-//                    grainsAndCereals = "1".toFloat(),
-//                    wholeGrains = "1".toFloat(),
-//                    meatAndAlternatives = "1".toFloat(),
-//                    dairyAndAlternatives = "1".toFloat(),
-//                    water = "1".toFloat(),
-//                    unsaturatedFats = "1".toFloat(),
-//                    sodium = "1".toFloat(),
-//                    sugar = "1".toFloat(),
-//                    alcohol = "1".toFloat(),
-//                    discretionaryFoods = "1".toFloat(),
-//                    totalScore = "1".toFloat(),
                     vegetables = tokens[if (isMale) 8 else 9].toFloat(),
                     fruits = tokens[if (isMale) 19 else 20].toFloat(),
                     grainsAndCereals = tokens[if (isMale) 28 else 29].toFloat(),
@@ -97,23 +77,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
                 scoresDao.insertHeifaScores(scores)
             }
-
-            // After all the data has been inserted, log the contents of the databases
-            // Fetch all patients and their scores and log them
-            val allPatients = patientDao.getAllPatients()
-//            val allScores = scoresDao.getAllHeifaScores()
-//
-//            // Log Patients data
-//            Log.d("MainViewModel", "---- All Patients ----")
-//            allPatients.forEach { patient ->
-//                Log.d("MainViewModel", "Patient: $patient")
-//            }
-
-//            // Log HeifaScores data
-//            Log.d("MainViewModel", "---- All Heifa Scores ----")
-//            allScores.forEach { scores ->
-//                Log.d("MainViewModel", "Scores: $scores")
-//            }
         }
     }
 }

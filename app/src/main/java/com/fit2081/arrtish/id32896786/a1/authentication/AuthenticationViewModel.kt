@@ -27,6 +27,8 @@ class AuthenticationViewModel(application: Application) : ViewModel() {
     private val repository = PatientRepository(patientDao)
     var registrationSuccessful = mutableStateOf(false)
         private set
+    var registrationMessage = mutableStateOf<String?>(null)
+        private set
 
 //    // Using liveData to collect Flow and expose as LiveData
 //    val patientIds: LiveData<List<Int>> = liveData {
@@ -92,28 +94,31 @@ class AuthenticationViewModel(application: Application) : ViewModel() {
     fun register(selectedId: String, phone: String, password: String, confirmPassword: String) {
         Log.d("AuthenticationViewModel", "attempting register")
         viewModelScope.launch {
-            val patientId = selectedId.toIntOrNull() ?: return@launch
+            val patientId = selectedId.toIntOrNull()
+            if (patientId == null) {
+                registrationMessage.value = "Invalid ID format."
+                return@launch
+            }
+
             val patient = repository.getPatientById(patientId)
 
             if (patient == null || patient.patientPhoneNumber != phone) {
-                // Show error: ID not found or phone doesn't match
-                Log.d("AuthenticationViewModel", "no patient/wrong hp no")
+                registrationMessage.value = "ID or phone number is incorrect."
                 return@launch
             }
 
             if (password != confirmPassword) {
-                // Show error: passwords don't match
-                Log.d("AuthenticationViewModel", "pw mismatch")
+                registrationMessage.value = "Passwords do not match."
                 return@launch
             }
 
             val updated = patient.copy(patientPassword = password)
             repository.updatePatient(updated)
-            Log.d("AuthenticationViewModel", "update done")
-            // Optionally notify UI of success
-            registrationSuccessful.value = true // ✅ Trigger navigation
+            registrationSuccessful.value = true
+            registrationMessage.value = "Registration successful!"
         }
     }
+
 
     class AuthenticationViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
