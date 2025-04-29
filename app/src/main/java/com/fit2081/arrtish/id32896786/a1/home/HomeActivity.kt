@@ -1,4 +1,4 @@
-package com.fit2081.arrtish.id32896786.a1
+package com.fit2081.arrtish.id32896786.a1.home
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -10,22 +10,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import com.fit2081.arrtish.id32896786.a1.clinician.ClinicianLogin
-import com.fit2081.arrtish.id32896786.a1.clinician.ClinicianPage
-import com.fit2081.arrtish.id32896786.a1.databases.AppDataBase
+import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
+import com.fit2081.arrtish.id32896786.a1.R
 import com.fit2081.arrtish.id32896786.a1.databases.patientdb.PatientRepository
-import com.fit2081.arrtish.id32896786.a1.insights.InsightsPage
-import com.fit2081.arrtish.id32896786.a1.nutricoach.NutriCoachPage
-import com.fit2081.arrtish.id32896786.a1.settings.SettingsPage
 
 // Home Activity for the app home page
 class HomeActivity : ComponentActivity() {
@@ -37,14 +29,11 @@ class HomeActivity : ComponentActivity() {
 }
 
 @Composable
-fun HomePage(userId: Int, modifier: Modifier = Modifier) {
-    val context = LocalContext.current // Get the current context
+fun HomePage(userId: Int, modifier: Modifier = Modifier, patientRepository: PatientRepository) {
 
-    val db = AppDataBase.getDatabase(context)
-    val repository = PatientRepository(db.patientDao())
 
     val viewModel: HomeViewModel = viewModel(
-        factory = HomeViewModel.HomeViewModelFactory(repository)
+        factory = AppViewModelFactory(patientRepository)
     )
 
     LaunchedEffect(Unit) {

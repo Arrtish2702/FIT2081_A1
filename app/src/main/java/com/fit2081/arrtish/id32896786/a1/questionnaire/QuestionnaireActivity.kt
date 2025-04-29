@@ -5,27 +5,24 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.ui.*
+import androidx.compose.ui.unit.*
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fit2081.arrtish.id32896786.a1.ui.theme.A1Theme
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 import com.fit2081.arrtish.id32896786.a1.R
-import com.fit2081.arrtish.id32896786.a1.clinician.ClinicianViewModel
 import com.fit2081.arrtish.id32896786.a1.databases.AppDataBase
 import com.fit2081.arrtish.id32896786.a1.databases.foodintakedb.FoodIntakeRepository
-import com.fit2081.arrtish.id32896786.a1.databases.patientdb.PatientRepository
 import kotlin.String
 
 // QuestionnaireActivity for the questionnaire form

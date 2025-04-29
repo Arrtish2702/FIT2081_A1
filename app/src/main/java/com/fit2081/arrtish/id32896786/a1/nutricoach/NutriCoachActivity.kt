@@ -10,11 +10,11 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.fit2081.arrtish.id32896786.a1.databases.patientdb.PatientRepository
 import com.fit2081.arrtish.id32896786.a1.ui.theme.A1Theme
 
 class NutriCoachActivity : ComponentActivity() {
@@ -30,7 +30,7 @@ class NutriCoachActivity : ComponentActivity() {
 }
 
 @Composable
-fun NutriCoachPage(userId: Int, modifier: Modifier = Modifier, viewModel: NutriCoachViewModel = viewModel()) {
+fun NutriCoachPage(userId: Int, modifier: Modifier = Modifier, viewModel: PatientRepository = viewModel()) {
     var fruitName by remember { mutableStateOf("") }
     var motivationalMessage by remember { mutableStateOf("") }
 

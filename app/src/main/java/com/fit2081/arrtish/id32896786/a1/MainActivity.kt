@@ -4,6 +4,10 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.*
+import androidx.compose.ui.unit.*
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -12,32 +16,17 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.material.icons.filled.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.content.edit
 import com.fit2081.arrtish.id32896786.a1.ui.theme.A1Theme
 import androidx.core.net.toUri
 import androidx.navigation.NavController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
+import androidx.navigation.compose.*
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -45,6 +34,10 @@ import com.fit2081.arrtish.id32896786.a1.authentication.LoginPage
 import com.fit2081.arrtish.id32896786.a1.authentication.RegisterPage
 import com.fit2081.arrtish.id32896786.a1.clinician.ClinicianLogin
 import com.fit2081.arrtish.id32896786.a1.clinician.ClinicianPage
+import com.fit2081.arrtish.id32896786.a1.databases.AppDataBase
+import com.fit2081.arrtish.id32896786.a1.databases.foodintakedb.FoodIntakeRepository
+import com.fit2081.arrtish.id32896786.a1.databases.patientdb.PatientRepository
+import com.fit2081.arrtish.id32896786.a1.home.HomePage
 import com.fit2081.arrtish.id32896786.a1.insights.InsightsPage
 import com.fit2081.arrtish.id32896786.a1.nutricoach.NutriCoachPage
 import com.fit2081.arrtish.id32896786.a1.settings.SettingsPage
@@ -87,7 +80,7 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 ) { innerPadding ->
-                    AppNavigation(userId, Modifier.padding(innerPadding), navController)
+                    AppInitialisation(userId, Modifier.padding(innerPadding), navController)
                 }
             }
         }
@@ -97,7 +90,12 @@ class MainActivity : ComponentActivity() {
 
 
 @Composable
-fun AppNavigation(userId: Int, modifier: Modifier, navController: NavHostController) {
+fun AppInitialisation(userId: Int, modifier: Modifier, navController: NavHostController) {
+
+    val context = LocalContext.current
+    val db = AppDataBase.getDatabase(context)
+    val patientRepository = PatientRepository(db.patientDao())
+    val foodIntakeRepository = FoodIntakeRepository(db.foodIntakeDao())
 
     var startDestination = ""
     startDestination = if (userId!=0){
@@ -121,19 +119,19 @@ fun AppNavigation(userId: Int, modifier: Modifier, navController: NavHostControl
         }
 
         composable("home") {
-            HomePage(userId, modifier)
+            HomePage(userId, modifier, patientRepository)
         }
 
         composable("insights") {
-            InsightsPage(userId, modifier, navController)
+            InsightsPage(userId, modifier, navController, patientRepository)
         }
 
         composable("nutricoach") {
-            NutriCoachPage(userId, modifier)
+            NutriCoachPage(userId, modifier, patientRepository)
         }
 
         composable("settings") {
-            SettingsPage(userId, modifier, navController)
+            SettingsPage(userId, modifier, navController,patientRepository)
         }
 
         composable("clinician login") {
@@ -141,7 +139,7 @@ fun AppNavigation(userId: Int, modifier: Modifier, navController: NavHostControl
         }
 
         composable("clinician") {
-            ClinicianPage(userId, modifier, navController)
+            ClinicianPage(userId, modifier, navController, patientRepository)
         }
     }
 }

@@ -32,12 +32,12 @@ class ClinicianViewModel(private val repository: PatientRepository) : ViewModel(
         return Pair(maleScore, femaleScore)
     }
 
-    class ClinicianViewModelFactory(private val repository: PatientRepository) : ViewModelProvider.Factory {
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(ClinicianViewModel::class.java)) {
-                return ClinicianViewModel(repository) as T
-            }
-            throw IllegalArgumentException("Unknown ViewModel class")
-        }
-    }
+//    class ClinicianViewModelFactory(private val repository: PatientRepository) : ViewModelProvider.Factory {
+//        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+//            if (modelClass.isAssignableFrom(ClinicianViewModel::class.java)) {
+//                return ClinicianViewModel(repository) as T
+//            }
+//            throw IllegalArgumentException("Unknown ViewModel class")
+//        }
+//    }
 }

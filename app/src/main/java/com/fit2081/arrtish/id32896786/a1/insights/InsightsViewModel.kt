@@ -42,12 +42,12 @@ class InsightsViewModel(private val repository: PatientRepository) : ViewModel()
         context.startActivity(chooser)
     }
 
-    class InsightsViewModelFactory(private val repository: PatientRepository) : ViewModelProvider.Factory {
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(InsightsViewModel::class.java)) {
-                return InsightsViewModel(repository) as T
-            }
-            throw IllegalArgumentException("Unknown ViewModel class")
-        }
-    }
+//    class InsightsViewModelFactory(private val repository: PatientRepository) : ViewModelProvider.Factory {
+//        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+//            if (modelClass.isAssignableFrom(InsightsViewModel::class.java)) {
+//                return InsightsViewModel(repository) as T
+//            }
+//            throw IllegalArgumentException("Unknown ViewModel class")
+//        }
+//    }
 }

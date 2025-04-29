@@ -20,12 +20,12 @@ class SettingsViewModel(private val repository: PatientRepository): ViewModel() 
         }
     }
 
-    class SettingsViewModelFactory(private val repository: PatientRepository) : ViewModelProvider.Factory {
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(SettingsViewModel::class.java)) {
-                return SettingsViewModel(repository) as T
-            }
-            throw IllegalArgumentException("Unknown ViewModel class")
-        }
-    }
+//    class SettingsViewModelFactory(private val repository: PatientRepository) : ViewModelProvider.Factory {
+//        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+//            if (modelClass.isAssignableFrom(SettingsViewModel::class.java)) {
+//                return SettingsViewModel(repository) as T
+//            }
+//            throw IllegalArgumentException("Unknown ViewModel class")
+//        }
+//    }
 }
