@@ -1,5 +1,6 @@
 package com.fit2081.arrtish.id32896786.a1.settings
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
@@ -23,6 +24,7 @@ import androidx.compose.ui.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
+import androidx.core.content.edit
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.fit2081.arrtish.id32896786.a1.MainActivity
@@ -127,10 +129,9 @@ fun SettingsPage(userId: Int, modifier: Modifier = Modifier, navController: NavH
 
         Button(
             onClick = {
-                val intent = Intent(context, MainActivity::class.java).apply {
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                }
-                context.startActivity(intent)
+                val sharedPreferences = context.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+                sharedPreferences.edit() { putInt("userId", 0) }
+                navController.navigate("login")
                 expanded = false
             },
             modifier = Modifier.fillMaxWidth()

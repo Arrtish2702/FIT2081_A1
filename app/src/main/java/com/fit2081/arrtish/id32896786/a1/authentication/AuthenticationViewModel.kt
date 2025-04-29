@@ -11,6 +11,7 @@ import com.fit2081.arrtish.id32896786.a1.databases.AppDataBase
 import com.fit2081.arrtish.id32896786.a1.databases.patientdb.PatientRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import androidx.core.content.edit
 
 class AuthenticationViewModel(application: Application) : ViewModel() {
 
@@ -42,7 +43,7 @@ class AuthenticationViewModel(application: Application) : ViewModel() {
     }
 
 
-    fun login(userId: String, password: String) {
+    fun login(userId: String, password: String, context: Context) {
         viewModelScope.launch {
             loginSuccessful.value = false
             val patientId = userId.toIntOrNull()
@@ -72,6 +73,8 @@ class AuthenticationViewModel(application: Application) : ViewModel() {
                 return@launch
             }
 
+            val sharedPreferences = context.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+            sharedPreferences.edit() { putInt("userId", patientId) }
             loginMessage.value = "Login successful!"
             loginSuccessful.value = true
         }

@@ -45,46 +45,46 @@ class HomeActivity : ComponentActivity() {
 //        // Get user ID passed from the previous activity, default to "default_user" if not available
         val userId: Int = intent.getStringExtra("user_id")?.toIntOrNull() ?: 0
 
-        setContent {
-//            HideSystemBars() // Hide system bars for a full-screen experience
-            A1Theme { // Apply the app's theme
-                val navController: NavHostController = rememberNavController()
-                Scaffold(
-                    topBar = {
-                        MyTopAppBar(navController)
-                    },
-                    modifier = Modifier.fillMaxSize(),
-                    bottomBar = {
-                        MyBottomAppBar(navController)
-                    }
-                ) { innerPadding ->
-                    Column(
-                        modifier = Modifier.padding(innerPadding)
-                    ){
-                        MyNavHost(navController, userId)
-                    }
-                }
-            }
-        }
+//        setContent {
+////            HideSystemBars() // Hide system bars for a full-screen experience
+//            A1Theme { // Apply the app's theme
+//                val navController: NavHostController = rememberNavController()
+//                Scaffold(
+//                    topBar = {
+//                        MyTopAppBar(navController)
+//                    },
+//                    modifier = Modifier.fillMaxSize(),
+//                    bottomBar = {
+//                        MyBottomAppBar(navController)
+//                    }
+//                ) { innerPadding ->
+//                    Column(
+//                        modifier = Modifier.padding(innerPadding)
+//                    ){
+//                        MyNavHost(navController, userId)
+//                    }
+//                }
+//            }
+//        }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun MyTopAppBar(navController: NavHostController) {
-    // Track the current route
-    val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route ?: "Home"
-
-//    // State to manage the menu's visibility
-//    var expanded by remember { mutableStateOf(false) }
-
-    // Get context from LocalContext
-    val context = LocalContext.current
-
-    TopAppBar(
-        title = { Text(currentRoute.replaceFirstChar { it.uppercase() }) }, // Display the route name as title
-    )
-}
+//@OptIn(ExperimentalMaterial3Api::class)
+//@Composable
+//fun MyTopAppBar(navController: NavHostController) {
+//    // Track the current route
+//    val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route ?: "Home"
+//
+////    // State to manage the menu's visibility
+////    var expanded by remember { mutableStateOf(false) }
+//
+//    // Get context from LocalContext
+//    val context = LocalContext.current
+//
+//    TopAppBar(
+//        title = { Text(currentRoute.replaceFirstChar { it.uppercase() }) }, // Display the route name as title
+//    )
+//}
 
 
 // MyNavHost Composable function for navigation within the app
@@ -126,54 +126,54 @@ fun MyNavHost(navController: NavHostController, userId: Int) {
 }
 
 
-// Composable function for creating the bottom navigation bar.
-@Composable
-fun MyBottomAppBar(navController: NavHostController) {
-    // State to track the currently selected item in the bottom navigation bar.
-    var selectedItem by remember { mutableStateOf(0) }
-
-    // List of navigation items: "home", "reports", "settings".
-    val items = listOf(
-        "home",
-        "insights",
-        "nutricoach",
-        "settings"
-    )
-
-    // NavigationBar composable to define the bottom navigation bar.
-    NavigationBar {
-        // Iterate through each item in the 'items' list along with its index.
-        items.forEachIndexed { index, item ->
-            // NavigationBarItem for each item in the list.
-            NavigationBarItem(
-                // Define the icon based on the item's name.
-                icon = {
-                    when (item) {
-                        // If the item is "home", show the Home icon.
-                        "home" -> Icon(Icons.Filled.Home, contentDescription = "Home")
-
-                        "insights" -> Icon(Icons.Filled.Person, contentDescription = "Insights")
-
-                        "nutricoach" -> Icon(Icons.Filled.Info, contentDescription = "NutriCoach")
-
-                        "settings" -> Icon(Icons.Filled.Settings, contentDescription = "Settings")
-                    }
-                },
-                // Display the item's name as the label.
-                label = { Text(item) },
-                // Determine if this item is currently selected.
-                selected = selectedItem == index,
-                // Actions to perform when this item is clicked.
-                onClick = {
-                    // Update the selectedItem state to the current index.
-                    selectedItem = index
-                    // Navigate to the corresponding screen based on the item's name.
-                    navController.navigate(item)
-                }
-            )
-        }
-    }
-}
+//// Composable function for creating the bottom navigation bar.
+//@Composable
+//fun MyBottomAppBar(navController: NavHostController) {
+//    // State to track the currently selected item in the bottom navigation bar.
+//    var selectedItem by remember { mutableStateOf(0) }
+//
+//    // List of navigation items: "home", "reports", "settings".
+//    val items = listOf(
+//        "home",
+//        "insights",
+//        "nutricoach",
+//        "settings"
+//    )
+//
+//    // NavigationBar composable to define the bottom navigation bar.
+//    NavigationBar {
+//        // Iterate through each item in the 'items' list along with its index.
+//        items.forEachIndexed { index, item ->
+//            // NavigationBarItem for each item in the list.
+//            NavigationBarItem(
+//                // Define the icon based on the item's name.
+//                icon = {
+//                    when (item) {
+//                        // If the item is "home", show the Home icon.
+//                        "home" -> Icon(Icons.Filled.Home, contentDescription = "Home")
+//
+//                        "insights" -> Icon(Icons.Filled.Person, contentDescription = "Insights")
+//
+//                        "nutricoach" -> Icon(Icons.Filled.Info, contentDescription = "NutriCoach")
+//
+//                        "settings" -> Icon(Icons.Filled.Settings, contentDescription = "Settings")
+//                    }
+//                },
+//                // Display the item's name as the label.
+//                label = { Text(item) },
+//                // Determine if this item is currently selected.
+//                selected = selectedItem == index,
+//                // Actions to perform when this item is clicked.
+//                onClick = {
+//                    // Update the selectedItem state to the current index.
+//                    selectedItem = index
+//                    // Navigate to the corresponding screen based on the item's name.
+//                    navController.navigate(item)
+//                }
+//            )
+//        }
+//    }
+//}
 
 @Composable
 fun HomePage(userId: Int, modifier: Modifier = Modifier) {

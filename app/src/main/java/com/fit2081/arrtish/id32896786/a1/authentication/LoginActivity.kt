@@ -50,7 +50,9 @@ import androidx.navigation.NavController
 import com.fit2081.arrtish.id32896786.a1.HomeActivity
 import com.fit2081.arrtish.id32896786.a1.R
 import com.fit2081.arrtish.id32896786.a1.authentication.AuthenticationViewModel.AuthenticationViewModelFactory
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 
 
 // Main Activity for Login
@@ -92,13 +94,11 @@ fun LoginPage(
     LaunchedEffect(loginSuccess) {
         if (loginSuccess == true) {
             viewModel.setLoading(true) // Show spinner
+            delay(1500) // Optional: let spinner show briefly before jump
 
-            delay(500) // Optional: let spinner show briefly before jump
-            val intent = Intent(context, HomeActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                putExtra("user_id", selectedUserId)
+            withContext(Dispatchers.Main) {
+                navController.navigate("home")
             }
-            context.startActivity(intent)
         }
     }
 
@@ -168,7 +168,7 @@ fun LoginPage(
             Button(onClick = {
                 if (selectedUserId.isNotEmpty() && password.isNotEmpty()) {
                     viewModel.loginSuccessful.value = false
-                    viewModel.login(selectedUserId, password)
+                    viewModel.login(selectedUserId, password, context)
                 } else {
                     Toast.makeText(
                         context,

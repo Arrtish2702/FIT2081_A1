@@ -3,6 +3,7 @@ package com.fit2081.arrtish.id32896786.a1
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -10,8 +11,17 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -21,6 +31,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.edit
 import com.fit2081.arrtish.id32896786.a1.ui.theme.A1Theme
 import androidx.core.net.toUri
 import androidx.navigation.NavController
@@ -28,15 +39,20 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.fit2081.arrtish.id32896786.a1.authentication.LoginPage
 import com.fit2081.arrtish.id32896786.a1.authentication.RegisterPage
+import com.fit2081.arrtish.id32896786.a1.insights.InsightsPage
+import com.fit2081.arrtish.id32896786.a1.nutricoach.NutriCoachPage
+import com.fit2081.arrtish.id32896786.a1.settings.SettingsPage
 
 
 class MainActivity : ComponentActivity() {
 
     // Create MainViewModel using ViewModelProvider
     private val viewModel: MainViewModel by lazy {
-        ViewModelProvider(this).get(MainViewModel::class.java)
+        ViewModelProvider(this)[MainViewModel::class.java]
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,31 +61,135 @@ class MainActivity : ComponentActivity() {
         // Calling the loadAndInsertData method of MainViewModel
         viewModel.loadAndInsertData(this)
 
+        val userId = checkForExistingUser(this)
+
         // Enables edge-to-edge display (immersive mode) for better UI experience
         enableEdgeToEdge()
 
         // Set the content of the screen to the WelcomePage Composable
         setContent {
+            val navController = rememberNavController()
+            val navBackStackEntry by navController.currentBackStackEntryAsState()
+            val currentRoute = navBackStackEntry?.destination?.route
+            Log.d("CurrentRoute", "Current route: $currentRoute")
+
+            // Define routes where bottom bar should be hidden
+            val hideBottomBarRoutes = listOf("welcome", "login", "register")
+
             A1Theme {
-                // Display the WelcomePage composable with modifier to fill the screen
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    AppNavigation(modifier = Modifier.padding(innerPadding))
+                Scaffold(
+                    bottomBar = {
+                        if (currentRoute !in hideBottomBarRoutes) {
+                            MyBottomAppBar(navController)
+//                            Text("Bottom Bar Here")
+                        }
+                    }
+                ) { innerPadding ->
+                    AppNavigation(userId, Modifier.padding(innerPadding), navController)
                 }
             }
         }
+
     }
 }
 
 
 @Composable
-fun AppNavigation(modifier: Modifier) {
-    val navController = rememberNavController()
+fun AppNavigation(userId: Int, modifier: Modifier, navController: NavHostController) {
+
+    var startDestination = ""
+    startDestination = if (userId!=0){
+        "home"
+    } else {
+        "welcome"
+    }
 
     // Define the NavHost with the start destination and routes
-    NavHost(navController = navController, startDestination = "welcome") {
-        composable("welcome") { WelcomePage(modifier, navController) }
-        composable("login") { LoginPage(modifier, navController) }
-        composable("register") { RegisterPage(modifier, navController) }
+    NavHost(navController = navController, startDestination = startDestination) {
+        composable("welcome") {
+            WelcomePage(modifier, navController)
+        }
+
+        composable("login") {
+            LoginPage(modifier, navController)
+        }
+
+        composable("register") {
+            RegisterPage(modifier, navController)
+        }
+
+        composable("home") {
+            HomePage(userId, modifier)
+        }
+
+        composable("insights") {
+            InsightsPage(userId, modifier, navController)
+        }
+
+        composable("nutricoach") {
+            NutriCoachPage(userId, modifier)
+        }
+
+        composable("settings") {
+            SettingsPage(userId, modifier, navController)
+        }
+
+        composable("clinician login") {
+            ClinicianLogin(userId, modifier, navController)
+        }
+
+        composable("clinician") {
+            ClinicianPage(userId, modifier, navController)
+        }
+    }
+}
+
+// Composable function for creating the bottom navigation bar.
+@Composable
+fun MyBottomAppBar(navController: NavHostController) {
+    // State to track the currently selected item in the bottom navigation bar.
+    var selectedItem by remember { mutableStateOf(0) }
+
+    // List of navigation items: "home", "reports", "settings".
+    val items = listOf(
+        "home",
+        "insights",
+        "nutricoach",
+        "settings"
+    )
+
+    // NavigationBar composable to define the bottom navigation bar.
+    NavigationBar {
+        // Iterate through each item in the 'items' list along with its index.
+        items.forEachIndexed { index, item ->
+            // NavigationBarItem for each item in the list.
+            NavigationBarItem(
+                // Define the icon based on the item's name.
+                icon = {
+                    when (item) {
+                        // If the item is "home", show the Home icon.
+                        "home" -> Icon(Icons.Filled.Home, contentDescription = "Home")
+
+                        "insights" -> Icon(Icons.Filled.Person, contentDescription = "Insights")
+
+                        "nutricoach" -> Icon(Icons.Filled.Info, contentDescription = "NutriCoach")
+
+                        "settings" -> Icon(Icons.Filled.Settings, contentDescription = "Settings")
+                    }
+                },
+                // Display the item's name as the label.
+                label = { Text(item) },
+                // Determine if this item is currently selected.
+                selected = selectedItem == index,
+                // Actions to perform when this item is clicked.
+                onClick = {
+                    // Update the selectedItem state to the current index.
+                    selectedItem = index
+                    // Navigate to the corresponding screen based on the item's name.
+                    navController.navigate(item)
+                }
+            )
+        }
     }
 }
 
@@ -168,6 +288,18 @@ private fun openMonashClinic(context: Context) {
     val url = "https://www.monash.edu/medicine/scs/nutrition/clinics/nutrition" // URL of the clinic
     val intent = Intent(Intent.ACTION_VIEW, url.toUri()) // Create an intent to open the URL in a browser
     context.startActivity(intent) // Start the activity to open the URL
+}
+
+fun checkForExistingUser(context: Context): Int {
+    val sharedPreferences = context.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+    val userId = sharedPreferences.getInt("userId", -1)
+
+    return if (userId != -1) {
+        userId
+    } else {
+        sharedPreferences.edit() { putInt("userId", 0) }
+        0
+    }
 }
 
 /**TODO LIST:
