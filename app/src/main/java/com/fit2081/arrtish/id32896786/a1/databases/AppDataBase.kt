@@ -4,14 +4,16 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.fit2081.arrtish.id32896786.a1.databases.foodintakedb.FoodIntake
+import com.fit2081.arrtish.id32896786.a1.databases.foodintakedb.FoodIntakeDao
 import com.fit2081.arrtish.id32896786.a1.databases.patientdb.PatientDao
 import com.fit2081.arrtish.id32896786.a1.databases.patientdb.Patient
 
-@Database(entities = [Patient::class], version = 1)
+@Database(entities = [Patient::class, FoodIntake::class], version = 2)
 abstract class AppDataBase : RoomDatabase() {
 
     abstract fun patientDao(): PatientDao
-
+    abstract fun foodIntakeDao(): FoodIntakeDao
 
     companion object {
         @Volatile private var INSTANCE: AppDataBase? = null
@@ -21,7 +23,7 @@ abstract class AppDataBase : RoomDatabase() {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AppDataBase::class.java,
-                    "patient_database"
+                    "app_database"
                 ).build()
                 INSTANCE = instance
                 instance
