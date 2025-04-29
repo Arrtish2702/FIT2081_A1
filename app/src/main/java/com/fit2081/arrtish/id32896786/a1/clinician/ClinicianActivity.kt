@@ -19,8 +19,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
 import com.fit2081.arrtish.id32896786.a1.authentication.AuthenticationViewModel
-import com.fit2081.arrtish.id32896786.a1.authentication.AuthenticationViewModel.AuthenticationViewModelFactory
-import com.fit2081.arrtish.id32896786.a1.databases.patientdb.PatientRepository
 import com.fit2081.arrtish.id32896786.a1.ui.theme.A1Theme
 
 class ClinicianActivity : ComponentActivity() {
@@ -37,11 +35,14 @@ class ClinicianActivity : ComponentActivity() {
 
 @Composable
 fun ClinicianLogin(
-    navController: NavHostController,
-    viewModel: AuthenticationViewModel = viewModel(factory = AuthenticationViewModelFactory(LocalContext.current))
+    navController: NavHostController
 ) {
+
+    var context = LocalContext.current
+    val viewModel: AuthenticationViewModel = viewModel(
+        factory = AppViewModelFactory(context)
+    )
     var clinicianKey by remember { mutableStateOf("") }
-    val context = LocalContext.current
 
     Column(
         modifier = Modifier
@@ -86,12 +87,11 @@ fun ClinicianLogin(
 fun ClinicianPage(
     userId: Int,
     modifier: Modifier = Modifier,
-    navController: NavHostController,
-    patientRepository: PatientRepository
+    navController: NavHostController
 ) {
 
     val viewModel: ClinicianViewModel = viewModel(
-        factory = AppViewModelFactory(patientRepository)
+        factory = AppViewModelFactory(LocalContext.current)
     )
 
     var avgMaleScore by remember { mutableStateOf(0f) }

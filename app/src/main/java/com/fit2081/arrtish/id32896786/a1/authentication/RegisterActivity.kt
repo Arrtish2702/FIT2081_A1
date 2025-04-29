@@ -23,8 +23,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fit2081.arrtish.id32896786.a1.ui.theme.A1Theme
 import androidx.compose.ui.unit.*
 import androidx.navigation.NavController
-import com.fit2081.arrtish.id32896786.a1.authentication.AuthenticationViewModel.AuthenticationViewModelFactory
-
+import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
 
 class RegisterActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,16 +43,18 @@ class RegisterActivity : ComponentActivity() {
 @Composable
 fun RegisterPage(
     modifier: Modifier = Modifier,
-    navController: NavController,
-    viewModel: AuthenticationViewModel = viewModel(factory = AuthenticationViewModelFactory(LocalContext.current))
+    navController: NavController
 ) {
+    var context = LocalContext.current
+    val viewModel: AuthenticationViewModel = viewModel(
+        factory = AppViewModelFactory(context)
+    )
     var selectedUserId by remember { mutableStateOf("") } // State to store selected user ID
     val userIds by viewModel.patientIds.collectAsState(initial = emptyList())
     var phone by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
-    val context = LocalContext.current
     val message = viewModel.registrationMessage.value
 
     LaunchedEffect(message) {

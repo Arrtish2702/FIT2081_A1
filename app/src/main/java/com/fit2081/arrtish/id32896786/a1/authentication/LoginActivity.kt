@@ -46,8 +46,8 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
 import com.fit2081.arrtish.id32896786.a1.R
-import com.fit2081.arrtish.id32896786.a1.authentication.AuthenticationViewModel.AuthenticationViewModelFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -67,9 +67,11 @@ class LoginActivity : ComponentActivity() {
 fun LoginPage(
     modifier: Modifier = Modifier,
     navController: NavController,
-    viewModel: AuthenticationViewModel = viewModel(factory = AuthenticationViewModelFactory(LocalContext.current))
 ){
     var context = LocalContext.current
+    val viewModel: AuthenticationViewModel = viewModel(
+        factory = AppViewModelFactory(context)
+    )
     var selectedUserId by remember { mutableStateOf("") } // State to store selected user ID
     val userIds by viewModel.patientIds.collectAsState(initial = emptyList())
     var expanded by remember { mutableStateOf(false) } // State to control dropdown menu expansion

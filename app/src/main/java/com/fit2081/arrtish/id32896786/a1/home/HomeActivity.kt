@@ -10,6 +10,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -17,7 +18,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
 import com.fit2081.arrtish.id32896786.a1.R
-import com.fit2081.arrtish.id32896786.a1.databases.patientdb.PatientRepository
+import com.fit2081.arrtish.id32896786.a1.settings.SettingsViewModel
 
 // Home Activity for the app home page
 class HomeActivity : ComponentActivity() {
@@ -29,11 +30,11 @@ class HomeActivity : ComponentActivity() {
 }
 
 @Composable
-fun HomePage(userId: Int, modifier: Modifier = Modifier, patientRepository: PatientRepository) {
+fun HomePage(userId: Int, modifier: Modifier = Modifier) {
 
-
+    val context = LocalContext.current
     val viewModel: HomeViewModel = viewModel(
-        factory = AppViewModelFactory(patientRepository)
+        factory = AppViewModelFactory(context)
     )
 
     LaunchedEffect(Unit) {

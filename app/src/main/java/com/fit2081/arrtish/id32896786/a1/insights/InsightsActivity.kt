@@ -15,7 +15,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
-import com.fit2081.arrtish.id32896786.a1.databases.patientdb.PatientRepository
+import com.fit2081.arrtish.id32896786.a1.settings.SettingsViewModel
 
 // InsightsActivity class - Activity for displaying food insights
 class InsightsActivity : ComponentActivity() {
@@ -32,13 +32,12 @@ class InsightsActivity : ComponentActivity() {
 fun InsightsPage(
     userId: Int,
     modifier: Modifier = Modifier,
-    navController: NavHostController,
-    patientRepository: PatientRepository
+    navController: NavHostController
 ) {
 
     val context = LocalContext.current
     val viewModel: InsightsViewModel = viewModel(
-        factory = AppViewModelFactory(patientRepository)
+        factory = AppViewModelFactory(context)
     )
 
     val patient by viewModel.patient.collectAsState()

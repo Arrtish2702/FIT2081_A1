@@ -34,9 +34,6 @@ import com.fit2081.arrtish.id32896786.a1.authentication.LoginPage
 import com.fit2081.arrtish.id32896786.a1.authentication.RegisterPage
 import com.fit2081.arrtish.id32896786.a1.clinician.ClinicianLogin
 import com.fit2081.arrtish.id32896786.a1.clinician.ClinicianPage
-import com.fit2081.arrtish.id32896786.a1.databases.AppDataBase
-import com.fit2081.arrtish.id32896786.a1.databases.foodintakedb.FoodIntakeRepository
-import com.fit2081.arrtish.id32896786.a1.databases.patientdb.PatientRepository
 import com.fit2081.arrtish.id32896786.a1.home.HomePage
 import com.fit2081.arrtish.id32896786.a1.insights.InsightsPage
 import com.fit2081.arrtish.id32896786.a1.nutricoach.NutriCoachPage
@@ -92,11 +89,6 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun AppInitialisation(userId: Int, modifier: Modifier, navController: NavHostController) {
 
-    val context = LocalContext.current
-    val db = AppDataBase.getDatabase(context)
-    val patientRepository = PatientRepository(db.patientDao())
-    val foodIntakeRepository = FoodIntakeRepository(db.foodIntakeDao())
-
     var startDestination = ""
     startDestination = if (userId!=0){
         "home"
@@ -119,19 +111,19 @@ fun AppInitialisation(userId: Int, modifier: Modifier, navController: NavHostCon
         }
 
         composable("home") {
-            HomePage(userId, modifier, patientRepository)
+            HomePage(userId, modifier)
         }
 
         composable("insights") {
-            InsightsPage(userId, modifier, navController, patientRepository)
+            InsightsPage(userId, modifier, navController)
         }
 
         composable("nutricoach") {
-            NutriCoachPage(userId, modifier, patientRepository)
+            NutriCoachPage(userId, modifier)
         }
 
         composable("settings") {
-            SettingsPage(userId, modifier, navController,patientRepository)
+            SettingsPage(userId, modifier, navController)
         }
 
         composable("clinician login") {
@@ -139,7 +131,7 @@ fun AppInitialisation(userId: Int, modifier: Modifier, navController: NavHostCon
         }
 
         composable("clinician") {
-            ClinicianPage(userId, modifier, navController, patientRepository)
+            ClinicianPage(userId, modifier, navController)
         }
     }
 }

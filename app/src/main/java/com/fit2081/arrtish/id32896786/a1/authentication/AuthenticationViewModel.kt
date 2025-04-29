@@ -1,22 +1,19 @@
 package com.fit2081.arrtish.id32896786.a1.authentication
 
-import android.app.Application
 import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.fit2081.arrtish.id32896786.a1.databases.AppDataBase
 import com.fit2081.arrtish.id32896786.a1.databases.patientdb.PatientRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import androidx.core.content.edit
+import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
 
-class AuthenticationViewModel(application: Application) : ViewModel() {
+class AuthenticationViewModel(private val repository: PatientRepository) : ViewModel() {
 
-    private val patientDao = AppDataBase.getDatabase(application).patientDao()
-    private val repository = PatientRepository(patientDao)
     val patientIds: Flow<List<Int>> = repository.allPatientIds()
 
     var registrationSuccessful = mutableStateOf(false)
@@ -116,10 +113,10 @@ class AuthenticationViewModel(application: Application) : ViewModel() {
         return inputKey == validKey
     }
 
-    class AuthenticationViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return AuthenticationViewModel(context.applicationContext as Application) as T
-        }
-    }
+//    class AuthenticationViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
+//        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+//            return AuthenticationViewModel(context.applicationContext as Application) as T
+//        }
+//    }
 
 }

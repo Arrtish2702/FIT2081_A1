@@ -21,7 +21,6 @@ import androidx.core.content.edit
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
-import com.fit2081.arrtish.id32896786.a1.databases.patientdb.PatientRepository
 import com.fit2081.arrtish.id32896786.a1.ui.theme.A1Theme
 
 class SettingsActivity : ComponentActivity() {
@@ -40,13 +39,12 @@ class SettingsActivity : ComponentActivity() {
 fun SettingsPage(
     userId: Int,
     modifier: Modifier = Modifier,
-    navController: NavHostController,
-    patientRepository: PatientRepository
+    navController: NavHostController
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val context = LocalContext.current
+    var context = LocalContext.current
     val viewModel: SettingsViewModel = viewModel(
-        factory = AppViewModelFactory(patientRepository)
+        factory = AppViewModelFactory(context)
     )
 
     val patient by viewModel.patient.collectAsState()
