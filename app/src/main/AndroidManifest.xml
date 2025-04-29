@@ -42,7 +42,7 @@
             android:label="@string/title_activity_insights"
             android:theme="@style/Theme.A1" />
         <activity
-            android:name=".QuestionnaireActivity"
+            android:name=".questionnaire.QuestionnaireActivity"
             android:exported="false"
             android:label="@string/title_activity_questionnaire"
             android:theme="@style/Theme.A1" />
