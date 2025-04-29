@@ -131,7 +131,9 @@ fun SettingsPage(userId: Int, modifier: Modifier = Modifier, navController: NavH
             onClick = {
                 val sharedPreferences = context.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
                 sharedPreferences.edit() { putInt("userId", 0) }
-                navController.navigate("login")
+                navController.navigate("login"){
+                    popUpTo(0) { inclusive = true }
+                }
                 expanded = false
             },
             modifier = Modifier.fillMaxWidth()

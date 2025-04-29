@@ -1,6 +1,7 @@
 package com.fit2081.arrtish.id32896786.a1.databases.patientdb
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 
 class PatientRepository(private val patientDao: PatientDao) {
 
@@ -24,6 +25,10 @@ class PatientRepository(private val patientDao: PatientDao) {
         } else {
             patientDao.updatePatient(patient) // You'll need an update method too
         }
+    }
+
+    suspend fun getAllPatientsOnce(): List<Patient> {
+        return patientDao.getAllPatients().first() // `.first()` collects the latest value once
     }
 
     // Add more methods to wrap DAO calls as needed

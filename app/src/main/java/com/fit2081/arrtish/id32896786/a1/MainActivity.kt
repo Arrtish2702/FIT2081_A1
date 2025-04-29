@@ -43,6 +43,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.fit2081.arrtish.id32896786.a1.authentication.LoginPage
 import com.fit2081.arrtish.id32896786.a1.authentication.RegisterPage
+import com.fit2081.arrtish.id32896786.a1.clinician.ClinicianLogin
+import com.fit2081.arrtish.id32896786.a1.clinician.ClinicianPage
 import com.fit2081.arrtish.id32896786.a1.insights.InsightsPage
 import com.fit2081.arrtish.id32896786.a1.nutricoach.NutriCoachPage
 import com.fit2081.arrtish.id32896786.a1.settings.SettingsPage
@@ -135,7 +137,7 @@ fun AppNavigation(userId: Int, modifier: Modifier, navController: NavHostControl
         }
 
         composable("clinician login") {
-            ClinicianLogin(userId, modifier, navController)
+            ClinicianLogin(navController)
         }
 
         composable("clinician") {
@@ -310,14 +312,16 @@ fun checkForExistingUser(context: Context): Int {
  * USE THE VM TO MAKE HTTP CONNECTION TO FRUITYVICE AND CHATGPT API FOR BOTH
  * MAKE A SHOW ALL TIPS TO SAVE ALL PREVIOUS TIPS FROM THE LLM
  *
- * FIX UP THE CLINICIAN LOGIN BACKEND IN THE SETTINGS PART.
- * MAYBE CAN REUSE VM FROM AUTHENTICATION
- *
- * FIX UP THE CLINICIAN PAGE FOR THE AVG SCORE MALE & FEMALE
  * FIX THE HTTP CONNECTION TO SEND DATASET TO LLM FOR 3 KEY DATA PATTERNS
- *
- * FIX LOGIN, SO LOGIN CREDENTIALS ARE RETAINED AFTER USER ONDESTROYS APP
  *
  * GIVE TO DR TAN ON WEDS TO SEE IF MISSING ANYTHING FURTHER
  *
+**/
+
+/** TO TEST/DONE
+ * FIX UP THE CLINICIAN LOGIN BACKEND IN THE SETTINGS PART.
+ *
+ * FIX LOGIN, SO LOGIN CREDENTIALS ARE RETAINED AFTER USER ONDESTROYS APP
+ *
+ * FIX UP THE CLINICIAN PAGE FOR THE AVG SCORE MALE & FEMALE
 **/

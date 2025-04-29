@@ -12,7 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.A1">
         <activity
-            android:name=".ClinicianActivity"
+            android:name=".clinician.ClinicianActivity"
             android:exported="false"
             android:label="@string/title_activity_clinician"
             android:theme="@style/Theme.A1" />

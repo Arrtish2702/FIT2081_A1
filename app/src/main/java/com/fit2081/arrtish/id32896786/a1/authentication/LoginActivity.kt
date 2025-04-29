@@ -1,6 +1,5 @@
 package com.fit2081.arrtish.id32896786.a1.authentication
 
-import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -47,7 +46,6 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.fit2081.arrtish.id32896786.a1.HomeActivity
 import com.fit2081.arrtish.id32896786.a1.R
 import com.fit2081.arrtish.id32896786.a1.authentication.AuthenticationViewModel.AuthenticationViewModelFactory
 import kotlinx.coroutines.Dispatchers
@@ -97,7 +95,9 @@ fun LoginPage(
             delay(1500) // Optional: let spinner show briefly before jump
 
             withContext(Dispatchers.Main) {
-                navController.navigate("home")
+                navController.navigate("home") {
+                    popUpTo("login") { inclusive = true }
+                }
             }
         }
     }
@@ -168,7 +168,7 @@ fun LoginPage(
             Button(onClick = {
                 if (selectedUserId.isNotEmpty() && password.isNotEmpty()) {
                     viewModel.loginSuccessful.value = false
-                    viewModel.login(selectedUserId, password, context)
+                    viewModel.appLogin(selectedUserId, password, context)
                 } else {
                     Toast.makeText(
                         context,
@@ -187,10 +187,8 @@ fun LoginPage(
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6C29FC))
             ) {
-                Text("Register", color = Color.White)
+                Text("Register")
             }
         }
     }

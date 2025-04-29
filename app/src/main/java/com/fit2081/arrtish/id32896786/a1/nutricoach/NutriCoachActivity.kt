@@ -97,8 +97,7 @@ fun NutriCoachPage(userId: Int, modifier: Modifier = Modifier, viewModel: NutriC
             onClick = {
                 motivationalMessage = "Hey! Just a little nudge to maybe grab a banana or an apple today. You got this! 🍌🍎"
             },
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFBB86FC))
+            modifier = Modifier.fillMaxWidth()
         ) {
             Icon(Icons.Default.Star, contentDescription = null)
             Spacer(Modifier.width(8.dp))

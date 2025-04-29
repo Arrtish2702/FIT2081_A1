@@ -19,7 +19,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fit2081.arrtish.id32896786.a1.ui.theme.A1Theme
 import androidx.compose.ui.unit.*
@@ -172,9 +171,8 @@ fun RegisterPage(
         Spacer(modifier = Modifier.height(24.dp))
 
         Button(
-            onClick = { viewModel.register(selectedUserId, name, phone, password, confirmPassword) },
+            onClick = { viewModel.appRegister(selectedUserId, name, phone, password, confirmPassword) },
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp)
         ) {
             Text("Register")
         }
@@ -188,10 +186,8 @@ fun RegisterPage(
                 }
             },
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6C29FC))
         ) {
-            Text("Login", color = Color.White)
+            Text("Login")
         }
     }
 }

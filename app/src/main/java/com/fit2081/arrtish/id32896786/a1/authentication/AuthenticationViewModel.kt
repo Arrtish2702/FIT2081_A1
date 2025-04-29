@@ -43,7 +43,7 @@ class AuthenticationViewModel(application: Application) : ViewModel() {
     }
 
 
-    fun login(userId: String, password: String, context: Context) {
+    fun appLogin(userId: String, password: String, context: Context) {
         viewModelScope.launch {
             loginSuccessful.value = false
             val patientId = userId.toIntOrNull()
@@ -81,9 +81,9 @@ class AuthenticationViewModel(application: Application) : ViewModel() {
     }
 
 
-    fun register(selectedId: String, name: String, phone: String, password: String, confirmPassword: String) {
+    fun appRegister(selectedId: String, name: String, phone: String, password: String, confirmPassword: String) {
 
-        Log.d("AuthenticationViewModel", "attempting register")
+        Log.d("AuthenticationViewModel", "attempting appRegister")
         viewModelScope.launch {
             registrationSuccessful.value = false
             val patientId = selectedId.toIntOrNull()
@@ -111,6 +111,10 @@ class AuthenticationViewModel(application: Application) : ViewModel() {
         }
     }
 
+    fun clinicianLogin(inputKey: String): Boolean {
+        val validKey = "dollar-entry-apples"
+        return inputKey == validKey
+    }
 
     class AuthenticationViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
