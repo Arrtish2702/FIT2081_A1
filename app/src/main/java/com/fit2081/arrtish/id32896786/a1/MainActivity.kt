@@ -2,6 +2,7 @@ package com.fit2081.arrtish.id32896786.a1
 
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 import androidx.compose.material3.*
@@ -51,22 +52,32 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Calling the loadAndInsertData method of MainViewModel
         viewModel.loadAndInsertData(this)
 
-        val userId = checkForExistingUser(this)
-
-        // Enables edge-to-edge display (immersive mode) for better UI experience
         enableEdgeToEdge()
 
-        // Set the content of the screen to the WelcomePage Composable
+        val sharedPrefs = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+
         setContent {
             val navController = rememberNavController()
+            var userId by remember { mutableIntStateOf(sharedPrefs.getInt("userId", 0)) }
+
+            // Register SharedPreferences listener
+            DisposableEffect(Unit) {
+                val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+                    if (key == "userId") {
+                        userId = sharedPrefs.getInt("userId", 0)
+                    }
+                }
+                sharedPrefs.registerOnSharedPreferenceChangeListener(listener)
+
+                onDispose {
+                    sharedPrefs.unregisterOnSharedPreferenceChangeListener(listener)
+                }
+            }
+
             val navBackStackEntry by navController.currentBackStackEntryAsState()
             val currentRoute = navBackStackEntry?.destination?.route
-            Log.d("CurrentRoute", "Current route: $currentRoute")
-
-            // Define routes where bottom bar should be hidden
             val hideBottomBarRoutes = listOf("welcome", "login", "register")
 
             A1Theme {
@@ -74,7 +85,6 @@ class MainActivity : ComponentActivity() {
                     bottomBar = {
                         if (currentRoute !in hideBottomBarRoutes) {
                             MyBottomAppBar(navController)
-//                            Text("Bottom Bar Here")
                         }
                     }
                 ) { innerPadding ->
@@ -82,7 +92,6 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-
     }
 }
 
