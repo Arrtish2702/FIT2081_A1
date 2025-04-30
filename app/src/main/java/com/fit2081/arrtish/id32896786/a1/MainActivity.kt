@@ -37,6 +37,7 @@ import com.fit2081.arrtish.id32896786.a1.clinician.ClinicianPage
 import com.fit2081.arrtish.id32896786.a1.home.HomePage
 import com.fit2081.arrtish.id32896786.a1.insights.InsightsPage
 import com.fit2081.arrtish.id32896786.a1.nutricoach.NutriCoachPage
+import com.fit2081.arrtish.id32896786.a1.questionnaire.QuestionnairePage
 import com.fit2081.arrtish.id32896786.a1.settings.SettingsPage
 
 
@@ -112,6 +113,10 @@ fun AppInitialisation(userId: Int, modifier: Modifier, navController: NavHostCon
 
         composable("home") {
             HomePage(userId, modifier)
+        }
+
+        composable("questionnaire") {
+            QuestionnairePage(userId, navController)
         }
 
         composable("insights") {
