@@ -3,41 +3,36 @@ package com.fit2081.arrtish.id32896786.a1.databases.patientdb
 import androidx.room.*
 import kotlinx.coroutines.flow.Flow
 
+import androidx.lifecycle.LiveData
+import androidx.room.*
+
 @Dao
 interface PatientDao {
 
-    // Insert a new patient into the database
     @Insert
     suspend fun insertPatient(patient: Patient)
 
-    // Update an existing patient's data
     @Update
     suspend fun updatePatient(patient: Patient)
 
-    // Delete a patient from the database
     @Delete
     suspend fun deletePatient(patient: Patient)
 
     @Query("SELECT * FROM patients WHERE patientId = :id")
     suspend fun findPatientById(id: Int): Patient?
 
-    // Get all patients from the database
     @Query("SELECT * FROM patients")
-    fun getAllPatients(): Flow<List<Patient>> // No suspend modifier here
+    fun getAllPatients(): LiveData<List<Patient>>
 
-    // Get a patient by ID
     @Query("SELECT * FROM patients WHERE patientId = :id")
-    fun getPatientById(id: Int): Flow<Patient?> // No suspend modifier here
+    fun getPatientById(id: Int): LiveData<Patient?>
 
-    // Get a patient by phone number
     @Query("SELECT * FROM patients WHERE patientPhoneNumber = :phoneNumber")
-    fun getPatientByPhoneNumber(phoneNumber: String): Flow<Patient?> // No suspend modifier here
+    fun getPatientByPhoneNumber(phoneNumber: String): LiveData<Patient?>
 
-    // Get patients based on their sex
     @Query("SELECT * FROM patients WHERE patientSex = :sex")
-    fun getPatientsBySex(sex: String): Flow<List<Patient>> // No suspend modifier here
+    fun getPatientsBySex(sex: String): LiveData<List<Patient>>
 
-    // Get only all patient IDs
     @Query("SELECT patientId FROM patients")
-    fun getAllPatientIds(): Flow<List<Int>> // No suspend modifier here
+    fun getAllPatientIds(): LiveData<List<Int>>
 }
