@@ -38,10 +38,10 @@ fun HomePage(userId: Int, modifier: Modifier = Modifier) {
         factory = AppViewModelFactory(context)
     )
 
-    LaunchedEffect(Unit) {
-        viewModel.loadPatientDataById(userId)
-    }
+    // Call the ViewModel function to load data when userId changes
+    viewModel.loadPatientDataById(userId)
 
+    // Observe LiveData from ViewModel
     val patient by viewModel.patient.observeAsState()
 
     patient?.let { patientData ->
