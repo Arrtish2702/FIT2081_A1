@@ -169,7 +169,7 @@ fun LoginPage(
                     Log.v(MainActivity.TAG, "input user: $selectedUserId")
                     Log.v(MainActivity.TAG, "password on login: $password")
                     viewModel.loginSuccessful.value = false
-                    viewModel.appLogin(selectedUserId, password, navController)
+                    viewModel.appLogin(selectedUserId, password, navController, context)
                 } else {
                     Toast.makeText(
                         context,

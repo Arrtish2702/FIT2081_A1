@@ -56,16 +56,13 @@ class MainActivity : ComponentActivity() {
 
         viewModel.loadAndInsertData(this)
 
-        // Load saved user session (if exists)
+        // Load saved user session before Compose runs
         AuthManager.loadSession(this)
 
         enableEdgeToEdge()
 
-        val sharedPrefs = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
-
         setContent {
             val navController = rememberNavController()
-
             val navBackStackEntry by navController.currentBackStackEntryAsState()
             val currentRoute = navBackStackEntry?.destination?.route
             val hideBottomBarRoutes = listOf("welcome", "login", "register")
@@ -92,15 +89,16 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun AppInitialisation(modifier: Modifier, navController: NavHostController) {
+    val context = LocalContext.current
     val userId by AuthManager._userId
+
+    Log.v(MainActivity.TAG, "userID on login: $userId")
 
     val startDestination = if (userId != null && userId != -1) {
         "home"
     } else {
         "welcome"
     }
-
-    Log.v(MainActivity.TAG, "userID on login: $userId")
 
     NavHost(navController = navController, startDestination = startDestination) {
         composable("welcome") {

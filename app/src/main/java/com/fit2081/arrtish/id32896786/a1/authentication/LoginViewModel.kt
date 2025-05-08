@@ -40,7 +40,7 @@ class LoginViewModel(private val repository: PatientRepository) : ViewModel() {
     }
 
 
-    fun appLogin(userId: String, password: String, navController: NavController) {
+    fun appLogin(userId: String, password: String, navController: NavController, context: Context) {
         viewModelScope.launch {
             loginSuccessful.value = false
             val patientId = userId.toIntOrNull()
@@ -76,7 +76,7 @@ class LoginViewModel(private val repository: PatientRepository) : ViewModel() {
                 }
                 else -> {
                     // ✅ Use AuthManager instead of SharedPreferences
-                    AuthManager.login(patientId)
+                    AuthManager.login(patientId, context)
                     loginMessage.value = "Login successful!"
                     loginSuccessful.value = true
                     // Navigate directly after login success
