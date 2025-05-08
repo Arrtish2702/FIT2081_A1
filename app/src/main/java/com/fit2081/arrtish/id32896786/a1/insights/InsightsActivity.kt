@@ -9,6 +9,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.*
 import androidx.compose.ui.unit.*
 import androidx.compose.ui.platform.LocalContext
@@ -40,7 +41,7 @@ fun InsightsPage(
         factory = AppViewModelFactory(context)
     )
 
-    val patient by viewModel.patient.collectAsState()
+    val patient by viewModel.patient.observeAsState()
 
     LaunchedEffect(userId) {
         viewModel.loadPatientScoresById(userId)

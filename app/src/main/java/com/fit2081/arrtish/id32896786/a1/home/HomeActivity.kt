@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -41,7 +42,7 @@ fun HomePage(userId: Int, modifier: Modifier = Modifier) {
         viewModel.loadPatientDataById(userId)
     }
 
-    val patient by viewModel.patient.collectAsState()
+    val patient by viewModel.patient.observeAsState()
 
     patient?.let { patientData ->
         val foodQualityScore = patientData.totalScore
