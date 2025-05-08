@@ -16,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.core.content.edit
@@ -50,7 +51,7 @@ fun SettingsPage(
         factory = AppViewModelFactory(context)
     )
 
-    val patient by viewModel.patient.collectAsState()
+    val patient by viewModel.patient.observeAsState()
 
     LaunchedEffect(userId) {
         viewModel.loadPatientScoresById(userId)
@@ -59,11 +60,6 @@ fun SettingsPage(
     // Default values before patient data is loaded
     val phoneNumber = patient?.patientPhoneNumber ?: "Loading..."
     val userName = patient?.patientName ?: "Loading..."
-
-    val onClinicianLoginClick = {
-        Toast.makeText(context, "Navigating to Clinician Login", Toast.LENGTH_SHORT).show()
-        // Navigate to Clinician Login screen
-    }
 
 
     Column(
@@ -106,7 +102,10 @@ fun SettingsPage(
         Spacer(modifier = Modifier.height(12.dp))
 
         Button(
-            onClick = { navController.navigate("clinician login") },
+            onClick = {
+                Toast.makeText(context, "Navigating to Clinician Login", Toast.LENGTH_SHORT).show()
+                navController.navigate("clinician login")
+            },
             modifier = Modifier.fillMaxWidth()
         ) {
             Icon(Icons.Default.AccountBox, contentDescription = null)

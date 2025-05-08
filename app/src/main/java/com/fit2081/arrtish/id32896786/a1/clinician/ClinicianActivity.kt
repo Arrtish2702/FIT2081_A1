@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -94,13 +95,13 @@ fun ClinicianPage(
         factory = AppViewModelFactory(LocalContext.current)
     )
 
+    val avgScores by viewModel.generateAvgScores.observeAsState(Pair(0f, 0f))
     var avgMaleScore by remember { mutableStateOf(0f) }
     var avgFemaleScore by remember { mutableStateOf(0f) }
-
-    LaunchedEffect(Unit) {
-        val (male, female) = viewModel.generateAvgScores()
-        avgMaleScore = male
-        avgFemaleScore = female
+    
+    LaunchedEffect(avgScores) {
+        avgMaleScore = avgScores.first
+        avgFemaleScore = avgScores.second
     }
 
     Column(
