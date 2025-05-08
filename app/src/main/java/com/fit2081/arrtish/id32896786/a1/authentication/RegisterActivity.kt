@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
@@ -48,7 +49,7 @@ fun RegisterPage(
         factory = AppViewModelFactory(context)
     )
     var selectedUserId by remember { mutableStateOf("") } // State to store selected user ID
-    val userIds by viewModel.patientIds.collectAsState(initial = emptyList())
+    val userIds by viewModel.patientIds.observeAsState(initial = emptyList())
     var phone by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }

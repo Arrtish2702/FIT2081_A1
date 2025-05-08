@@ -9,12 +9,13 @@ import com.fit2081.arrtish.id32896786.a1.databases.patientdb.PatientRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import androidx.core.content.edit
+import androidx.lifecycle.LiveData
 import androidx.navigation.NavController
 import com.fit2081.arrtish.id32896786.a1.MainActivity
 
 class LoginViewModel(private val repository: PatientRepository) : ViewModel() {
 
-    val patientIds: Flow<List<Int>> = repository.allPatientIds()
+    val patientIds: LiveData<List<Int>> = repository.allPatientIds()
 
     var registrationSuccessful = mutableStateOf(false)
         private set

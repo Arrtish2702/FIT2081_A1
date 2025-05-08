@@ -31,6 +31,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -73,7 +74,7 @@ fun LoginPage(
         factory = AppViewModelFactory(context)
     )
     var selectedUserId by remember { mutableStateOf("") } // State to store selected user ID
-    val userIds by viewModel.patientIds.collectAsState(initial = emptyList())
+    val userIds by viewModel.patientIds.observeAsState(initial = emptyList())
     var expanded by remember { mutableStateOf(false) } // State to control dropdown menu expansion
     var password by remember { mutableStateOf("") }
 
