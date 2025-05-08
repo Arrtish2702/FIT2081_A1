@@ -43,9 +43,8 @@ fun InsightsPage(
 
     val patient by viewModel.patient.observeAsState()
 
-    LaunchedEffect(userId) {
-        viewModel.loadPatientScoresById(userId)
-    }
+    // Call the ViewModel function to load data when userId changes
+    viewModel.loadPatientDataById(userId)
 
     patient?.let { patientData ->
         val userScores = mapOf(

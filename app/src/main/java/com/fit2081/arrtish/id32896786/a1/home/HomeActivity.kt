@@ -37,12 +37,12 @@ fun HomePage(userId: Int, modifier: Modifier = Modifier) {
     val viewModel: HomeViewModel = viewModel(
         factory = AppViewModelFactory(context)
     )
+    val patient by viewModel.patient.observeAsState()
 
     // Call the ViewModel function to load data when userId changes
     viewModel.loadPatientDataById(userId)
 
     // Observe LiveData from ViewModel
-    val patient by viewModel.patient.observeAsState()
 
     patient?.let { patientData ->
         val foodQualityScore = patientData.totalScore

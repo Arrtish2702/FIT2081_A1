@@ -53,14 +53,11 @@ fun SettingsPage(
 
     val patient by viewModel.patient.observeAsState()
 
-    LaunchedEffect(userId) {
-        viewModel.loadPatientScoresById(userId)
-    }
+    viewModel.loadPatientDataById(userId)
 
     // Default values before patient data is loaded
     val phoneNumber = patient?.patientPhoneNumber ?: "Loading..."
     val userName = patient?.patientName ?: "Loading..."
-
 
     Column(
         modifier = Modifier
