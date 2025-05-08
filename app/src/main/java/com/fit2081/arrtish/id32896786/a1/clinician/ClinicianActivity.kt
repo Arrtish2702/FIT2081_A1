@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.*
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
-import com.fit2081.arrtish.id32896786.a1.authentication.AuthenticationViewModel
+import com.fit2081.arrtish.id32896786.a1.authentication.LoginViewModel
 import com.fit2081.arrtish.id32896786.a1.ui.theme.A1Theme
 
 class ClinicianActivity : ComponentActivity() {
@@ -39,7 +39,7 @@ fun ClinicianLogin(
 ) {
 
     var context = LocalContext.current
-    val viewModel: AuthenticationViewModel = viewModel(
+    val viewModel: LoginViewModel = viewModel(
         factory = AppViewModelFactory(context)
     )
     var clinicianKey by remember { mutableStateOf("") }

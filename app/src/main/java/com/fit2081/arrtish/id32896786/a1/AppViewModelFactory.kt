@@ -1,10 +1,9 @@
 package com.fit2081.arrtish.id32896786.a1
 
 import android.content.Context
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.fit2081.arrtish.id32896786.a1.authentication.AuthenticationViewModel
+import com.fit2081.arrtish.id32896786.a1.authentication.LoginViewModel
 import com.fit2081.arrtish.id32896786.a1.clinician.ClinicianViewModel
 import com.fit2081.arrtish.id32896786.a1.databases.AppDataBase
 import com.fit2081.arrtish.id32896786.a1.databases.foodintakedb.FoodIntakeRepository
@@ -24,8 +23,8 @@ class AppViewModelFactory(
 
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return when {
-            modelClass.isAssignableFrom(AuthenticationViewModel::class.java) -> {
-                AuthenticationViewModel(patientRepository) as T
+            modelClass.isAssignableFrom(LoginViewModel::class.java) -> {
+                LoginViewModel(patientRepository) as T
             }
             modelClass.isAssignableFrom(HomeViewModel::class.java) -> {
                 HomeViewModel(patientRepository) as T

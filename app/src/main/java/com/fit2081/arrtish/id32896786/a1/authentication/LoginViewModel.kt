@@ -5,14 +5,12 @@ import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.fit2081.arrtish.id32896786.a1.databases.AppDataBase
 import com.fit2081.arrtish.id32896786.a1.databases.patientdb.PatientRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import androidx.core.content.edit
-import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
 
-class AuthenticationViewModel(private val repository: PatientRepository) : ViewModel() {
+class LoginViewModel(private val repository: PatientRepository) : ViewModel() {
 
     val patientIds: Flow<List<Int>> = repository.allPatientIds()
 
@@ -46,41 +44,35 @@ class AuthenticationViewModel(private val repository: PatientRepository) : ViewM
             val patientId = userId.toIntOrNull()
             if (patientId == null) {
                 loginMessage.value = "Invalid ID format."
-                loginSuccessful.value = false
                 return@launch
             }
 
             val patient = repository.getPatientById(patientId)
 
-            if (patient == null) {
-                loginMessage.value = "User ID not found."
-                loginSuccessful.value = false
-                return@launch
+            when {
+                patient == null -> {
+                    loginMessage.value = "User ID not found."
+                }
+                patient.patientPassword.isEmpty() -> {
+                    loginMessage.value = "Account has not been registered."
+                }
+                patient.patientPassword != password -> {
+                    loginMessage.value = "Incorrect password."
+                }
+                else -> {
+                    // ✅ Use AuthManager instead of SharedPreferences
+                    AuthManager.login(patientId)
+                    loginMessage.value = "Login successful!"
+                    loginSuccessful.value = true
+                }
             }
-
-            if (patient.patientPassword.isEmpty()) {
-                loginMessage.value = "Account has not been registered."
-                loginSuccessful.value = false
-                return@launch
-            }
-
-            if (patient.patientPassword != password) {
-                loginMessage.value = "Incorrect password."
-                loginSuccessful.value = false
-                return@launch
-            }
-
-            val sharedPreferences = context.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
-            sharedPreferences.edit() { putInt("userId", patientId) }
-            loginMessage.value = "Login successful!"
-            loginSuccessful.value = true
         }
     }
 
 
     fun appRegister(selectedId: String, name: String, phone: String, password: String, confirmPassword: String) {
 
-        Log.d("AuthenticationViewModel", "attempting appRegister")
+        Log.d("LoginViewModel", "attempting appRegister")
         viewModelScope.launch {
             registrationSuccessful.value = false
             val patientId = selectedId.toIntOrNull()
@@ -112,11 +104,5 @@ class AuthenticationViewModel(private val repository: PatientRepository) : ViewM
         val validKey = "dollar-entry-apples"
         return inputKey == validKey
     }
-
-//    class AuthenticationViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
-//        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-//            return AuthenticationViewModel(context.applicationContext as Application) as T
-//        }
-//    }
 
 }

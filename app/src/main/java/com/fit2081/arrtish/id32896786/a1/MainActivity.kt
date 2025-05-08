@@ -31,6 +31,7 @@ import androidx.navigation.compose.*
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.fit2081.arrtish.id32896786.a1.authentication.AuthManager
 import com.fit2081.arrtish.id32896786.a1.authentication.LoginPage
 import com.fit2081.arrtish.id32896786.a1.authentication.RegisterPage
 import com.fit2081.arrtish.id32896786.a1.clinician.ClinicianLogin
@@ -54,27 +55,16 @@ class MainActivity : ComponentActivity() {
 
         viewModel.loadAndInsertData(this)
 
+        // Load saved user session (if exists)
+        AuthManager.loadSession(this)
+
         enableEdgeToEdge()
 
         val sharedPrefs = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
 
         setContent {
             val navController = rememberNavController()
-            var userId by remember { mutableIntStateOf(sharedPrefs.getInt("userId", 0)) }
-
-            // Register SharedPreferences listener
-            DisposableEffect(Unit) {
-                val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
-                    if (key == "userId") {
-                        userId = sharedPrefs.getInt("userId", 0)
-                    }
-                }
-                sharedPrefs.registerOnSharedPreferenceChangeListener(listener)
-
-                onDispose {
-                    sharedPrefs.unregisterOnSharedPreferenceChangeListener(listener)
-                }
-            }
+            val userId by AuthManager._userId
 
             val navBackStackEntry by navController.currentBackStackEntryAsState()
             val currentRoute = navBackStackEntry?.destination?.route
@@ -88,7 +78,7 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 ) { innerPadding ->
-                    AppInitialisation(userId, Modifier.padding(innerPadding), navController)
+                    AppInitialisation(userId = userId ?: -1, Modifier.padding(innerPadding), navController)
                 }
             }
         }

@@ -21,6 +21,7 @@ import androidx.core.content.edit
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
+import com.fit2081.arrtish.id32896786.a1.authentication.AuthManager
 import com.fit2081.arrtish.id32896786.a1.ui.theme.A1Theme
 
 class SettingsActivity : ComponentActivity() {
@@ -115,12 +116,7 @@ fun SettingsPage(
 
         Button(
             onClick = {
-                val sharedPreferences = context.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
-                sharedPreferences.edit() { putInt("userId", 0) }
-                navController.navigate("login"){
-                    popUpTo(0) { inclusive = true }
-                }
-                expanded = false
+                AuthManager.logout(context)
             },
             modifier = Modifier.fillMaxWidth()
         ) {
