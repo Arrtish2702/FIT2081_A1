@@ -1,6 +1,7 @@
 package com.fit2081.arrtish.id32896786.a1.authentication
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.enableEdgeToEdge
@@ -45,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
+import com.fit2081.arrtish.id32896786.a1.MainActivity
 import com.fit2081.arrtish.id32896786.a1.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -75,8 +77,18 @@ fun LoginPage(
     var expanded by remember { mutableStateOf(false) } // State to control dropdown menu expansion
     var password by remember { mutableStateOf("") }
 
-    val loginSuccess = viewModel.loginSuccessful.value
+    val loginMessage by viewModel.loginMessage
     val isLoading = viewModel.isLoading.value
+
+    LaunchedEffect(loginMessage) {
+        loginMessage?.let {
+            if (it.isNotBlank()) {
+                Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+                viewModel.loginMessage.value = "" // Reset message
+            }
+        }
+    }
+
 
     if (isLoading) {
         Box(
@@ -86,19 +98,6 @@ fun LoginPage(
             contentAlignment = Alignment.Center
         ) {
             CircularProgressIndicator()
-        }
-    }
-
-    LaunchedEffect(loginSuccess) {
-        if (loginSuccess == true) {
-            viewModel.setLoading(true) // Show spinner
-            delay(1500) // Optional: let spinner show briefly before jump
-
-            withContext(Dispatchers.Main) {
-                navController.navigate("home") {
-                    popUpTo("login") { inclusive = true }
-                }
-            }
         }
     }
 
@@ -167,8 +166,10 @@ fun LoginPage(
             // Login button that triggers authentication
             Button(onClick = {
                 if (selectedUserId.isNotEmpty() && password.isNotEmpty()) {
+                    Log.v(MainActivity.TAG, "input user: $selectedUserId")
+                    Log.v(MainActivity.TAG, "password on login: $password")
                     viewModel.loginSuccessful.value = false
-                    viewModel.appLogin(selectedUserId, password, context)
+                    viewModel.appLogin(selectedUserId, password, navController)
                 } else {
                     Toast.makeText(
                         context,

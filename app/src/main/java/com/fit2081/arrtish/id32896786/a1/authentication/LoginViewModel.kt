@@ -9,6 +9,8 @@ import com.fit2081.arrtish.id32896786.a1.databases.patientdb.PatientRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import androidx.core.content.edit
+import androidx.navigation.NavController
+import com.fit2081.arrtish.id32896786.a1.MainActivity
 
 class LoginViewModel(private val repository: PatientRepository) : ViewModel() {
 
@@ -38,7 +40,7 @@ class LoginViewModel(private val repository: PatientRepository) : ViewModel() {
     }
 
 
-    fun appLogin(userId: String, password: String, context: Context) {
+    fun appLogin(userId: String, password: String, navController: NavController) {
         viewModelScope.launch {
             loginSuccessful.value = false
             val patientId = userId.toIntOrNull()
@@ -47,28 +49,45 @@ class LoginViewModel(private val repository: PatientRepository) : ViewModel() {
                 return@launch
             }
 
+            Log.v(MainActivity.TAG, "inside vm: $patientId")
+
             val patient = repository.getPatientById(patientId)
 
+            val logpw = patient?.patientPassword
+
+            Log.v(MainActivity.TAG, "patient: $patient")
+            Log.v(MainActivity.TAG, "saved: $logpw")
+            Log.v(MainActivity.TAG, "input pw: $password")
+
+            Log.v(MainActivity.TAG, "patient password length: ${patient?.patientPassword?.length}")
+            Log.v(MainActivity.TAG, "input password length: ${password.length}")
             when {
                 patient == null -> {
                     loginMessage.value = "User ID not found."
+                    return@launch
                 }
                 patient.patientPassword.isEmpty() -> {
                     loginMessage.value = "Account has not been registered."
+                    return@launch
                 }
-                patient.patientPassword != password -> {
+                patient.patientPassword.trim() != password.trim() -> {
                     loginMessage.value = "Incorrect password."
+                    return@launch
                 }
                 else -> {
                     // ✅ Use AuthManager instead of SharedPreferences
                     AuthManager.login(patientId)
                     loginMessage.value = "Login successful!"
                     loginSuccessful.value = true
+                    // Navigate directly after login success
+                    navController.navigate("home") {
+                        popUpTo("login") { inclusive = true }
+                    }
+                    return@launch
                 }
             }
         }
     }
-
 
     fun appRegister(selectedId: String, name: String, phone: String, password: String, confirmPassword: String) {
 

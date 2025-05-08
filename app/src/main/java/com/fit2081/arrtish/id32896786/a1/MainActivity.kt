@@ -32,6 +32,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.fit2081.arrtish.id32896786.a1.authentication.AuthManager
+import com.fit2081.arrtish.id32896786.a1.authentication.AuthManager.getStudentId
 import com.fit2081.arrtish.id32896786.a1.authentication.LoginPage
 import com.fit2081.arrtish.id32896786.a1.authentication.RegisterPage
 import com.fit2081.arrtish.id32896786.a1.clinician.ClinicianLogin
@@ -64,7 +65,6 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val navController = rememberNavController()
-            val userId by AuthManager._userId
 
             val navBackStackEntry by navController.currentBackStackEntryAsState()
             val currentRoute = navBackStackEntry?.destination?.route
@@ -78,64 +78,60 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 ) { innerPadding ->
-                    AppInitialisation(userId = userId ?: -1, Modifier.padding(innerPadding), navController)
+                    AppInitialisation(Modifier.padding(innerPadding), navController)
                 }
             }
         }
+    }
+
+    companion object {
+        val TAG = "FIT2081-A3"
     }
 }
 
 
 @Composable
-fun AppInitialisation(userId: Int, modifier: Modifier, navController: NavHostController) {
+fun AppInitialisation(modifier: Modifier, navController: NavHostController) {
+    val userId by AuthManager._userId
 
-    var startDestination = ""
-    startDestination = if (userId!=0){
+    val startDestination = if (userId != null && userId != -1) {
         "home"
     } else {
         "welcome"
     }
 
-    // Define the NavHost with the start destination and routes
+    Log.v(MainActivity.TAG, "userID on login: $userId")
+
     NavHost(navController = navController, startDestination = startDestination) {
         composable("welcome") {
             WelcomePage(modifier, navController)
         }
-
         composable("login") {
             LoginPage(modifier, navController)
         }
-
         composable("register") {
             RegisterPage(modifier, navController)
         }
-
         composable("home") {
-            HomePage(userId, modifier)
+            HomePage(userId ?: -1, modifier)
         }
-
         composable("questionnaire") {
-            QuestionnairePage(userId, navController)
+            QuestionnairePage(userId ?: -1, navController)
         }
-
         composable("insights") {
-            InsightsPage(userId, modifier, navController)
+            InsightsPage(userId ?: -1, modifier, navController)
         }
-
         composable("nutricoach") {
-            NutriCoachPage(userId, modifier)
+            NutriCoachPage(userId ?: -1, modifier)
         }
-
         composable("settings") {
-            SettingsPage(userId, modifier, navController)
+            SettingsPage(userId ?: -1, modifier, navController)
         }
-
         composable("clinician login") {
             ClinicianLogin(navController)
         }
-
         composable("clinician") {
-            ClinicianPage(userId, modifier, navController)
+            ClinicianPage(userId ?: -1, modifier, navController)
         }
     }
 }

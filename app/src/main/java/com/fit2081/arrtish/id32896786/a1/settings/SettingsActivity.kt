@@ -2,6 +2,7 @@ package com.fit2081.arrtish.id32896786.a1.settings
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -21,6 +22,7 @@ import androidx.core.content.edit
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
+import com.fit2081.arrtish.id32896786.a1.MainActivity
 import com.fit2081.arrtish.id32896786.a1.authentication.AuthManager
 import com.fit2081.arrtish.id32896786.a1.ui.theme.A1Theme
 
@@ -117,6 +119,10 @@ fun SettingsPage(
         Button(
             onClick = {
                 AuthManager.logout(context)
+                Log.v(MainActivity.TAG, "userID on logout: $userId")
+                navController.navigate("login") {
+                    popUpTo("settings") { inclusive = true }
+                }
             },
             modifier = Modifier.fillMaxWidth()
         ) {
