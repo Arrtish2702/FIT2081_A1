@@ -39,9 +39,9 @@ object AuthManager {
         val storedId = prefs.getInt(USER_ID_KEY, -1)
         if (storedId != -1) {
             _userId.value = storedId
-            Log.v("AuthManager", "Loaded userId from SharedPrefs: $storedId")
+            Log.v(MainActivity.TAG, "AuthManager:Loaded userId from SharedPrefs: $storedId")
         } else {
-            Log.v("AuthManager", "No user session found, routing to welcome page.")
+            Log.v(MainActivity.TAG, "AuthManagerNo user session found, routing to welcome page.")
         }
     }
 

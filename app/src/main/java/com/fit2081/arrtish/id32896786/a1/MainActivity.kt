@@ -117,7 +117,7 @@ fun AppInitialisation(modifier: Modifier, navController: NavHostController) {
             RegisterPage(modifier, navController)
         }
         composable("home") {
-            HomePage(userId ?: -1, modifier)
+            HomePage(userId ?: -1, modifier, navController)
         }
         composable("questionnaire") {
             QuestionnairePage(userId ?: -1, navController)

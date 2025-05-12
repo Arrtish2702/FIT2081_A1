@@ -30,11 +30,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
         // If data has already been loaded, return early
         if (isDataLoaded) {
-            Log.v("MainViewModel", "Data already loaded. Skipping CSV insertion.")
+            Log.v(MainActivity.TAG, "MainViewModel: Data already loaded. Skipping CSV insertion.")
             return
         }
 
-        Log.v("MainViewModel", "Getting csv data")
+        Log.v(MainActivity.TAG, "MainViewModel:Getting csv data")
         val currentDate = Date()
         println("Current Date object: $currentDate")
 
@@ -82,7 +82,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 putBoolean("isDataLoaded", true)
             }
 
-            Log.v("MainViewModel", "Data loaded and inserted successfully.")
+            Log.v(MainActivity.TAG, "MainViewModel:Data loaded and inserted successfully.")
         }
     }
 }

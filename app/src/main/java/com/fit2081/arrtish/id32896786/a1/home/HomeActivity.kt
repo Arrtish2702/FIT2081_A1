@@ -17,6 +17,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
 import com.fit2081.arrtish.id32896786.a1.R
 import com.fit2081.arrtish.id32896786.a1.settings.SettingsViewModel
@@ -31,7 +32,7 @@ class HomeActivity : ComponentActivity() {
 }
 
 @Composable
-fun HomePage(userId: Int, modifier: Modifier = Modifier) {
+fun HomePage(userId: Int, modifier: Modifier = Modifier, navController: NavController) {
 
     val context = LocalContext.current
     val viewModel: HomeViewModel = viewModel(
@@ -55,12 +56,29 @@ fun HomePage(userId: Int, modifier: Modifier = Modifier) {
                 .padding(16.dp), // Add padding
             contentAlignment = Alignment.TopCenter // Align content to the top center
         ) {
+            // Top Row with Button
+
+
+
             // Column to arrange elements vertically
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp), // Space between elements
                 modifier = Modifier.fillMaxSize()
             ) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    Button(
+                        onClick = {
+                            navController.navigate("questionnaire")
+                        }
+                    ) {
+                        Text("Questionnaire")
+                    }
+                }
                 // Display image based on food quality score
                 Image(
                     painter = painterResource(

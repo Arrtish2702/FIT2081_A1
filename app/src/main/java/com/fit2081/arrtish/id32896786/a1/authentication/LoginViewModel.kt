@@ -92,7 +92,7 @@ class LoginViewModel(private val repository: PatientRepository) : ViewModel() {
 
     fun appRegister(selectedId: String, name: String, phone: String, password: String, confirmPassword: String) {
 
-        Log.d("LoginViewModel", "attempting appRegister")
+        Log.d(MainActivity.TAG, "LoginViewModel: attempting appRegister")
         viewModelScope.launch {
             registrationSuccessful.value = false
             val patientId = selectedId.toIntOrNull()
