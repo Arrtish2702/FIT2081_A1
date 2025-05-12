@@ -52,7 +52,13 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
         super.onCreate(savedInstanceState)
+
+        //TEMP CODE TO CLEAR SHARED PREF
+        //COMMENT OUT DURING ACTUAL APP BUILD
+//        val sharedPref = getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
+//        sharedPref.edit() { clear() }
 
         viewModel.loadAndInsertData(this)
 
@@ -188,7 +194,7 @@ fun MyBottomAppBar(navController: NavHostController) {
 @Composable
 fun WelcomePage(
     modifier: Modifier = Modifier,
-    navController: NavController
+    navController: NavController,
 ) {
     // Get the current context to use it for navigation actions
     val context = LocalContext.current
@@ -278,18 +284,6 @@ private fun openMonashClinic(context: Context) {
     val url = "https://www.monash.edu/medicine/scs/nutrition/clinics/nutrition" // URL of the clinic
     val intent = Intent(Intent.ACTION_VIEW, url.toUri()) // Create an intent to open the URL in a browser
     context.startActivity(intent) // Start the activity to open the URL
-}
-
-fun checkForExistingUser(context: Context): Int {
-    val sharedPreferences = context.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
-    val userId = sharedPreferences.getInt("userId", -1)
-
-    return if (userId != -1) {
-        userId
-    } else {
-        sharedPreferences.edit() { putInt("userId", 0) }
-        0
-    }
 }
 
 /**TODO LIST:

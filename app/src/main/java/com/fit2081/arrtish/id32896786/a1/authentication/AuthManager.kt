@@ -37,11 +37,14 @@ object AuthManager {
     fun loadSession(context: Context) {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val storedId = prefs.getInt(USER_ID_KEY, -1)
-        Log.v("AuthManager", "Loaded userId from SharedPrefs: $storedId")
         if (storedId != -1) {
             _userId.value = storedId
+            Log.v("AuthManager", "Loaded userId from SharedPrefs: $storedId")
+        } else {
+            Log.v("AuthManager", "No user session found, routing to welcome page.")
         }
     }
+
 }
 
 
