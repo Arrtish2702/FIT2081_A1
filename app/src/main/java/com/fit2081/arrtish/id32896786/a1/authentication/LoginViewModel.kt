@@ -1,22 +1,21 @@
 package com.fit2081.arrtish.id32896786.a1.authentication
 
-import android.app.Application
 import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.fit2081.arrtish.id32896786.a1.databases.AppDataBase
 import com.fit2081.arrtish.id32896786.a1.databases.patientdb.PatientRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import androidx.core.content.edit
+import androidx.lifecycle.LiveData
+import androidx.navigation.NavController
+import com.fit2081.arrtish.id32896786.a1.MainActivity
 
-class AuthenticationViewModel(application: Application) : ViewModel() {
+class LoginViewModel(private val repository: PatientRepository) : ViewModel() {
 
-    private val patientDao = AppDataBase.getDatabase(application).patientDao()
-    private val repository = PatientRepository(patientDao)
-    val patientIds: Flow<List<Int>> = repository.allPatientIds()
+    val patientIds: LiveData<List<Int>> = repository.allPatientIds()
 
     var registrationSuccessful = mutableStateOf(false)
         private set
@@ -42,45 +41,58 @@ class AuthenticationViewModel(application: Application) : ViewModel() {
     }
 
 
-    fun login(userId: String, password: String) {
+    fun appLogin(userId: String, password: String, navController: NavController, context: Context) {
         viewModelScope.launch {
             loginSuccessful.value = false
             val patientId = userId.toIntOrNull()
             if (patientId == null) {
                 loginMessage.value = "Invalid ID format."
-                loginSuccessful.value = false
                 return@launch
             }
+
+            Log.v(MainActivity.TAG, "inside vm: $patientId")
 
             val patient = repository.getPatientById(patientId)
 
-            if (patient == null) {
-                loginMessage.value = "User ID not found."
-                loginSuccessful.value = false
-                return@launch
-            }
+            val logpw = patient?.patientPassword
 
-            if (patient.patientPassword.isEmpty()) {
-                loginMessage.value = "Account has not been registered."
-                loginSuccessful.value = false
-                return@launch
-            }
+            Log.v(MainActivity.TAG, "patient: $patient")
+            Log.v(MainActivity.TAG, "saved: $logpw")
+            Log.v(MainActivity.TAG, "input pw: $password")
 
-            if (patient.patientPassword != password) {
-                loginMessage.value = "Incorrect password."
-                loginSuccessful.value = false
-                return@launch
+            Log.v(MainActivity.TAG, "patient password length: ${patient?.patientPassword?.length}")
+            Log.v(MainActivity.TAG, "input password length: ${password.length}")
+            when {
+                patient == null -> {
+                    loginMessage.value = "User ID not found."
+                    return@launch
+                }
+                patient.patientPassword.isEmpty() -> {
+                    loginMessage.value = "Account has not been registered."
+                    return@launch
+                }
+                patient.patientPassword.trim() != password.trim() -> {
+                    loginMessage.value = "Incorrect password."
+                    return@launch
+                }
+                else -> {
+                    // ✅ Use AuthManager instead of SharedPreferences
+                    AuthManager.login(patientId, context)
+                    loginMessage.value = "Login successful!"
+                    loginSuccessful.value = true
+                    // Navigate directly after login success
+                    navController.navigate("home") {
+                        popUpTo("login") { inclusive = true }
+                    }
+                    return@launch
+                }
             }
-
-            loginMessage.value = "Login successful!"
-            loginSuccessful.value = true
         }
     }
 
+    fun appRegister(selectedId: String, name: String, phone: String, password: String, confirmPassword: String) {
 
-    fun register(selectedId: String, name: String, phone: String, password: String, confirmPassword: String) {
-
-        Log.d("AuthenticationViewModel", "attempting register")
+        Log.d(MainActivity.TAG, "LoginViewModel: attempting appRegister")
         viewModelScope.launch {
             registrationSuccessful.value = false
             val patientId = selectedId.toIntOrNull()
@@ -108,11 +120,9 @@ class AuthenticationViewModel(application: Application) : ViewModel() {
         }
     }
 
-
-    class AuthenticationViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return AuthenticationViewModel(context.applicationContext as Application) as T
-        }
+    fun clinicianLogin(inputKey: String): Boolean {
+        val validKey = "dollar-entry-apples"
+        return inputKey == validKey
     }
 
 }

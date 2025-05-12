@@ -1,12 +1,27 @@
 package com.fit2081.arrtish.id32896786.a1.databases.patientdb
 
-import kotlinx.coroutines.flow.Flow
+import androidx.lifecycle.LiveData
 
 class PatientRepository(private val patientDao: PatientDao) {
 
-    // Fetch all patient IDs as a Flow
-    fun allPatientIds(): Flow<List<Int>> {
-        return patientDao.getAllPatientIds() // Return the Flow directly
+    fun allPatientIds(): LiveData<List<Int>> {
+        return patientDao.getAllPatientIds()
+    }
+
+    fun getPatientByIdLive(id: Int): LiveData<Patient?> {
+        return patientDao.getPatientById(id)
+    }
+
+    fun getPatientByPhoneNumber(phone: String): LiveData<Patient?> {
+        return patientDao.getPatientByPhoneNumber(phone)
+    }
+
+    fun getAllPatients(): LiveData<List<Patient>> {
+        return patientDao.getAllPatients()
+    }
+
+    fun getPatientsBySex(sex: String): LiveData<List<Patient>> {
+        return patientDao.getPatientsBySex(sex)
     }
 
     suspend fun getPatientById(id: Int): Patient? {
@@ -17,14 +32,12 @@ class PatientRepository(private val patientDao: PatientDao) {
         patientDao.updatePatient(patient)
     }
 
-    suspend fun safeInsert(patient: Patient){
+    suspend fun safeInsert(patient: Patient) {
         val existing = getPatientById(patient.patientId)
         if (existing == null) {
             patientDao.insertPatient(patient)
         } else {
-            patientDao.updatePatient(patient) // You'll need an update method too
+            patientDao.updatePatient(patient)
         }
     }
-
-    // Add more methods to wrap DAO calls as needed
 }

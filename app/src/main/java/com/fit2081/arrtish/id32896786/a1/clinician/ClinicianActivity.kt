@@ -1,6 +1,7 @@
-package com.fit2081.arrtish.id32896786.a1
+package com.fit2081.arrtish.id32896786.a1.clinician
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -9,12 +10,16 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.*
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.*
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
+import com.fit2081.arrtish.id32896786.a1.authentication.LoginViewModel
 import com.fit2081.arrtish.id32896786.a1.ui.theme.A1Theme
 
 class ClinicianActivity : ComponentActivity() {
@@ -31,9 +36,14 @@ class ClinicianActivity : ComponentActivity() {
 
 @Composable
 fun ClinicianLogin(
-    userId: Int, modifier: Modifier = Modifier, navController: NavHostController
+    navController: NavHostController
 ) {
-    var clinicianKey by remember { mutableStateOf("dollar-entry-apples") }
+
+    var context = LocalContext.current
+    val viewModel: LoginViewModel = viewModel(
+        factory = AppViewModelFactory(context)
+    )
+    var clinicianKey by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
@@ -56,11 +66,16 @@ fun ClinicianLogin(
         Spacer(modifier = Modifier.height(24.dp))
 
         Button(
-            onClick = { navController.navigate("clinician") },
+            onClick = {
+                if (viewModel.clinicianLogin(clinicianKey)) {
+                    navController.navigate("clinician")
+                } else {
+                    Toast.makeText(context, "Invalid clinician key", Toast.LENGTH_SHORT).show()
+                }
+            },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(48.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6A1B9A))
+                .height(48.dp)
         ) {
             Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = null, tint = Color.White)
             Spacer(modifier = Modifier.width(8.dp))
@@ -68,16 +83,20 @@ fun ClinicianLogin(
         }
     }
 }
-
 @Composable
 fun ClinicianPage(
-    userId: Int, modifier: Modifier = Modifier, navController: NavHostController
+    userId: Int,
+    modifier: Modifier = Modifier,
+    navController: NavHostController
 ) {
-    val maleScore = 25.5f
-    val femaleScore = 30.1f
+    val viewModel: ClinicianViewModel = viewModel(
+        factory = AppViewModelFactory(LocalContext.current)
+    )
+
+    val avgScores by viewModel.generateAvgScores.observeAsState(Pair(0f, 0f))
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(24.dp)
     ) {
@@ -85,8 +104,8 @@ fun ClinicianPage(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text("Average HEIFA (Male): $maleScore", fontSize = 16.sp)
-        Text("Average HEIFA (Female): $femaleScore", fontSize = 16.sp)
+        Text("Average HEIFA (Male): ${avgScores.first}", fontSize = 16.sp)
+        Text("Average HEIFA (Female): ${avgScores.second}", fontSize = 16.sp)
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -100,7 +119,6 @@ fun ClinicianPage(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Dummy AI results
         val insights = listOf(
             "Variable Water Intake: Consumption of water varies greatly among users...",
             "Low Wholegrain Consumption: Intake of wholegrains appears generally low...",

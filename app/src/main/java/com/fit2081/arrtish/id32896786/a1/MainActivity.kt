@@ -2,7 +2,13 @@ package com.fit2081.arrtish.id32896786.a1
 
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
+import android.util.Log
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.*
+import androidx.compose.ui.unit.*
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -10,66 +16,176 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.core.content.edit
 import com.fit2081.arrtish.id32896786.a1.ui.theme.A1Theme
 import androidx.core.net.toUri
 import androidx.navigation.NavController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
+import androidx.navigation.compose.*
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
+import com.fit2081.arrtish.id32896786.a1.authentication.AuthManager
+import com.fit2081.arrtish.id32896786.a1.authentication.AuthManager.getStudentId
 import com.fit2081.arrtish.id32896786.a1.authentication.LoginPage
 import com.fit2081.arrtish.id32896786.a1.authentication.RegisterPage
+import com.fit2081.arrtish.id32896786.a1.clinician.ClinicianLogin
+import com.fit2081.arrtish.id32896786.a1.clinician.ClinicianPage
+import com.fit2081.arrtish.id32896786.a1.home.HomePage
+import com.fit2081.arrtish.id32896786.a1.insights.InsightsPage
+import com.fit2081.arrtish.id32896786.a1.nutricoach.NutriCoachPage
+import com.fit2081.arrtish.id32896786.a1.questionnaire.QuestionnairePage
+import com.fit2081.arrtish.id32896786.a1.settings.SettingsPage
 
 
 class MainActivity : ComponentActivity() {
 
     // Create MainViewModel using ViewModelProvider
     private val viewModel: MainViewModel by lazy {
-        ViewModelProvider(this).get(MainViewModel::class.java)
+        ViewModelProvider(this)[MainViewModel::class.java]
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
         super.onCreate(savedInstanceState)
 
-        // Calling the loadAndInsertData method of MainViewModel
+        //TEMP CODE TO CLEAR SHARED PREF
+        //COMMENT OUT DURING ACTUAL APP BUILD
+//        val sharedPref = getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
+//        sharedPref.edit() { clear() }
+
         viewModel.loadAndInsertData(this)
 
-        // Enables edge-to-edge display (immersive mode) for better UI experience
+        // Load saved user session before Compose runs
+        AuthManager.loadSession(this)
+
         enableEdgeToEdge()
 
-        // Set the content of the screen to the WelcomePage Composable
         setContent {
+            val navController = rememberNavController()
+            val navBackStackEntry by navController.currentBackStackEntryAsState()
+            val currentRoute = navBackStackEntry?.destination?.route
+            val hideBottomBarRoutes = listOf("welcome", "login", "register")
+
             A1Theme {
-                // Display the WelcomePage composable with modifier to fill the screen
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    AppNavigation(modifier = Modifier.padding(innerPadding))
+                Scaffold(
+                    bottomBar = {
+                        if (currentRoute !in hideBottomBarRoutes) {
+                            MyBottomAppBar(navController)
+                        }
+                    }
+                ) { innerPadding ->
+                    AppInitialisation(Modifier.padding(innerPadding), navController)
                 }
             }
         }
+    }
+
+    companion object {
+        val TAG = "FIT2081-A3"
     }
 }
 
 
 @Composable
-fun AppNavigation(modifier: Modifier) {
-    val navController = rememberNavController()
+fun AppInitialisation(modifier: Modifier, navController: NavHostController) {
+    val context = LocalContext.current
+    val userId by AuthManager._userId
 
-    // Define the NavHost with the start destination and routes
-    NavHost(navController = navController, startDestination = "welcome") {
-        composable("welcome") { WelcomePage(modifier, navController) }
-        composable("login") { LoginPage(modifier, navController) }
-        composable("register") { RegisterPage(modifier, navController) }
+    Log.v(MainActivity.TAG, "userID on login: $userId")
+
+    val startDestination = if (userId != null && userId != -1) {
+        "home"
+    } else {
+        "welcome"
+    }
+
+    NavHost(navController = navController, startDestination = startDestination) {
+        composable("welcome") {
+            WelcomePage(modifier, navController)
+        }
+        composable("login") {
+            LoginPage(modifier, navController)
+        }
+        composable("register") {
+            RegisterPage(modifier, navController)
+        }
+        composable("home") {
+            HomePage(userId ?: -1, modifier, navController)
+        }
+        composable("questionnaire") {
+            QuestionnairePage(userId ?: -1, navController)
+        }
+        composable("insights") {
+            InsightsPage(userId ?: -1, modifier, navController)
+        }
+        composable("nutricoach") {
+            NutriCoachPage(userId ?: -1, modifier)
+        }
+        composable("settings") {
+            SettingsPage(userId ?: -1, modifier, navController)
+        }
+        composable("clinician login") {
+            ClinicianLogin(navController)
+        }
+        composable("clinician") {
+            ClinicianPage(userId ?: -1, modifier, navController)
+        }
+    }
+}
+
+// Composable function for creating the bottom navigation bar.
+@Composable
+fun MyBottomAppBar(navController: NavHostController) {
+    // State to track the currently selected item in the bottom navigation bar.
+    var selectedItem by remember { mutableStateOf(0) }
+
+    // List of navigation items: "home", "reports", "settings".
+    val items = listOf(
+        "home",
+        "insights",
+        "nutricoach",
+        "settings"
+    )
+
+    // NavigationBar composable to define the bottom navigation bar.
+    NavigationBar {
+        // Iterate through each item in the 'items' list along with its index.
+        items.forEachIndexed { index, item ->
+            // NavigationBarItem for each item in the list.
+            NavigationBarItem(
+                // Define the icon based on the item's name.
+                icon = {
+                    when (item) {
+                        // If the item is "home", show the Home icon.
+                        "home" -> Icon(Icons.Filled.Home, contentDescription = "Home")
+
+                        "insights" -> Icon(Icons.Filled.Person, contentDescription = "Insights")
+
+                        "nutricoach" -> Icon(Icons.Filled.Info, contentDescription = "NutriCoach")
+
+                        "settings" -> Icon(Icons.Filled.Settings, contentDescription = "Settings")
+                    }
+                },
+                // Display the item's name as the label.
+                label = { Text(item) },
+                // Determine if this item is currently selected.
+                selected = selectedItem == index,
+                // Actions to perform when this item is clicked.
+                onClick = {
+                    // Update the selectedItem state to the current index.
+                    selectedItem = index
+                    // Navigate to the corresponding screen based on the item's name.
+                    navController.navigate(item)
+                }
+            )
+        }
     }
 }
 
@@ -78,7 +194,7 @@ fun AppNavigation(modifier: Modifier) {
 @Composable
 fun WelcomePage(
     modifier: Modifier = Modifier,
-    navController: NavController
+    navController: NavController,
 ) {
     // Get the current context to use it for navigation actions
     val context = LocalContext.current
@@ -171,6 +287,7 @@ private fun openMonashClinic(context: Context) {
 }
 
 /**TODO LIST:
+ *
  * FIX UP THE BROKEN QUESTIONNAIRE AND HOOK IT UP (INSERT/RETRIEVAL) FROM THE DB IN IRL TIME
  * FIX THE FOOD INTAKE ENTITY/DAO/REPO/QUESTIONNAIRE VM TO DO THIS
  *
@@ -178,14 +295,21 @@ private fun openMonashClinic(context: Context) {
  * USE THE VM TO MAKE HTTP CONNECTION TO FRUITYVICE AND CHATGPT API FOR BOTH
  * MAKE A SHOW ALL TIPS TO SAVE ALL PREVIOUS TIPS FROM THE LLM
  *
- * FIX UP THE CLINICIAN LOGIN BACKEND IN THE SETTINGS PART.
- * MAYBE CAN REUSE VM FROM AUTHENTICATION
- *
- * FIX UP THE CLINICIAN PAGE FOR THE AVG SCORE MALE & FEMALE
  * FIX THE HTTP CONNECTION TO SEND DATASET TO LLM FOR 3 KEY DATA PATTERNS
- *
- * FIX LOGIN, SO LOGIN CREDENTIALS ARE RETAINED AFTER USER ONDESTROYS APP
  *
  * GIVE TO DR TAN ON WEDS TO SEE IF MISSING ANYTHING FURTHER
  *
+**/
+
+/** TO TEST/DONE
+ *
+ * REMOVE THE REMAINING LAUNCHED EFFECTS
+ *
+ * FIX UP THE CLINICIAN LOGIN BACKEND IN THE SETTINGS PART.
+ *
+ * FIX LOGIN, SO LOGIN CREDENTIALS ARE RETAINED AFTER USER ONDESTROYS APP
+ *
+ * FIX DB/REPO/DAO TO USE LIVEDATA INSTEAD OF FLOW
+ *
+ * FIX UP THE CLINICIAN PAGE FOR THE AVG SCORE MALE & FEMALE
 **/

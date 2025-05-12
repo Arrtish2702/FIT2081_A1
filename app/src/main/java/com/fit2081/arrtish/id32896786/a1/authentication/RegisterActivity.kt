@@ -6,26 +6,23 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.*
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fit2081.arrtish.id32896786.a1.ui.theme.A1Theme
 import androidx.compose.ui.unit.*
 import androidx.navigation.NavController
-import com.fit2081.arrtish.id32896786.a1.authentication.AuthenticationViewModel.AuthenticationViewModelFactory
-
+import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
 
 class RegisterActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,16 +42,18 @@ class RegisterActivity : ComponentActivity() {
 @Composable
 fun RegisterPage(
     modifier: Modifier = Modifier,
-    navController: NavController,
-    viewModel: AuthenticationViewModel = viewModel(factory = AuthenticationViewModelFactory(LocalContext.current))
+    navController: NavController
 ) {
+    var context = LocalContext.current
+    val viewModel: LoginViewModel = viewModel(
+        factory = AppViewModelFactory(context)
+    )
     var selectedUserId by remember { mutableStateOf("") } // State to store selected user ID
-    val userIds by viewModel.patientIds.collectAsState(initial = emptyList())
+    val userIds by viewModel.patientIds.observeAsState(initial = emptyList())
     var phone by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
-    val context = LocalContext.current
     val message = viewModel.registrationMessage.value
 
     LaunchedEffect(message) {
@@ -172,9 +171,8 @@ fun RegisterPage(
         Spacer(modifier = Modifier.height(24.dp))
 
         Button(
-            onClick = { viewModel.register(selectedUserId, name, phone, password, confirmPassword) },
+            onClick = { viewModel.appRegister(selectedUserId, name, phone, password, confirmPassword) },
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp)
         ) {
             Text("Register")
         }
@@ -188,10 +186,8 @@ fun RegisterPage(
                 }
             },
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6C29FC))
         ) {
-            Text("Login", color = Color.White)
+            Text("Login")
         }
     }
 }

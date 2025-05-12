@@ -4,35 +4,19 @@ package com.fit2081.arrtish.id32896786.a1.insights
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderDefaults
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.*
+import androidx.compose.ui.unit.*
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import com.fit2081.arrtish.id32896786.a1.databases.AppDataBase
-import com.fit2081.arrtish.id32896786.a1.databases.patientdb.PatientRepository
+import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
+import com.fit2081.arrtish.id32896786.a1.settings.SettingsViewModel
 
 // InsightsActivity class - Activity for displaying food insights
 class InsightsActivity : ComponentActivity() {
@@ -46,20 +30,21 @@ class InsightsActivity : ComponentActivity() {
 }
 
 @Composable
-fun InsightsPage(userId: Int, modifier: Modifier = Modifier, navController: NavHostController) {
-    val context = LocalContext.current
-    val db = AppDataBase.getDatabase(context)
-    val repository = PatientRepository(db.patientDao())
+fun InsightsPage(
+    userId: Int,
+    modifier: Modifier = Modifier,
+    navController: NavHostController
+) {
 
+    val context = LocalContext.current
     val viewModel: InsightsViewModel = viewModel(
-        factory = InsightsViewModel.InsightsViewModelFactory(repository)
+        factory = AppViewModelFactory(context)
     )
 
-    val patient by viewModel.patient.collectAsState()
+    val patient by viewModel.patient.observeAsState()
 
-    LaunchedEffect(userId) {
-        viewModel.loadPatientScoresById(userId)
-    }
+    // Call the ViewModel function to load data when userId changes
+    viewModel.loadPatientDataById(userId)
 
     patient?.let { patientData ->
         val userScores = mapOf(

@@ -30,11 +30,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
         // If data has already been loaded, return early
         if (isDataLoaded) {
-            Log.v("MainViewModel", "Data already loaded. Skipping CSV insertion.")
+            Log.v(MainActivity.TAG, "MainViewModel: Data already loaded. Skipping CSV insertion.")
             return
         }
 
-        Log.v("MainViewModel", "Getting csv data")
+        Log.v(MainActivity.TAG, "MainViewModel:Getting csv data")
         val currentDate = Date()
         println("Current Date object: $currentDate")
 
@@ -62,15 +62,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     patientPhoneNumber = phone,
                     vegetables = tokens[if (isMale) 8 else 9].toFloat(),
                     fruits = tokens[if (isMale) 19 else 20].toFloat(),
-                    grainsAndCereals = tokens[if (isMale) 28 else 29].toFloat(),
-                    wholeGrains = tokens[if (isMale) 32 else 33].toFloat(),
-                    meatAndAlternatives = tokens[if (isMale) 35 else 36].toFloat(),
-                    dairyAndAlternatives = tokens[if (isMale) 39 else 40].toFloat(),
-                    water = tokens[if (isMale) 48 else 49].toFloat(),
+                    grainsAndCereals = tokens[if (isMale) 29 else 30].toFloat(),
+                    wholeGrains = tokens[if (isMale) 33 else 34].toFloat(),
+                    meatAndAlternatives = tokens[if (isMale) 36 else 37].toFloat(),
+                    dairyAndAlternatives = tokens[if (isMale) 40 else 41].toFloat(),
+                    water = tokens[if (isMale) 49 else 50].toFloat(),
                     unsaturatedFats = tokens[if (isMale) 60 else 61].toFloat(),
                     sodium = tokens[if (isMale) 43 else 44].toFloat(),
                     sugar = tokens[if (isMale) 54 else 55].toFloat(),
-                    alcohol = tokens[if (isMale) 45 else 46].toFloat(),
+                    alcohol = tokens[if (isMale) 46 else 47].toFloat(),
                     discretionaryFoods = tokens[if (isMale) 5 else 6].toFloat(),
                     totalScore = tokens[if (isMale) 3 else 4].toFloat()
                 )
@@ -82,7 +82,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 putBoolean("isDataLoaded", true)
             }
 
-            Log.v("MainViewModel", "Data loaded and inserted successfully.")
+            Log.v(MainActivity.TAG, "MainViewModel:Data loaded and inserted successfully.")
         }
     }
 }

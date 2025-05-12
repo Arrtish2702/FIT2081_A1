@@ -1,7 +1,7 @@
 package com.fit2081.arrtish.id32896786.a1.authentication
 
-import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.enableEdgeToEdge
@@ -14,13 +14,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -33,6 +31,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -47,10 +46,12 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.fit2081.arrtish.id32896786.a1.HomeActivity
+import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
+import com.fit2081.arrtish.id32896786.a1.MainActivity
 import com.fit2081.arrtish.id32896786.a1.R
-import com.fit2081.arrtish.id32896786.a1.authentication.AuthenticationViewModel.AuthenticationViewModelFactory
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 
 
 // Main Activity for Login
@@ -67,16 +68,28 @@ class LoginActivity : ComponentActivity() {
 fun LoginPage(
     modifier: Modifier = Modifier,
     navController: NavController,
-    viewModel: AuthenticationViewModel = viewModel(factory = AuthenticationViewModelFactory(LocalContext.current))
 ){
     var context = LocalContext.current
+    val viewModel: LoginViewModel = viewModel(
+        factory = AppViewModelFactory(context)
+    )
     var selectedUserId by remember { mutableStateOf("") } // State to store selected user ID
-    val userIds by viewModel.patientIds.collectAsState(initial = emptyList())
+    val userIds by viewModel.patientIds.observeAsState(initial = emptyList())
     var expanded by remember { mutableStateOf(false) } // State to control dropdown menu expansion
     var password by remember { mutableStateOf("") }
 
-    val loginSuccess = viewModel.loginSuccessful.value
+    val loginMessage by viewModel.loginMessage
     val isLoading = viewModel.isLoading.value
+
+    LaunchedEffect(loginMessage) {
+        loginMessage?.let {
+            if (it.isNotBlank()) {
+                Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+                viewModel.loginMessage.value = "" // Reset message
+            }
+        }
+    }
+
 
     if (isLoading) {
         Box(
@@ -86,19 +99,6 @@ fun LoginPage(
             contentAlignment = Alignment.Center
         ) {
             CircularProgressIndicator()
-        }
-    }
-
-    LaunchedEffect(loginSuccess) {
-        if (loginSuccess == true) {
-            viewModel.setLoading(true) // Show spinner
-
-            delay(500) // Optional: let spinner show briefly before jump
-            val intent = Intent(context, HomeActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                putExtra("user_id", selectedUserId)
-            }
-            context.startActivity(intent)
         }
     }
 
@@ -167,8 +167,10 @@ fun LoginPage(
             // Login button that triggers authentication
             Button(onClick = {
                 if (selectedUserId.isNotEmpty() && password.isNotEmpty()) {
+                    Log.v(MainActivity.TAG, "input user: $selectedUserId")
+                    Log.v(MainActivity.TAG, "password on login: $password")
                     viewModel.loginSuccessful.value = false
-                    viewModel.login(selectedUserId, password)
+                    viewModel.appLogin(selectedUserId, password, navController, context)
                 } else {
                     Toast.makeText(
                         context,
@@ -187,10 +189,8 @@ fun LoginPage(
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6C29FC))
             ) {
-                Text("Register", color = Color.White)
+                Text("Register")
             }
         }
     }
