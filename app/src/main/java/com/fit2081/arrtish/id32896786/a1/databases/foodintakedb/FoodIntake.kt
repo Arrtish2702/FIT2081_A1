@@ -26,7 +26,6 @@ import java.util.Date
 data class FoodIntake(
     @PrimaryKey(autoGenerate = true) val intakeId: Int = 0,
     val patientId: Int,
-
     // Use Date instead of DateTime (with converters if needed)
     var sleepTime: Date,
     var wakeTime: Date,

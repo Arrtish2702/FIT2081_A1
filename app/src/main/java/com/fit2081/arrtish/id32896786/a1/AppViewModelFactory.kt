@@ -42,7 +42,7 @@ class AppViewModelFactory(
                 NutriCoachViewModel(patientRepository) as T
             }
             modelClass.isAssignableFrom(QuestionnaireViewModel::class.java) -> {
-                QuestionnaireViewModel(foodIntakeRepository) as T
+                QuestionnaireViewModel(foodIntakeRepository, patientRepository) as T
             }
             else -> throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
         }

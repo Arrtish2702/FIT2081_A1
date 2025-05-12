@@ -3,6 +3,7 @@ package com.fit2081.arrtish.id32896786.a1.questionnaire
 import android.app.TimePickerDialog
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
@@ -17,6 +18,7 @@ import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -24,6 +26,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
+import com.fit2081.arrtish.id32896786.a1.MainActivity
 import com.fit2081.arrtish.id32896786.a1.ui.theme.A1Theme
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -54,9 +57,16 @@ fun QuestionnairePage(
 ) {
 
     val context = LocalContext.current
-    val viewModel: QuestionnaireViewModel = viewModel(
-        factory = AppViewModelFactory(context)
-    )
+    val viewModel: QuestionnaireViewModel = viewModel(factory = AppViewModelFactory(context))
+    Log.v(MainActivity.TAG, "Questionnaire: Vm made")
+    // Ensure we call loadPatientDataByIdAndIntake only once
+    val hasLoaded = remember { mutableStateOf(false) }
+    if (!hasLoaded.value) {
+        viewModel.loadPatientDataByIdAndIntake(userId)
+        hasLoaded.value = true
+    }
+
+    val foodIntake by viewModel.existingIntake.observeAsState()
 
     val personas = listOf("Health Devotee", "Mindful Eater", "Wellness Striver", "Balance Seeker", "Health Procrastinator", "Food Carefree")
 
@@ -69,6 +79,32 @@ fun QuestionnairePage(
 
     var expanded by remember { mutableStateOf(false) }  // State for dropdown menu expansion
     var showModal by remember { mutableStateOf(false) }  // State for modal dialog visibility
+
+    LaunchedEffect(foodIntake) {
+        if (foodIntake != null) {
+            biggestMealTime.value = foodIntake!!.biggestMealTime.toString()
+            sleepTime.value = foodIntake!!.sleepTime.toString()
+            wakeTime.value = foodIntake!!.wakeTime.toString()
+            selectedPersona.value = foodIntake!!.selectedPersona
+
+            selectedCategories.clear()
+            if (foodIntake!!.eatsFruits) selectedCategories.add("Fruits")
+            if (foodIntake!!.eatsVegetables) selectedCategories.add("Vegetables")
+            if (foodIntake!!.eatsGrains) selectedCategories.add("Grains")
+            if (foodIntake!!.eatsRedMeat) selectedCategories.add("Red Meat")
+            if (foodIntake!!.eatsSeafood) selectedCategories.add("Seafood")
+            if (foodIntake!!.eatsPoultry) selectedCategories.add("Poultry")
+            if (foodIntake!!.eatsFish) selectedCategories.add("Fish")
+            if (foodIntake!!.eatsEggs) selectedCategories.add("Eggs")
+            if (foodIntake!!.eatsNutsOrSeeds) selectedCategories.add("Nuts/Seeds")
+        }
+    }
+
+
+    foodIntake?.let {
+        Log.v(MainActivity.TAG, "UI: existing intake updated: $it")
+    }
+
 
     // Function to open a time picker dialog and set the time
     fun openTimePicker(initialTime: String, onTimeSet: (String) -> Unit) {
@@ -91,10 +127,17 @@ fun QuestionnairePage(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(
+                start = 16.dp,
+                end = 16.dp,
+                top = 16.dp,
+                bottom = 120.dp // Ensures buttons at the bottom are visible
+            )
             .verticalScroll(scrollState),  // Make column scrollable
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Spacer(modifier = Modifier.height(24.dp))
+
         Text("Select Food Categories:", fontSize = 20.sp)  // Label for food categories selection
 
         val foodCategories = listOf("Fruits", "Vegetables", "Grains", "Red Meat", "Seafood", "Poultry", "Fish", "Eggs","Nuts/Seeds")  // Food categories list
@@ -226,7 +269,6 @@ fun QuestionnairePage(
         Row(horizontalArrangement = Arrangement.SpaceEvenly) {
             Button(onClick = {
                 viewModel.saveFoodIntake(
-                    userId = userId,
                     selectedCategories = selectedCategories,
                     biggestMealTime = biggestMealTime.value,
                     sleepTime = sleepTime.value,
@@ -239,7 +281,7 @@ fun QuestionnairePage(
 
             Spacer(modifier = Modifier.width(4.dp))  // Spacer for layout spacing
 
-            Button(onClick = { viewModel.eraseFoodIntake() }) {
+            Button(onClick = { viewModel.clearFoodIntake() }) {
                 Text("Clear Responses")  // Clear button
             }
         }
