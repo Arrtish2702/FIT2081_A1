@@ -83,29 +83,20 @@ fun ClinicianLogin(
         }
     }
 }
-
 @Composable
 fun ClinicianPage(
     userId: Int,
     modifier: Modifier = Modifier,
     navController: NavHostController
 ) {
-
     val viewModel: ClinicianViewModel = viewModel(
         factory = AppViewModelFactory(LocalContext.current)
     )
 
     val avgScores by viewModel.generateAvgScores.observeAsState(Pair(0f, 0f))
-    var avgMaleScore by remember { mutableStateOf(0f) }
-    var avgFemaleScore by remember { mutableStateOf(0f) }
-    
-    LaunchedEffect(avgScores) {
-        avgMaleScore = avgScores.first
-        avgFemaleScore = avgScores.second
-    }
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(24.dp)
     ) {
@@ -113,8 +104,8 @@ fun ClinicianPage(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text("Average HEIFA (Male): $avgMaleScore", fontSize = 16.sp)
-        Text("Average HEIFA (Female): $avgFemaleScore", fontSize = 16.sp)
+        Text("Average HEIFA (Male): ${avgScores.first}", fontSize = 16.sp)
+        Text("Average HEIFA (Female): ${avgScores.second}", fontSize = 16.sp)
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -128,7 +119,6 @@ fun ClinicianPage(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Dummy AI results
         val insights = listOf(
             "Variable Water Intake: Consumption of water varies greatly among users...",
             "Low Wholegrain Consumption: Intake of wholegrains appears generally low...",
