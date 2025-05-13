@@ -68,4 +68,6 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.androidx.runtime.livedata)
+    implementation(libs.retrofit)                // Retrofit core :contentReference[oaicite:1]{index=1}
+    implementation(libs.converter.gson)
 }

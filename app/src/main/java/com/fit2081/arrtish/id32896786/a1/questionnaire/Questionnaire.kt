@@ -1,11 +1,7 @@
 package com.fit2081.arrtish.id32896786.a1.questionnaire
 
 import android.app.TimePickerDialog
-import android.content.Context
-import android.os.Bundle
 import android.util.Log
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -27,27 +23,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
 import com.fit2081.arrtish.id32896786.a1.MainActivity
-import com.fit2081.arrtish.id32896786.a1.ui.theme.A1Theme
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 import com.fit2081.arrtish.id32896786.a1.R
-import com.fit2081.arrtish.id32896786.a1.databases.AppDataBase
-import com.fit2081.arrtish.id32896786.a1.databases.foodintakedb.FoodIntakeRepository
-import com.fit2081.arrtish.id32896786.a1.home.HomeViewModel
 import kotlin.String
 
-// QuestionnaireActivity for the questionnaire form
-class QuestionnaireActivity : ComponentActivity() {
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            A1Theme {  // Apply app theme
-            }
-        }
-    }
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -1,6 +1,5 @@
 package com.fit2081.arrtish.id32896786.a1.settings
 
-import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -19,7 +18,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.core.content.edit
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
@@ -27,17 +25,6 @@ import com.fit2081.arrtish.id32896786.a1.MainActivity
 import com.fit2081.arrtish.id32896786.a1.authentication.AuthManager
 import com.fit2081.arrtish.id32896786.a1.ui.theme.A1Theme
 
-class SettingsActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            A1Theme {
-
-            }
-        }
-    }
-}
 
 @Composable
 fun SettingsPage(

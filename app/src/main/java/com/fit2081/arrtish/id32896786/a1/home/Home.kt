@@ -1,8 +1,5 @@
 package com.fit2081.arrtish.id32896786.a1.home
 
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
@@ -20,16 +17,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
 import com.fit2081.arrtish.id32896786.a1.R
-import com.fit2081.arrtish.id32896786.a1.settings.SettingsViewModel
 
-// Home Activity for the app home page
-class HomeActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge() // Enable edge-to-edge display (no status bar)
-
-    }
-}
 
 @Composable
 fun HomePage(userId: Int, modifier: Modifier = Modifier, navController: NavController) {

@@ -1,9 +1,5 @@
 package com.fit2081.arrtish.id32896786.a1.nutricoach
 
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
@@ -16,21 +12,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
-import com.fit2081.arrtish.id32896786.a1.databases.patientdb.PatientRepository
-import com.fit2081.arrtish.id32896786.a1.insights.InsightsViewModel
-import com.fit2081.arrtish.id32896786.a1.ui.theme.A1Theme
-
-class NutriCoachActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            A1Theme {
-
-            }
-        }
-    }
-}
 
 @Composable
 fun NutriCoachPage(userId: Int, modifier: Modifier = Modifier) {

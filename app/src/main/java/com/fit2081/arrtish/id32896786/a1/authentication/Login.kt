@@ -29,7 +29,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -49,18 +48,7 @@ import androidx.navigation.NavController
 import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
 import com.fit2081.arrtish.id32896786.a1.MainActivity
 import com.fit2081.arrtish.id32896786.a1.R
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.withContext
 
-
-// Main Activity for Login
-class LoginActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge() // Enables edge-to-edge display (no status bar)
-    }
-}
 
 // Composable function for the login page UI
 @OptIn(ExperimentalMaterial3Api::class) // Opt-in to use new Material3 components

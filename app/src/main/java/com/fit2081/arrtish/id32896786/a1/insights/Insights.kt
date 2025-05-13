@@ -1,9 +1,6 @@
 package com.fit2081.arrtish.id32896786.a1.insights
 
 
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -16,18 +13,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
-import com.fit2081.arrtish.id32896786.a1.settings.SettingsViewModel
 
-// InsightsActivity class - Activity for displaying food insights
-class InsightsActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        setContent {
-
-        }
-    }
-}
 
 @Composable
 fun InsightsPage(

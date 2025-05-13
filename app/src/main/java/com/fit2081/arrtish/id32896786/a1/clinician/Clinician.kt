@@ -22,17 +22,6 @@ import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
 import com.fit2081.arrtish.id32896786.a1.authentication.LoginViewModel
 import com.fit2081.arrtish.id32896786.a1.ui.theme.A1Theme
 
-class ClinicianActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            A1Theme {
-
-            }
-        }
-    }
-}
 
 @Composable
 fun ClinicianLogin(
