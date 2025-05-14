@@ -16,6 +16,7 @@ import com.fit2081.arrtish.id32896786.a1.MainActivity
 class LoginViewModel(private val repository: PatientRepository) : ViewModel() {
 
     val patientIds: LiveData<List<Int>> = repository.allPatientIds()
+    val registeredPatientIds: LiveData<List<Int>> = repository.allRegisteredPatientIds()
 
     var registrationSuccessful = mutableStateOf(false)
         private set

@@ -62,7 +62,7 @@ fun LoginPage(
         factory = AppViewModelFactory(context)
     )
     var selectedUserId by remember { mutableStateOf("") } // State to store selected user ID
-    val userIds by viewModel.patientIds.observeAsState(initial = emptyList())
+    val userIds by viewModel.registeredPatientIds.observeAsState(initial = emptyList())
     var expanded by remember { mutableStateOf(false) } // State to control dropdown menu expansion
     var password by remember { mutableStateOf("") }
 
