@@ -63,9 +63,12 @@ fun QuestionnairePage(
 
     LaunchedEffect(foodIntake) {
         if (foodIntake != null) {
-            biggestMealTime.value = foodIntake!!.biggestMealTime.toString()
-            sleepTime.value = foodIntake!!.sleepTime.toString()
-            wakeTime.value = foodIntake!!.wakeTime.toString()
+            val fmt = SimpleDateFormat("hh:mm a", Locale.getDefault())
+
+            // Convert Date back to the desired string format
+            biggestMealTime.value = fmt.format(foodIntake!!.biggestMealTime)
+            sleepTime.value = fmt.format(foodIntake!!.sleepTime)
+            wakeTime.value = fmt.format(foodIntake!!.wakeTime)
             selectedPersona.value = foodIntake!!.selectedPersona
 
             selectedCategories.clear()
