@@ -27,89 +27,96 @@ fun NutriCoachPage(userId: Int, modifier: Modifier = Modifier) {
     val fruitDetails by viewModel.fruitDetails.observeAsState(emptyMap())
     val errorMessage by viewModel.errorMessage.observeAsState()
 
-    Column(
-        modifier = modifier
+    Box(
+        modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(top = 32.dp, bottom = 128.dp, start = 16.dp, end = 16.dp)
     ) {
-        Text("NutriCoach", fontSize = 24.sp, fontWeight = FontWeight.Bold)
-        Spacer(Modifier.height(16.dp))
-
-        OutlinedTextField(
-            value = fruitName,
-            onValueChange = { fruitName = it },
-            label = { Text("Fruit Name") },
-            modifier = Modifier.fillMaxWidth()
-        )
-        Spacer(Modifier.height(8.dp))
-
-        Button(
-            onClick = {
-                viewModel.fetchFruit(fruitName)
-            },
-            modifier = Modifier.align(Alignment.End)
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(16.dp)
         ) {
-            Text("Details")
-        }
+            Text("NutriCoach", fontSize = 24.sp, fontWeight = FontWeight.Bold)
 
-        Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(24.dp))
 
-        // Show error if any
-        errorMessage?.let { err ->
-            Text(
-                text = err,
-                color = MaterialTheme.colorScheme.error,
+            OutlinedTextField(
+                value = fruitName,
+                onValueChange = { fruitName = it },
+                label = { Text("Fruit Name") },
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(Modifier.height(8.dp))
-        }
 
-        // Render the details
-        if (fruitDetails.isNotEmpty()) {
-            fruitDetails.forEach { (label, value) ->
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    Text("$label :", fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
-                    Text(value, modifier = Modifier.weight(1f))
-                }
-                Spacer(Modifier.height(4.dp))
+            Button(
+                onClick = {
+                    viewModel.fetchFruit(fruitName)
+                },
+                modifier = Modifier.align(Alignment.End)
+            ) {
+                Text("Details")
             }
-        }
 
-        Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(16.dp))
 
-        Button(
-            onClick = {
-                motivationalMessage = "Hey! Just a little nudge to maybe grab a banana or an apple today. You got this! 🍌🍎"
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Icon(Icons.Default.Star, contentDescription = null)
-            Spacer(Modifier.width(8.dp))
-            Text("Motivational Message (AI)")
-        }
+            // Show error if any
+            errorMessage?.let { err ->
+                Text(
+                    text = err,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(Modifier.height(8.dp))
+            }
 
-        Spacer(Modifier.height(12.dp))
+            // Render the details
+            if (fruitDetails.isNotEmpty()) {
+                fruitDetails.forEach { (label, value) ->
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        Text("$label :", fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
+                        Text(value, modifier = Modifier.weight(1f))
+                    }
+                    Spacer(Modifier.height(4.dp))
+                }
+            }
 
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            elevation = CardDefaults.cardElevation(4.dp)
-        ) {
-            Text(
-                motivationalMessage,
-                modifier = Modifier.padding(12.dp),
-                fontStyle = FontStyle.Italic
-            )
-        }
+            Spacer(Modifier.height(24.dp))
 
-        Spacer(Modifier.height(20.dp))
+            Button(
+                onClick = {
+                    motivationalMessage = "Hey! Just a little nudge to maybe grab a banana or an apple today. You got this! 🍌🍎"
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(Icons.Default.Star, contentDescription = null)
+                Spacer(Modifier.width(8.dp))
+                Text("Motivational Message (AI)")
+            }
 
-        Button(
-            onClick = {
-                // Show modal or toast for saved tips
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Shows All Tips")
+            Spacer(Modifier.height(12.dp))
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                elevation = CardDefaults.cardElevation(4.dp)
+            ) {
+                Text(
+                    motivationalMessage,
+                    modifier = Modifier.padding(12.dp),
+                    fontStyle = FontStyle.Italic
+                )
+            }
+
+            Spacer(Modifier.height(20.dp))
+
+            Button(
+                onClick = {
+                    // Show modal or toast for saved tips
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Shows All Tips")
+            }
         }
     }
 }

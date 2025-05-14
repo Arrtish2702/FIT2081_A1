@@ -46,72 +46,79 @@ fun SettingsPage(
     val phoneNumber = patient?.patientPhoneNumber ?: "Loading..."
     val userName = patient?.patientName ?: "Loading..."
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(top = 32.dp, bottom = 128.dp, start = 16.dp, end = 16.dp)
     ) {
-        Text("Settings", fontSize = 24.sp, fontWeight = FontWeight.Bold)
-
-        Spacer(Modifier.height(24.dp))
-
-        // User Info Section
-        Text("ACCOUNT", fontWeight = FontWeight.SemiBold)
-        Spacer(Modifier.height(8.dp))
-
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Default.Phone, contentDescription = null)
-            Spacer(Modifier.width(8.dp))
-            Text(phoneNumber)
-        }
-
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Default.Person, contentDescription = null)
-            Spacer(Modifier.width(8.dp))
-            Text(userName)
-        }
-
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Default.Info, contentDescription = null)
-            Spacer(Modifier.width(8.dp))
-            Text(userId.toString())
-        }
-
-        Spacer(modifier = Modifier.height(32.dp))
-        HorizontalDivider()
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text("OTHER SETTINGS", fontWeight = FontWeight.SemiBold)
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Button(
-            onClick = {
-                Toast.makeText(context, "Navigating to Clinician Login", Toast.LENGTH_SHORT).show()
-                navController.navigate("clinician login")
-            },
-            modifier = Modifier.fillMaxWidth()
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
         ) {
-            Icon(Icons.Default.AccountBox, contentDescription = null)
-            Spacer(Modifier.width(8.dp))
-            Text("Clinician Login")
-        }
+            Text("Settings", fontSize = 24.sp, fontWeight = FontWeight.Bold)
 
-        Spacer(modifier = Modifier.height(12.dp))
+            Spacer(Modifier.height(24.dp))
 
-        Button(
-            onClick = {
-                AuthManager.logout(context)
-                Log.v(MainActivity.TAG, "userID on logout: $userId")
-                navController.navigate("login") {
-                    popUpTo("settings") { inclusive = true }
-                }
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = null)
-            Spacer(Modifier.width(8.dp))
-            Text("Logout")
+            // User Info Section
+            Text("ACCOUNT", fontWeight = FontWeight.SemiBold)
+            Spacer(Modifier.height(8.dp))
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Default.Phone, contentDescription = null)
+                Spacer(Modifier.width(8.dp))
+                Text(phoneNumber)
+            }
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Default.Person, contentDescription = null)
+                Spacer(Modifier.width(8.dp))
+                Text(userName)
+            }
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Default.Info, contentDescription = null)
+                Spacer(Modifier.width(8.dp))
+                Text(userId.toString())
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+            HorizontalDivider()
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text("OTHER SETTINGS", fontWeight = FontWeight.SemiBold)
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Button(
+                onClick = {
+                    Toast.makeText(context, "Navigating to Clinician Login", Toast.LENGTH_SHORT)
+                        .show()
+                    navController.navigate("clinician login")
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(Icons.Default.AccountBox, contentDescription = null)
+                Spacer(Modifier.width(8.dp))
+                Text("Clinician Login")
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Button(
+                onClick = {
+                    AuthManager.logout(context)
+                    Log.v(MainActivity.TAG, "userID on logout: $userId")
+                    navController.navigate("login") {
+                        popUpTo("settings") { inclusive = true }
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = null)
+                Spacer(Modifier.width(8.dp))
+                Text("Logout")
+            }
         }
     }
 }

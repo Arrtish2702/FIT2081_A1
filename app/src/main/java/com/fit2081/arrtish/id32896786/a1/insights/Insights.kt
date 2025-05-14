@@ -1,6 +1,7 @@
 package com.fit2081.arrtish.id32896786.a1.insights
 
 
+import android.graphics.Paint
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -10,6 +11,8 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.*
 import androidx.compose.ui.unit.*
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
@@ -53,19 +56,25 @@ fun InsightsPage(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp)
+                .padding(top = 32.dp, bottom = 128.dp, start = 16.dp, end = 16.dp)
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(16.dp)
-                    .verticalScroll(rememberScrollState()),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .verticalScroll(rememberScrollState())
             ) {
+                Text("Insights", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+
+                Spacer(Modifier.height(24.dp))
+
                 Text(
-                    text = "Insights: Food Score",
+                    text = "Food Score",
                     fontSize = 20.sp,
-                    modifier = Modifier.padding(bottom = 16.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp),
+                    textAlign = TextAlign.Center
                 )
 
                 userScores.forEach { (name, score) ->
@@ -74,7 +83,14 @@ fun InsightsPage(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Text(text = "Total Food Quality Score", fontSize = 16.sp)
+                Text(
+                    text = "Total Food Quality Score",
+                    fontSize = 16.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp)
+                )
 
                 Slider(
                     value = totalScore,
@@ -87,7 +103,14 @@ fun InsightsPage(
                     )
                 )
 
-                Text(text = "%.2f / 100".format(totalScore))
+                Text(
+                    text = "%.2f / 100"
+                        .format(totalScore),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp)
+                )
 
                 Spacer(modifier = Modifier.height(8.dp))
 
