@@ -5,8 +5,9 @@ import androidx.lifecycle.LiveData
 class FoodIntakeRepository(private val foodIntakeDao: FoodIntakeDao) {
 
     /** LiveData stream of the patient’s questionnaire (or null if not answered) */
-    fun getFoodIntake(patientId: Int): LiveData<FoodIntake?> =
-        foodIntakeDao.getFoodIntakeForPatient(patientId)
+    fun getFoodIntake(patientId: Int): FoodIntake? {
+        return foodIntakeDao.getFoodIntakeForPatient(patientId)
+    }
 
     /** Insert or update the patient’s questionnaire */
     suspend fun insertFoodIntake(foodIntake: FoodIntake) {

@@ -22,7 +22,6 @@ class QuestionnaireViewModel(
     private val patientRepository: PatientRepository           // inject via factory or pass in after login
 ) : ViewModel() {
 
-
     private val _patient = MutableLiveData<Patient?>()
     val patient: LiveData<Patient?> = _patient
 
@@ -37,12 +36,13 @@ class QuestionnaireViewModel(
             patientId = id
             viewModelScope.launch(Dispatchers.IO) {
                 val patientData = patientRepository.getPatientById(id)
-                val intakeData = foodIntakeRepository.getFoodIntake(id).value
+                val intakeData = foodIntakeRepository.getFoodIntake(id)
+//                Log.v(MainActivity.TAG, "QuestionnaireVM: loaded intakeData from method: $intakeData")
                 _patient.postValue(patientData)
                 _existingIntake.postValue(intakeData)
                 Log.v(MainActivity.TAG, "QuestionnaireVM: loaded intakeData: $intakeData")
+                Log.v(MainActivity.TAG, "QuestionnaireVM: loaded existingIntake: $existingIntake")
             }
-            Log.v(MainActivity.TAG, "QuestionnaireVM: loaded existingIntake: $existingIntake")
         } else {
             Log.v(MainActivity.TAG, "QuestionnaireVM: no intake")
         }
