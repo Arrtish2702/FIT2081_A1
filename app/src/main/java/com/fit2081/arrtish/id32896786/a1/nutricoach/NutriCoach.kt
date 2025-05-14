@@ -17,13 +17,13 @@ import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
 @Composable
 fun NutriCoachPage(userId: Int, modifier: Modifier = Modifier) {
     val context = LocalContext.current
+    // Retrieve the ViewModel using the factory
     val viewModel: NutriCoachViewModel = viewModel(
         factory = AppViewModelFactory(context)
     )
 
     var fruitName by remember { mutableStateOf("") }
-    var motivationalMessage by remember { mutableStateOf("") }
-
+    val motivationalMessage by viewModel.motivationalMessage.observeAsState("")
     val fruitDetails by viewModel.fruitDetails.observeAsState(emptyMap())
     val errorMessage by viewModel.errorMessage.observeAsState()
 
@@ -85,7 +85,7 @@ fun NutriCoachPage(userId: Int, modifier: Modifier = Modifier) {
 
             Button(
                 onClick = {
-                    motivationalMessage = "Hey! Just a little nudge to maybe grab a banana or an apple today. You got this! 🍌🍎"
+                    viewModel.generateMotivationalMessage()
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {

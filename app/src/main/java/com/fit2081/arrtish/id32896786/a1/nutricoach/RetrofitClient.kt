@@ -1,16 +1,41 @@
 package com.fit2081.arrtish.id32896786.a1.nutricoach
 
+import com.fit2081.arrtish.id32896786.a1.gpt.ChatGptApi
+import okhttp3.Interceptor
+import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
-    private const val BASE_URL = "https://www.fruityvice.com/#3"  // Base path :contentReference[oaicite:8]{index=8}
 
-    val api: FruityViceApi by lazy {
+    private const val FRUITYVICE_BASE_URL = "https://www.fruityvice.com/api/"
+    private const val OPENAI_BASE_URL    = "https://api.openai.com/"
+
+    fun createFruityViceApi(): FruityViceApi =
         Retrofit.Builder()
-            .baseUrl(BASE_URL)                                      // Set base URL :contentReference[oaicite:9]{index=9}
-            .addConverterFactory(GsonConverterFactory.create())      // JSON converter :contentReference[oaicite:10]{index=10}
+            .baseUrl(FRUITYVICE_BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(FruityViceApi::class.java)
+
+    fun createOpenAiApi(apiKey: String): ChatGptApi {
+        val authInterceptor = Interceptor { chain ->
+            val request = chain.request().newBuilder()
+                .addHeader("Authorization", "Bearer $apiKey")
+                .addHeader("Content-Type", "application/json")
+                .build()
+            chain.proceed(request)
+        }
+
+        val client = OkHttpClient.Builder()
+            .addInterceptor(authInterceptor)
+            .build()
+
+        return Retrofit.Builder()
+            .baseUrl(OPENAI_BASE_URL)
+            .client(client)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(ChatGptApi::class.java)
     }
 }

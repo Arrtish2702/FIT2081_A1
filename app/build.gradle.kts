@@ -1,9 +1,18 @@
+import java.io.FileInputStream
+import java.util.Properties
+import kotlin.apply
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("com.google.devtools.ksp") version "2.0.21-1.0.27"
 }
+
+val localProperties = Properties().apply {
+    load(FileInputStream(rootProject.file("local.properties")))
+}
+val openAiKey: String = localProperties.getProperty("open_ai_api_key") ?: ""
 
 android {
     namespace = "com.fit2081.arrtish.id32896786.a1"
@@ -15,7 +24,7 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
-
+        buildConfigField("String", "OPEN_AI_API_KEY", "\"$openAiKey\"")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -37,6 +46,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -71,3 +81,4 @@ dependencies {
     implementation(libs.retrofit)                // Retrofit core :contentReference[oaicite:1]{index=1}
     implementation(libs.converter.gson)
 }
+
