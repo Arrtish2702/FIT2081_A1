@@ -5,6 +5,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontStyle
@@ -15,7 +16,6 @@ import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
 
 @Composable
 fun NutriCoachPage(userId: Int, modifier: Modifier = Modifier) {
-
     val context = LocalContext.current
     val viewModel: NutriCoachViewModel = viewModel(
         factory = AppViewModelFactory(context)
@@ -24,26 +24,16 @@ fun NutriCoachPage(userId: Int, modifier: Modifier = Modifier) {
     var fruitName by remember { mutableStateOf("") }
     var motivationalMessage by remember { mutableStateOf("") }
 
-    val fruitDetails = remember {
-        mutableStateOf(
-            mapOf(
-                "family" to "",
-                "calories" to "",
-                "fat" to "",
-                "sugar" to "",
-                "carbohydrates" to "",
-                "protein" to ""
-            )
-        )
-    }
+    val fruitDetails by viewModel.fruitDetails.observeAsState(emptyMap())
+    val errorMessage by viewModel.errorMessage.observeAsState()
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
         Text("NutriCoach", fontSize = 24.sp, fontWeight = FontWeight.Bold)
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(Modifier.height(16.dp))
 
         OutlinedTextField(
             value = fruitName,
@@ -51,37 +41,41 @@ fun NutriCoachPage(userId: Int, modifier: Modifier = Modifier) {
             label = { Text("Fruit Name") },
             modifier = Modifier.fillMaxWidth()
         )
-
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(Modifier.height(8.dp))
 
         Button(
             onClick = {
-                // Dummy data for demonstration
-                fruitDetails.value = mapOf(
-                    "family" to "Musaceae",
-                    "calories" to "96",
-                    "fat" to "0.2",
-                    "sugar" to "17.2",
-                    "carbohydrates" to "22",
-                    "protein" to "1"
-                )
+                viewModel.fetchFruit(fruitName)
             },
             modifier = Modifier.align(Alignment.End)
         ) {
             Text("Details")
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(Modifier.height(16.dp))
 
-        fruitDetails.value.forEach { (label, value) ->
-            Row(modifier = Modifier.fillMaxWidth()) {
-                Text("$label :", fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
-                Text(value, modifier = Modifier.weight(1f))
-            }
-            Spacer(modifier = Modifier.height(4.dp))
+        // Show error if any
+        errorMessage?.let { err ->
+            Text(
+                text = err,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(Modifier.height(8.dp))
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        // Render the details
+        if (fruitDetails.isNotEmpty()) {
+            fruitDetails.forEach { (label, value) ->
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    Text("$label :", fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
+                    Text(value, modifier = Modifier.weight(1f))
+                }
+                Spacer(Modifier.height(4.dp))
+            }
+        }
+
+        Spacer(Modifier.height(24.dp))
 
         Button(
             onClick = {
@@ -94,7 +88,7 @@ fun NutriCoachPage(userId: Int, modifier: Modifier = Modifier) {
             Text("Motivational Message (AI)")
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(Modifier.height(12.dp))
 
         Card(
             modifier = Modifier.fillMaxWidth(),
@@ -107,7 +101,7 @@ fun NutriCoachPage(userId: Int, modifier: Modifier = Modifier) {
             )
         }
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(Modifier.height(20.dp))
 
         Button(
             onClick = {
@@ -119,3 +113,5 @@ fun NutriCoachPage(userId: Int, modifier: Modifier = Modifier) {
         }
     }
 }
+
+
