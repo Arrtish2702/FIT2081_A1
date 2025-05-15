@@ -9,7 +9,7 @@ import com.fit2081.arrtish.id32896786.a1.databases.foodintakedb.FoodIntakeDao
 import com.fit2081.arrtish.id32896786.a1.databases.patientdb.PatientDao
 import com.fit2081.arrtish.id32896786.a1.databases.patientdb.Patient
 
-@Database(entities = [Patient::class, FoodIntake::class], version = 2)
+@Database(entities = [Patient::class, FoodIntake::class], version = 3)
 abstract class AppDataBase : RoomDatabase() {
 
     abstract fun patientDao(): PatientDao
@@ -24,7 +24,9 @@ abstract class AppDataBase : RoomDatabase() {
                     context.applicationContext,
                     AppDataBase::class.java,
                     "app_database"
-                ).build()
+                )
+                    .fallbackToDestructiveMigration(true)
+                    .build()
                 INSTANCE = instance
                 instance
             }

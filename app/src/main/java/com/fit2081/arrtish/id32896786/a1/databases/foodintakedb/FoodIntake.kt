@@ -24,8 +24,7 @@ import java.util.Date
 
 @TypeConverters(DateConverter::class)
 data class FoodIntake(
-    @PrimaryKey(autoGenerate = true) val intakeId: Int = 0,
-    val patientId: Int,
+    @PrimaryKey(autoGenerate = true) val patientId: Int,
     // Use Date instead of DateTime (with converters if needed)
     var sleepTime: Date,
     var wakeTime: Date,

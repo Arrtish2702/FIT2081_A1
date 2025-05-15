@@ -60,9 +60,9 @@ class QuestionnaireViewModel(
         val fmt = SimpleDateFormat("hh:mm a", Locale.getDefault())
         val intake = FoodIntake(
             patientId        = patientId?:-1,
-            biggestMealTime  = fmt.parse(biggestMealTime) ?: Date(),
             sleepTime        = fmt.parse(sleepTime)     ?: Date(),
             wakeTime         = fmt.parse(wakeTime)      ?: Date(),
+            biggestMealTime  = fmt.parse(biggestMealTime) ?: Date(),
             selectedPersona  = selectedPersona,
             eatsFruits       = "Fruits"      in selectedCategories,
             eatsVegetables   = "Vegetables"  in selectedCategories,
