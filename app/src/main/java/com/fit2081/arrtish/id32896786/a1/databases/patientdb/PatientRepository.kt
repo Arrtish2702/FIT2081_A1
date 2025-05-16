@@ -20,6 +20,10 @@ class PatientRepository(private val patientDao: PatientDao) {
         return patientDao.getRegisteredPatientIds()
     }
 
+    fun allUnregisteredPatientIds(): LiveData<List<Int>> {
+        return patientDao.getUnregisteredPatientIds()
+    }
+
     fun getAllPatients(): LiveData<List<Patient>> {
         return patientDao.getAllPatients()
     }

@@ -36,7 +36,7 @@ fun RegisterPage(
         factory = AppViewModelFactory(context)
     )
     var selectedUserId by remember { mutableStateOf("") } // State to store selected user ID
-    val userIds by viewModel.patientIds.observeAsState(initial = emptyList())
+    val userIds by viewModel.unregisteredPatientIds.observeAsState(initial = emptyList())
     var phone by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }

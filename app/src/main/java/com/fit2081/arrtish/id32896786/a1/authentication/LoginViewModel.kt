@@ -17,6 +17,7 @@ class LoginViewModel(private val repository: PatientRepository) : ViewModel() {
 
     val patientIds: LiveData<List<Int>> = repository.allPatientIds()
     val registeredPatientIds: LiveData<List<Int>> = repository.allRegisteredPatientIds()
+    val unregisteredPatientIds: LiveData<List<Int>> = repository.allUnregisteredPatientIds()
 
     var registrationSuccessful = mutableStateOf(false)
         private set
