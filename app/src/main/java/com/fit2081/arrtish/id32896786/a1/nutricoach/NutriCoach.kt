@@ -1,6 +1,8 @@
 package com.fit2081.arrtish.id32896786.a1.nutricoach
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
@@ -13,6 +15,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
+import com.fit2081.arrtish.id32896786.a1.MainActivity
+import androidx.compose.foundation.lazy.items
+import androidx.compose.ui.Modifier
 
 @Composable
 fun NutriCoachPage(userId: Int, modifier: Modifier = Modifier) {
@@ -26,16 +31,19 @@ fun NutriCoachPage(userId: Int, modifier: Modifier = Modifier) {
     val motivationalMessage by viewModel.motivationalMessage.observeAsState("")
     val fruitDetails by viewModel.fruitDetails.observeAsState(emptyMap())
     val errorMessage by viewModel.errorMessage.observeAsState()
+    val tipsList by viewModel.tipsList.observeAsState(emptyList())
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(top = 32.dp, bottom = 128.dp, start = 16.dp, end = 16.dp)
+            .padding(top = 32.dp, bottom = 16.dp, start = 16.dp, end = 16.dp)
+            .fillMaxHeight()
     ) {
         Column(
             modifier = modifier
                 .fillMaxSize()
                 .padding(16.dp)
+
         ) {
             Text("NutriCoach", fontSize = 24.sp, fontWeight = FontWeight.Bold)
 
@@ -85,7 +93,7 @@ fun NutriCoachPage(userId: Int, modifier: Modifier = Modifier) {
 
             Button(
                 onClick = {
-                    viewModel.generateMotivationalMessage()
+                    viewModel.generateMotivationalMessage(userId)
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -111,11 +119,49 @@ fun NutriCoachPage(userId: Int, modifier: Modifier = Modifier) {
 
             Button(
                 onClick = {
-                    // Show modal or toast for saved tips
+                    viewModel.loadAllTips(userId)
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Shows All Tips")
+                Text("Show All Tips")
+            }
+
+            if (tipsList.isNotEmpty()) {
+                Spacer(Modifier.height(12.dp))
+                Text("Saved Tips", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                Spacer(Modifier.height(8.dp))
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(500.dp) // Or use Modifier.weight(1f) if in a flexible layout
+                ) {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        items(items = tipsList, key = { it.tipsId }) { tip ->
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp),
+                                elevation = CardDefaults.cardElevation(2.dp)
+                            ) {
+                                Column(modifier = Modifier.padding(12.dp)) {
+                                    Text(
+                                        text = tip.responseString,
+                                        fontStyle = FontStyle.Italic
+                                    )
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text(
+                                        text = "Saved on: ${tip.responseTimeStamp}",
+                                        fontSize = 12.sp,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }

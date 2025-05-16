@@ -6,13 +6,17 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fit2081.arrtish.id32896786.a1.MainActivity
+import com.fit2081.arrtish.id32896786.a1.databases.aitipsdb.AITips
+import com.fit2081.arrtish.id32896786.a1.databases.aitipsdb.AITipsRepository
 import com.fit2081.arrtish.id32896786.a1.databases.patientdb.PatientRepository
 import com.fit2081.arrtish.id32896786.a1.gpt.ChatGptApi
 import com.fit2081.arrtish.id32896786.a1.gpt.ChatGptRequest
 import com.fit2081.arrtish.id32896786.a1.gpt.Message
 import kotlinx.coroutines.launch
+import java.util.Date
 
 class NutriCoachViewModel(
+    private val aiTipsRepository: AITipsRepository,
     private val fruityViceApi: FruityViceApi,
     private val openAiApi: ChatGptApi
 ) : ViewModel() {
@@ -27,40 +31,51 @@ class NutriCoachViewModel(
     private val _errorMessage = MutableLiveData<String?>(null)
     val errorMessage: LiveData<String?> = _errorMessage
 
+    private val _tipsList = MutableLiveData<List<AITips>>(emptyList())
+    val tipsList: LiveData<List<AITips>> = _tipsList
+
+    fun loadAllTips(patientId: Int) {
+        viewModelScope.launch {
+            _tipsList.value = aiTipsRepository.getTipsByPatientId(patientId)
+            val valuse = tipsList.value
+            Log.v(MainActivity.TAG, "$valuse")
+        }
+    }
+
     fun fetchFruit(name: String) {
         viewModelScope.launch {
             try {
-                val fruit = fruityViceApi.getFruitByName(name.trim().lowercase())
+                val fruits = fruityViceApi.getAllFruits() // get all fruits
+                val fruit = fruits.firstOrNull { it.name.equals(name.trim(), ignoreCase = true) }
 
-                _fruitDetails.value = mapOf(
-                    "family" to fruit.family,
-                    "calories" to fruit.nutritions.calories.toString(),
-                    "fat" to fruit.nutritions.fat.toString(),
-                    "sugar" to fruit.nutritions.sugar.toString(),
-                    "carbohydrates" to fruit.nutritions.carbohydrates.toString(),
-                    "protein" to fruit.nutritions.protein.toString()
-                )
-                _errorMessage.value = null
+                if (fruit != null) {
+                    Log.v(MainActivity.TAG, "fruit: $fruit")
 
-            } catch (e: retrofit2.HttpException) {
-                if (e.code() == 404) {
-                    _errorMessage.value = "Fruit not found: \"$name\""
+                    _fruitDetails.value = mapOf(
+                        "family" to fruit.family,
+                        "calories" to fruit.nutritions.calories.toString(),
+                        "fat" to fruit.nutritions.fat.toString(),
+                        "sugar" to fruit.nutritions.sugar.toString(),
+                        "carbohydrates" to fruit.nutritions.carbohydrates.toString(),
+                        "protein" to fruit.nutritions.protein.toString()
+                    )
+                    _errorMessage.value = null
                 } else {
-                    _errorMessage.value = "HTTP error: ${e.code()}"
+                    _fruitDetails.value = emptyMap()
+                    _errorMessage.value = "Fruit not found: \"$name\""
                 }
-                _fruitDetails.value = emptyMap()
 
             } catch (t: Throwable) {
-                _errorMessage.value = "Network error: ${t.localizedMessage}"
                 _fruitDetails.value = emptyMap()
+                _errorMessage.value = "Network error: ${t.localizedMessage}"
             }
         }
     }
 
-    fun generateMotivationalMessage() {
+    fun generateMotivationalMessage(patientId: Int) {
         viewModelScope.launch {
             try {
-                val response = openAiApi.getChatResponse(
+                val responseText = openAiApi.getChatResponse(
                     ChatGptRequest(
                         model = "gpt-4.1",
                         messages = listOf(
@@ -68,9 +83,20 @@ class NutriCoachViewModel(
                             Message("user", "Give me a short inspirational message about healthy eating.")
                         )
                     )
+                ).choices.firstOrNull()?.message?.content ?: "Stay healthy!"
+
+                _motivationalMessage.value = responseText
+
+                val newTip = AITips(
+                    tipsId = 0, // autoGenerate
+                    patientId = patientId,
+                    responseTimeStamp = Date(),
+                    promptString = "Give me a short inspirational message about healthy eating.",
+                    responseString = responseText
                 )
-                _motivationalMessage.value =
-                    response.choices.firstOrNull()?.message?.content ?: "Stay healthy!"
+
+                aiTipsRepository.insertTip(newTip)
+
             } catch (e: Exception) {
                 _motivationalMessage.value = "Failed to fetch inspiration: ${e.localizedMessage}"
             }
