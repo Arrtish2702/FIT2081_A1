@@ -58,7 +58,9 @@ class LoginViewModel(private val repository: PatientRepository) : ViewModel() {
             }
 
             // Perform update
-            val updatedPatient = patient.copy(patientPassword = new.trim())
+            val updatedPatient = patient.copy(
+                patientPassword = PasswordUtils.hashPassword(new.trim())
+            )
             repository.updatePatient(updatedPatient)
 
             changePasswordMessage.value = "Password updated successfully."
@@ -97,7 +99,7 @@ class LoginViewModel(private val repository: PatientRepository) : ViewModel() {
                     loginMessage.value = "Account has not been registered."
                     return@launch
                 }
-                patient.patientPassword.trim() != password.trim() -> {
+                (!PasswordUtils.passwordsMatch(password, patient.patientPassword))->{
                     loginMessage.value = "Incorrect password."
                     return@launch
                 }
@@ -139,7 +141,10 @@ class LoginViewModel(private val repository: PatientRepository) : ViewModel() {
                 return@launch
             }
 
-            val updated = patient.copy(patientName = name,patientPassword = password)
+            val updated = patient.copy(
+                patientName = name,
+                patientPassword = PasswordUtils.hashPassword(password)
+            )
             repository.updatePatient(updated)
             registrationSuccessful.value = true
             registrationMessage.value = "Registration successful!"
