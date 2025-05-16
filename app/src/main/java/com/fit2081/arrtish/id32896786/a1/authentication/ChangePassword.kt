@@ -1,63 +1,65 @@
 package com.fit2081.arrtish.id32896786.a1.authentication
 
-import android.os.Bundle
 import android.widget.Toast
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.ui.*
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.fit2081.arrtish.id32896786.a1.ui.theme.A1Theme
-import androidx.compose.ui.unit.*
 import androidx.navigation.NavController
 import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RegisterPage(
+fun ChangePasswordPage(
     modifier: Modifier = Modifier,
     navController: NavController
 ) {
-    var context = LocalContext.current
-    val viewModel: LoginViewModel = viewModel(
-        factory = AppViewModelFactory(context)
-    )
-    var selectedUserId by remember { mutableStateOf("") } // State to store selected user ID
-    val userIds by viewModel.patientIds.observeAsState(initial = emptyList())
-    var phone by remember { mutableStateOf("") }
+    val context = LocalContext.current
+    val viewModel: LoginViewModel = viewModel(factory = AppViewModelFactory(context))
+
+    var selectedUserId by remember { mutableStateOf("") }
+    var phoneNumber by remember { mutableStateOf("") }
+    var newPassword by remember { mutableStateOf("") }
+    var confirmNewPassword by remember { mutableStateOf("") }
+    val userIds by viewModel.registeredPatientIds.observeAsState(initial = emptyList())
+    var expanded by remember { mutableStateOf(false) } // State to control dropdown menu expansion
     var password by remember { mutableStateOf("") }
-    var confirmPassword by remember { mutableStateOf("") }
-    var name by remember { mutableStateOf("") }
-    val message = viewModel.registrationMessage.value
+
+    val message = viewModel.changePasswordMessage.value
+    val passwordChangeSuccess = viewModel.changePasswordSuccessful.value
 
     LaunchedEffect(message) {
         message?.let {
             Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
-            viewModel.registrationMessage.value = null // reset so it doesn’t keep showing
+            viewModel.changePasswordMessage.value = null
         }
     }
 
-    if (viewModel.registrationSuccessful.value) {
+    if (passwordChangeSuccess) {
         LaunchedEffect(Unit) {
             navController.navigate("login") {
-                popUpTo("register") { inclusive = true }
+                popUpTo("changePassword") { inclusive = true }
             }
         }
     }
-
 
     Column(
         modifier = modifier
@@ -68,14 +70,10 @@ fun RegisterPage(
     ) {
         Spacer(modifier = Modifier.height(40.dp))
 
-        Text(text = "Register", style = MaterialTheme.typography.titleLarge)
+        Text(text = "Change Password", style = MaterialTheme.typography.titleLarge)
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Dropdown for ID
-        var expanded by remember { mutableStateOf(false) }
-
-        // Exposed dropdown menu for user selection
         ExposedDropdownMenuBox(
             expanded = expanded,
             onExpandedChange = { expanded = !expanded }) { // Toggle dropdown expansion on click
@@ -103,21 +101,9 @@ fun RegisterPage(
         Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(
-            value = name,
-            onValueChange = { name = it },
-            label = { Text("Name") },
-            placeholder = { Text("Enter your name") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        OutlinedTextField(
-            value = phone,
-            onValueChange = { phone = it },
+            value = phoneNumber,
+            onValueChange = { phoneNumber = it },
             label = { Text("Phone Number") },
-            placeholder = { Text("Enter your phone number") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
             modifier = Modifier.fillMaxWidth()
         )
@@ -125,10 +111,9 @@ fun RegisterPage(
         Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text("Password") },
-            placeholder = { Text("Enter your password") },
+            value = newPassword,
+            onValueChange = { newPassword = it },
+            label = { Text("New Password") },
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             modifier = Modifier.fillMaxWidth()
@@ -137,44 +122,36 @@ fun RegisterPage(
         Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(
-            value = confirmPassword,
-            onValueChange = { confirmPassword = it },
-            label = { Text("Confirm Password") },
-            placeholder = { Text("Enter your password again") },
+            value = confirmNewPassword,
+            onValueChange = { confirmNewPassword = it },
+            label = { Text("Confirm New Password") },
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             modifier = Modifier.fillMaxWidth()
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(
-            text = "This app is only for pre-registered users. Please enter your ID, phone number and password to claim your account.",
-            style = MaterialTheme.typography.bodySmall,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(horizontal = 12.dp)
-        )
-
         Spacer(modifier = Modifier.height(24.dp))
 
         Button(
-            onClick = { viewModel.appRegister(selectedUserId, name, phone, password, confirmPassword) },
-            modifier = Modifier.fillMaxWidth(),
+            onClick = {
+                viewModel.changePassword(selectedUserId.toInt(), phoneNumber, newPassword, confirmNewPassword, context)
+            },
+            modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Register Account")
+            Text("Update Password")
         }
 
-//        Spacer(modifier = Modifier.height(12.dp))
-//
-//        Button(
-//            onClick = {
-//                navController.navigate("login") {
-//                    popUpTo("register") { inclusive = true }
-//                }
-//            },
-//            modifier = Modifier.fillMaxWidth(),
-//        ) {
-//            Text("Login")
-//        }
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Button(
+            onClick = {
+                navController.navigate("login") {
+                    popUpTo("changePassword") { inclusive = true }
+                }
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Back to Login")
+        }
     }
 }

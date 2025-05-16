@@ -33,6 +33,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.fit2081.arrtish.id32896786.a1.authentication.AuthManager
 import com.fit2081.arrtish.id32896786.a1.authentication.AuthManager.getStudentId
+import com.fit2081.arrtish.id32896786.a1.authentication.ChangePasswordPage
 import com.fit2081.arrtish.id32896786.a1.authentication.LoginPage
 import com.fit2081.arrtish.id32896786.a1.authentication.RegisterPage
 import com.fit2081.arrtish.id32896786.a1.clinician.ClinicianLogin
@@ -65,7 +66,7 @@ class MainActivity : ComponentActivity() {
             val navController = rememberNavController()
             val navBackStackEntry by navController.currentBackStackEntryAsState()
             val currentRoute = navBackStackEntry?.destination?.route
-            val hideBottomBarRoutes = listOf("welcome", "login", "register")
+            val hideBottomBarRoutes = listOf("welcome", "login", "register", "changePassword")
 
             A1Theme {
                 Scaffold(
@@ -109,6 +110,9 @@ fun AppInitialisation(modifier: Modifier, navController: NavHostController) {
         }
         composable("register") {
             RegisterPage(modifier, navController)
+        }
+        composable("changePassword") {
+            ChangePasswordPage(modifier, navController)
         }
         composable("home") {
             HomePage(userId ?: -1, modifier, navController)
@@ -258,6 +262,21 @@ fun WelcomePage(
         ) {
             // Text inside the button
             Text("Login", fontSize = 18.sp) // Font size of 18sp
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            onClick = {
+                navController.navigate("register") {
+                    popUpTo("welcome") { inclusive = true }
+                }
+            },
+            modifier = Modifier
+                .fillMaxWidth(0.8f) // Fill 80% of the screen width
+                .height(50.dp), // Set the button height to 50dp
+        ) {
+            Text("New to this app? Register here")
         }
 
         // Spacer to add vertical space between components

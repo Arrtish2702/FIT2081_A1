@@ -10,8 +10,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
@@ -152,6 +154,8 @@ fun LoginPage(
                 modifier = Modifier.fillMaxWidth()
             )
 
+            Spacer(modifier = Modifier.height(24.dp))
+
             // Login button that triggers authentication
             Button(onClick = {
                 if (selectedUserId.isNotEmpty() && password.isNotEmpty()) {
@@ -170,15 +174,17 @@ fun LoginPage(
                 Text("Login") // Button label
             }
 
+            Spacer(modifier = Modifier.height(12.dp))
+
             Button(
                 onClick = {
-                    navController.navigate("register") {
+                    navController.navigate("changePassword") {
                         popUpTo("login") { inclusive = true }
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Text("Register")
+                Text("Change Password")
             }
         }
     }

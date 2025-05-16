@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.fit2081.arrtish.id32896786.a1.authentication.LoginViewModel
 import com.fit2081.arrtish.id32896786.a1.clinician.ClinicianViewModel
 import com.fit2081.arrtish.id32896786.a1.databases.AppDataBase
+import com.fit2081.arrtish.id32896786.a1.databases.aitipsdb.AITipsRepository
 import com.fit2081.arrtish.id32896786.a1.databases.foodintakedb.FoodIntakeRepository
 import com.fit2081.arrtish.id32896786.a1.insights.InsightsViewModel
 import com.fit2081.arrtish.id32896786.a1.home.HomeViewModel
@@ -21,6 +22,7 @@ class AppViewModelFactory(
     val db = AppDataBase.getDatabase(context)
     val patientRepository = PatientRepository(db.patientDao())
     val foodIntakeRepository = FoodIntakeRepository(db.foodIntakeDao())
+    val aiTipsRepository = AITipsRepository(db.aiTipsDao())
 
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return when {
@@ -42,8 +44,7 @@ class AppViewModelFactory(
             modelClass.isAssignableFrom(NutriCoachViewModel::class.java) -> {
                 @Suppress("UNCHECKED_CAST")
                 NutriCoachViewModel(
-                    fruityViceApi = RetrofitClient.createFruityViceApi(),
-                    openAiApi = RetrofitClient.createOpenAiApi(BuildConfig.OPEN_AI_API_KEY)
+                    aiTipsRepository, RetrofitClient.createFruityViceApi(), RetrofitClient.createOpenAiApi(BuildConfig.OPEN_AI_API_KEY)
                 ) as T
             }
             modelClass.isAssignableFrom(QuestionnaireViewModel::class.java) -> {

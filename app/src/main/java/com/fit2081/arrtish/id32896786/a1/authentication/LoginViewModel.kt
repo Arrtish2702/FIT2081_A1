@@ -34,11 +34,36 @@ class LoginViewModel(private val repository: PatientRepository) : ViewModel() {
         isLoading.value = value
     }
 
-    // Function to validate phone number (supports Australian and Malaysian numbers)
-    fun isValidNumber(number: String): Boolean {
-        val aussieRegex = Regex("^(61[2-478]\\d{8})$") // Australian phone number regex
-        val malaysianRegex = Regex("^(60[1-9]\\d{7,9})$") // Malaysian phone number regex
-        return aussieRegex.matches(number) || malaysianRegex.matches(number) // Return true if valid
+    val changePasswordMessage = mutableStateOf<String?>(null)
+    val changePasswordSuccessful = mutableStateOf(false)
+
+    fun changePassword(selectedUserId: Int, inputPhoneNumber: String, new: String, confirm: String, context: Context) {
+        viewModelScope.launch {
+            val patient = repository.getPatientById(selectedUserId)
+
+            if (patient == null) {
+                changePasswordMessage.value = "User not found."
+                return@launch
+            }
+
+            // Trim and compare phone numbers
+            if (patient.patientPhoneNumber.trim() != inputPhoneNumber.trim()) {
+                changePasswordMessage.value = "Phone number does not match User Account."
+                return@launch
+            }
+
+            if (new != confirm) {
+                changePasswordMessage.value = "New passwords do not match."
+                return@launch
+            }
+
+            // Perform update
+            val updatedPatient = patient.copy(patientPassword = new.trim())
+            repository.updatePatient(updatedPatient)
+
+            changePasswordMessage.value = "Password updated successfully."
+            changePasswordSuccessful.value = true
+        }
     }
 
 
