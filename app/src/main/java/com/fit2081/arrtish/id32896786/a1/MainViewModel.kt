@@ -17,15 +17,21 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.util.Date
 import androidx.core.content.edit
+import com.fit2081.arrtish.id32896786.a1.authentication.AuthManager
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val patientDao = AppDataBase.getDatabase(application).patientDao()
     private val repository = PatientRepository(patientDao)
+    private val PREFS_NAME = "MyPrefs"
 
     fun loadAndInsertData(context: Context) {
-        // Check if the data has already been loaded by reading SharedPreferences
-        val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
+
+        val sharedPreferences = context.getSharedPreferences(PREFS_NAME,Context.MODE_PRIVATE)
+        val allEntries = sharedPreferences.all
+        for ((key, value) in allEntries) {
+            Log.v(MainActivity.TAG, "SharedPref entry: $key = $value")
+        }
         val isDataLoaded = sharedPreferences.getBoolean("isDataLoaded", false)
 
         // If data has already been loaded, return early

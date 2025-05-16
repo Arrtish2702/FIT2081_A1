@@ -8,6 +8,7 @@ import android.util.Log
 import com.fit2081.arrtish.id32896786.a1.MainActivity
 
 object AuthManager {
+
     private const val PREFS_NAME = "MyPrefs"
     private const val USER_ID_KEY = "userId"
 
@@ -37,11 +38,12 @@ object AuthManager {
     fun loadSession(context: Context) {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val storedId = prefs.getInt(USER_ID_KEY, -1)
-        if (storedId != -1) {
+        Log.v(MainActivity.TAG, "Saved User id: $storedId")
+        if (storedId == -1) {
+            Log.v(MainActivity.TAG, "AuthManager: No user session found, routing to welcome page.")
+        } else {
             _userId.value = storedId
             Log.v(MainActivity.TAG, "AuthManager:Loaded userId from SharedPrefs: $storedId")
-        } else {
-            Log.v(MainActivity.TAG, "AuthManagerNo user session found, routing to welcome page.")
         }
     }
 

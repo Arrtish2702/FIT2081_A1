@@ -55,15 +55,9 @@ class MainActivity : ComponentActivity() {
 
         super.onCreate(savedInstanceState)
 
-        //TEMP CODE TO CLEAR SHARED PREF
-        //COMMENT OUT DURING ACTUAL APP BUILD
-//        val sharedPref = getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
-//        sharedPref.edit() { clear() }
+        AuthManager.loadSession(this)
 
         viewModel.loadAndInsertData(this)
-
-        // Load saved user session before Compose runs
-        AuthManager.loadSession(this)
 
         enableEdgeToEdge()
 
