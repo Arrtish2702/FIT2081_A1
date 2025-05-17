@@ -23,6 +23,7 @@ import androidx.navigation.NavHostController
 import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
 import com.fit2081.arrtish.id32896786.a1.MainActivity
 import com.fit2081.arrtish.id32896786.a1.authentication.AuthManager
+import com.fit2081.arrtish.id32896786.a1.questionnaire.QuestionnaireViewModel
 import com.fit2081.arrtish.id32896786.a1.ui.theme.A1Theme
 
 
@@ -30,14 +31,13 @@ import com.fit2081.arrtish.id32896786.a1.ui.theme.A1Theme
 fun SettingsPage(
     userId: Int,
     modifier: Modifier = Modifier,
-    navController: NavHostController
+    navController: NavHostController,
+    viewModel: SettingsViewModel = viewModel(
+        factory = AppViewModelFactory(LocalContext.current)
+    )
 ) {
     var expanded by remember { mutableStateOf(false) }
     var context = LocalContext.current
-    val viewModel: SettingsViewModel = viewModel(
-        factory = AppViewModelFactory(context)
-    )
-
     val patient by viewModel.patient.observeAsState()
 
     viewModel.loadPatientDataById(userId)

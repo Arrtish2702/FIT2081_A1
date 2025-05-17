@@ -58,11 +58,11 @@ import com.fit2081.arrtish.id32896786.a1.R
 fun LoginPage(
     modifier: Modifier = Modifier,
     navController: NavController,
+    viewModel: LoginViewModel = viewModel(
+        factory = AppViewModelFactory(LocalContext.current)
+    )
 ){
     var context = LocalContext.current
-    val viewModel: LoginViewModel = viewModel(
-        factory = AppViewModelFactory(context)
-    )
     var selectedUserId by remember { mutableStateOf("") } // State to store selected user ID
     val userIds by viewModel.registeredPatientIds.observeAsState(initial = emptyList())
     var expanded by remember { mutableStateOf(false) } // State to control dropdown menu expansion

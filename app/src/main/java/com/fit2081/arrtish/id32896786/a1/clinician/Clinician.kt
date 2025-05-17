@@ -25,13 +25,14 @@ import com.fit2081.arrtish.id32896786.a1.ui.theme.A1Theme
 
 @Composable
 fun ClinicianLogin(
-    navController: NavHostController
+    navController: NavHostController,
+    viewModel: LoginViewModel = viewModel(
+        factory = AppViewModelFactory(LocalContext.current)
+    )
 ) {
 
     var context = LocalContext.current
-    val viewModel: LoginViewModel = viewModel(
-        factory = AppViewModelFactory(context)
-    )
+
     var clinicianKey by remember { mutableStateOf("") }
 
     Column(
@@ -72,15 +73,18 @@ fun ClinicianLogin(
         }
     }
 }
+
+
+
 @Composable
 fun ClinicianPage(
     userId: Int,
     modifier: Modifier = Modifier,
-    navController: NavHostController
-) {
-    val viewModel: ClinicianViewModel = viewModel(
+    navController: NavHostController,
+    viewModel: ClinicianViewModel = viewModel(
         factory = AppViewModelFactory(LocalContext.current)
     )
+) {
 
     val avgScores by viewModel.generateAvgScores.observeAsState(Pair(0f, 0f))
 

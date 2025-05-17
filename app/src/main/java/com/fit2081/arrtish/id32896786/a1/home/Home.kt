@@ -20,12 +20,13 @@ import com.fit2081.arrtish.id32896786.a1.R
 
 
 @Composable
-fun HomePage(userId: Int, modifier: Modifier = Modifier, navController: NavController) {
-
-    val context = LocalContext.current
-    val viewModel: HomeViewModel = viewModel(
-        factory = AppViewModelFactory(context)
-    )
+fun HomePage(userId: Int,
+     modifier: Modifier = Modifier,
+     navController: NavController,
+     viewModel: HomeViewModel = viewModel(
+         factory = AppViewModelFactory(LocalContext.current)
+     )
+) {
     val patient by viewModel.patient.observeAsState()
 
     // Call the ViewModel function to load data when userId changes

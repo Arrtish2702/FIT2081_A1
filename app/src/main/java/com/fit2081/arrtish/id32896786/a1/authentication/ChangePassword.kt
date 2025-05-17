@@ -30,11 +30,10 @@ import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
 @Composable
 fun ChangePasswordPage(
     modifier: Modifier = Modifier,
-    navController: NavController
+    navController: NavController,
+    viewModel: LoginViewModel = viewModel(factory = AppViewModelFactory(LocalContext.current))
 ) {
     val context = LocalContext.current
-    val viewModel: LoginViewModel = viewModel(factory = AppViewModelFactory(context))
-
     var selectedUserId by remember { mutableStateOf("") }
     var phoneNumber by remember { mutableStateOf("") }
     var newPassword by remember { mutableStateOf("") }

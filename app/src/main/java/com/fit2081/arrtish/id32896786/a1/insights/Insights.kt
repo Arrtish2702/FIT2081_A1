@@ -22,14 +22,13 @@ import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
 fun InsightsPage(
     userId: Int,
     modifier: Modifier = Modifier,
-    navController: NavHostController
+    navController: NavHostController,
+    viewModel: InsightsViewModel = viewModel(
+        factory = AppViewModelFactory(LocalContext.current)
+    )
 ) {
 
     val context = LocalContext.current
-    val viewModel: InsightsViewModel = viewModel(
-        factory = AppViewModelFactory(context)
-    )
-
     val patient by viewModel.patient.observeAsState()
 
     // Call the ViewModel function to load data when userId changes

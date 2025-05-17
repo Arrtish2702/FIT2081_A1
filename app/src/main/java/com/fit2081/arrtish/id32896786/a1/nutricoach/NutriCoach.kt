@@ -20,13 +20,13 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.ui.Modifier
 
 @Composable
-fun NutriCoachPage(userId: Int, modifier: Modifier = Modifier) {
-    val context = LocalContext.current
-    // Retrieve the ViewModel using the factory
-    val viewModel: NutriCoachViewModel = viewModel(
-        factory = AppViewModelFactory(context)
+fun NutriCoachPage(
+    userId: Int,
+    modifier: Modifier = Modifier,
+    viewModel: NutriCoachViewModel = viewModel(
+       factory = AppViewModelFactory(LocalContext.current)
     )
-
+) {
     var fruitName by remember { mutableStateOf("") }
     val motivationalMessage by viewModel.motivationalMessage.observeAsState("")
     val fruitDetails by viewModel.fruitDetails.observeAsState(emptyMap())
