@@ -26,7 +26,6 @@ import com.fit2081.arrtish.id32896786.a1.MainActivity
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
-import com.fit2081.arrtish.id32896786.a1.R
 import kotlin.String
 
 
@@ -34,11 +33,14 @@ import kotlin.String
 @Composable
 fun QuestionnairePage(
     userId: Int,
-    navController: NavController
+    navController: NavController,
+    viewModel: QuestionnaireViewModel = viewModel(
+        factory = AppViewModelFactory(LocalContext.current)
+    )
 ) {
 
     val context = LocalContext.current
-    val viewModel: QuestionnaireViewModel = viewModel(factory = AppViewModelFactory(context))
+
     Log.v(MainActivity.TAG, "Questionnaire: Vm made")
     // Ensure we call loadPatientDataByIdAndIntake only once
     val hasLoaded = remember { mutableStateOf(false) }
@@ -87,25 +89,6 @@ fun QuestionnairePage(
 
     foodIntake?.let {
         Log.v(MainActivity.TAG, "UI: existing intake updated: $it")
-    }
-
-
-    // Function to open a time picker dialog and set the time
-    fun openTimePicker(initialTime: String, onTimeSet: (String) -> Unit) {
-        val calendar = Calendar.getInstance()  // Get current calendar instance
-        val initialHour = calendar.get(Calendar.HOUR_OF_DAY)  // Initial hour of the day
-        val initialMinute = calendar.get(Calendar.MINUTE)  // Initial minute of the day
-
-        // Create and show time picker dialog
-        val timePickerDialog = TimePickerDialog(
-            context,
-            { _, hourOfDay, minute ->
-                val time = formatTime(hourOfDay, minute)  // Format time
-                onTimeSet(time)  // Set the chosen time
-            },
-            initialHour, initialMinute, false
-        )
-        timePickerDialog.show()  // Show time picker dialog
     }
 
     Column(
@@ -224,7 +207,7 @@ fun QuestionnairePage(
 
         Text("Select Your Meal Time:", fontSize = 20.sp)  // Label for meal time selection
         Button(
-            onClick = { openTimePicker(biggestMealTime.value) { biggestMealTime.value = it } }  // Open time picker for biggest meal time
+            onClick = { viewModel.openTimePicker(context,biggestMealTime.value) { biggestMealTime.value = it } }  // Open time picker for biggest meal time
         ) {
             Text(biggestMealTime.value)  // Display selected meal time
         }
@@ -233,7 +216,7 @@ fun QuestionnairePage(
 
         Text("Select Your Sleep Time:", fontSize = 20.sp)  // Label for sleep time selection
         Button(
-            onClick = { openTimePicker(sleepTime.value) { sleepTime.value = it } }  // Open time picker for sleep time
+            onClick = { viewModel.openTimePicker(context,sleepTime.value) { sleepTime.value = it } }  // Open time picker for sleep time
         ) {
             Text(sleepTime.value)  // Display selected sleep time
         }
@@ -242,7 +225,7 @@ fun QuestionnairePage(
 
         Text("Select Your Wake Time:", fontSize = 20.sp)  // Label for wake time selection
         Button(
-            onClick = { openTimePicker(wakeTime.value) { wakeTime.value = it } }  // Open time picker for wake time
+            onClick = { viewModel.openTimePicker(context,wakeTime.value) { wakeTime.value = it } }  // Open time picker for wake time
         ) {
             Text(wakeTime.value)  // Display selected wake time
         }
@@ -273,28 +256,15 @@ fun QuestionnairePage(
     }
 }
 
-// Function to format time to "hh:mm a" format
-fun formatTime(hour: Int, minute: Int): String {
-    val calendar = Calendar.getInstance()
-    calendar.set(Calendar.HOUR_OF_DAY, hour)
-    calendar.set(Calendar.MINUTE, minute)
 
-    val format = SimpleDateFormat("hh:mm a", Locale.getDefault())  // Date format for time
-    return format.format(calendar.time)  // Return formatted time
-}
 
 // Modal to display selected persona details
 @Composable
 fun PersonaModal(selectedPersona: String, onDismiss: () -> Unit) {
-    val (textInput, imageResId) = when (selectedPersona) {
-        "Health Devotee" -> "You are highly committed to your health and wellness goals." to R.drawable.persona_1
-        "Mindful Eater" -> "You pay close attention to your food choices and eat with awareness." to R.drawable.persona_2
-        "Wellness Striver" -> "You make efforts to improve your well-being but seek more guidance." to R.drawable.persona_3
-        "Balance Seeker" -> "You value a balanced lifestyle and strive for moderation in eating." to R.drawable.persona_4
-        "Health Procrastinator" -> "You want to be healthier but often postpone taking action." to R.drawable.persona_5
-        "Food Carefree" -> "You enjoy food freely without strict rules or limitations." to R.drawable.persona_6
-        else -> "Invalid Persona" to R.drawable.default_image
-    }
+    val persona = PersonaEnum.fromDisplayName(selectedPersona)
+
+    val textInput = persona.description
+    val imageResId = persona.imageResId
 
     AlertDialog(
         onDismissRequest = onDismiss,  // Dismiss modal on request
