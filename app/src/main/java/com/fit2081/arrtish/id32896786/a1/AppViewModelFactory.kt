@@ -27,7 +27,7 @@ class AppViewModelFactory(
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return when {
             modelClass.isAssignableFrom(LoginViewModel::class.java) -> {
-                LoginViewModel(patientRepository) as T
+                LoginViewModel(foodIntakeRepository, patientRepository) as T
             }
             modelClass.isAssignableFrom(HomeViewModel::class.java) -> {
                 HomeViewModel(patientRepository) as T

@@ -12,12 +12,15 @@ import androidx.core.content.edit
 import androidx.lifecycle.LiveData
 import androidx.navigation.NavController
 import com.fit2081.arrtish.id32896786.a1.MainActivity
+import com.fit2081.arrtish.id32896786.a1.databases.foodintakedb.FoodIntakeRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
-class LoginViewModel(private val repository: PatientRepository) : ViewModel() {
+class LoginViewModel(private val foodIntakeRepository: FoodIntakeRepository, private val patientRepository: PatientRepository) : ViewModel() {
 
-    val patientIds: LiveData<List<Int>> = repository.allPatientIds()
-    val registeredPatientIds: LiveData<List<Int>> = repository.allRegisteredPatientIds()
-    val unregisteredPatientIds: LiveData<List<Int>> = repository.allUnregisteredPatientIds()
+    val patientIds: LiveData<List<Int>> = patientRepository.allPatientIds()
+    val registeredPatientIds: LiveData<List<Int>> = patientRepository.allRegisteredPatientIds()
+    val unregisteredPatientIds: LiveData<List<Int>> = patientRepository.allUnregisteredPatientIds()
 
     var registrationSuccessful = mutableStateOf(false)
         private set
@@ -40,7 +43,7 @@ class LoginViewModel(private val repository: PatientRepository) : ViewModel() {
 
     fun changePassword(selectedUserId: Int, inputPhoneNumber: String, new: String, confirm: String, context: Context) {
         viewModelScope.launch {
-            val patient = repository.getPatientById(selectedUserId)
+            val patient = patientRepository.getPatientById(selectedUserId)
 
             if (patient == null) {
                 changePasswordMessage.value = "User not found."
@@ -62,7 +65,7 @@ class LoginViewModel(private val repository: PatientRepository) : ViewModel() {
             val updatedPatient = patient.copy(
                 patientPassword = PasswordUtils.hashPassword(new.trim())
             )
-            repository.updatePatient(updatedPatient)
+            patientRepository.updatePatient(updatedPatient)
 
             changePasswordMessage.value = "Password updated successfully."
             changePasswordSuccessful.value = true
@@ -71,7 +74,7 @@ class LoginViewModel(private val repository: PatientRepository) : ViewModel() {
 
 
     fun appLogin(userId: String, password: String, navController: NavController, context: Context) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             loginSuccessful.value = false
             val patientId = userId.toIntOrNull()
             if (patientId == null) {
@@ -81,7 +84,7 @@ class LoginViewModel(private val repository: PatientRepository) : ViewModel() {
 
             Log.v(MainActivity.TAG, "inside vm: $patientId")
 
-            val patient = repository.getPatientById(patientId)
+            val patient = patientRepository.getPatientById(patientId)
 
             val logpw = patient?.patientPassword
 
@@ -105,15 +108,23 @@ class LoginViewModel(private val repository: PatientRepository) : ViewModel() {
                     return@launch
                 }
                 else -> {
-                    // ✅ Use AuthManager instead of SharedPreferences
                     AuthManager.login(patientId, context)
-                    loginMessage.value = "Login successful!"
-                    loginSuccessful.value = true
-                    // Navigate directly after login success
-                    navController.navigate("home") {
-                        popUpTo("login") { inclusive = true }
+                    val foodIntake = foodIntakeRepository.getFoodIntake(patientId)
+
+                    withContext(Dispatchers.Main) {
+                        loginMessage.value = "Login successful!"
+                        loginSuccessful.value = true
+
+                        if (foodIntake == null) {
+                            navController.navigate("questionnaire") {
+                                popUpTo("login") { inclusive = true }
+                            }
+                        } else {
+                            navController.navigate("home") {
+                                popUpTo("login") { inclusive = true }
+                            }
+                        }
                     }
-                    return@launch
                 }
             }
         }
@@ -130,7 +141,7 @@ class LoginViewModel(private val repository: PatientRepository) : ViewModel() {
                 return@launch
             }
 
-            val patient = repository.getPatientById(patientId)
+            val patient = patientRepository.getPatientById(patientId)
 
             if (patient == null || patient.patientPhoneNumber != phone) {
                 registrationMessage.value = "ID or phone number is incorrect."
@@ -146,7 +157,7 @@ class LoginViewModel(private val repository: PatientRepository) : ViewModel() {
                 patientName = name,
                 patientPassword = PasswordUtils.hashPassword(password)
             )
-            repository.updatePatient(updated)
+            patientRepository.updatePatient(updated)
             registrationSuccessful.value = true
             registrationMessage.value = "Registration successful!"
         }
