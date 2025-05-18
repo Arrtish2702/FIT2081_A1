@@ -18,6 +18,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -27,6 +28,9 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 import kotlin.String
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -91,6 +95,7 @@ fun QuestionnairePage(
         Log.v(MainActivity.TAG, "UI: existing intake updated: $it")
     }
 
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -98,11 +103,13 @@ fun QuestionnairePage(
                 start = 16.dp,
                 end = 16.dp,
                 top = 16.dp,
-                bottom = 120.dp // Ensures buttons at the bottom are visible
+                bottom = 16.dp // Ensures buttons at the bottom are visible
             )
             .verticalScroll(scrollState),  // Make column scrollable
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Text("Questionnaire", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+
         Spacer(modifier = Modifier.height(24.dp))
 
         Text("Select Food Categories:", fontSize = 20.sp)  // Label for food categories selection
@@ -124,7 +131,9 @@ fun QuestionnairePage(
                         Checkbox(
                             checked = selectedCategories.contains(category),
                             onCheckedChange = {
-                                if (it) selectedCategories.add(category) else selectedCategories.remove(category)
+                                if (it) selectedCategories.add(category) else selectedCategories.remove(
+                                    category
+                                )
                             }
                         )
                         Text(text = category, fontSize = 12.sp)
@@ -133,8 +142,6 @@ fun QuestionnairePage(
             }
 
         }
-
-        Spacer(modifier = Modifier.height(16.dp))  // Spacer for layout spacing
 
         Text("Select Your Persona:", fontSize = 20.sp)  // Label for persona selection
 
@@ -166,7 +173,9 @@ fun QuestionnairePage(
 
         // Show persona modal dialog if `showModal` is true
         if (showModal) {
-            PersonaModal(selectedPersona = selectedPersona.value, onDismiss = { showModal = false })
+            PersonaModal(
+                selectedPersona = selectedPersona.value,
+                onDismiss = { showModal = false })
         }
 
         Spacer(modifier = Modifier.height(16.dp))  // Spacer for layout spacing
@@ -207,7 +216,12 @@ fun QuestionnairePage(
 
         Text("Select Your Meal Time:", fontSize = 20.sp)  // Label for meal time selection
         Button(
-            onClick = { viewModel.openTimePicker(context,biggestMealTime.value) { biggestMealTime.value = it } }  // Open time picker for biggest meal time
+            onClick = {
+                viewModel.openTimePicker(
+                    context,
+                    biggestMealTime.value
+                ) { biggestMealTime.value = it }
+            }  // Open time picker for biggest meal time
         ) {
             Text(biggestMealTime.value)  // Display selected meal time
         }
@@ -216,7 +230,11 @@ fun QuestionnairePage(
 
         Text("Select Your Sleep Time:", fontSize = 20.sp)  // Label for sleep time selection
         Button(
-            onClick = { viewModel.openTimePicker(context,sleepTime.value) { sleepTime.value = it } }  // Open time picker for sleep time
+            onClick = {
+                viewModel.openTimePicker(context, sleepTime.value) {
+                    sleepTime.value = it
+                }
+            }  // Open time picker for sleep time
         ) {
             Text(sleepTime.value)  // Display selected sleep time
         }
@@ -225,7 +243,11 @@ fun QuestionnairePage(
 
         Text("Select Your Wake Time:", fontSize = 20.sp)  // Label for wake time selection
         Button(
-            onClick = { viewModel.openTimePicker(context,wakeTime.value) { wakeTime.value = it } }  // Open time picker for wake time
+            onClick = {
+                viewModel.openTimePicker(context, wakeTime.value) {
+                    wakeTime.value = it
+                }
+            }  // Open time picker for wake time
         ) {
             Text(wakeTime.value)  // Display selected wake time
         }
@@ -242,15 +264,18 @@ fun QuestionnairePage(
                     wakeTime = wakeTime.value,
                     selectedPersona = selectedPersona.value
                 )
+                navController.navigate("home") {
+                    popUpTo("questionnaire") { inclusive = true }
+                }
             }) {
                 Text("Save Responses")  // Save button
             }
 
-            Spacer(modifier = Modifier.width(4.dp))  // Spacer for layout spacing
+            //            Spacer(modifier = Modifier.width(4.dp))  // Spacer for layout spacing
 
-            Button(onClick = { viewModel.clearFoodIntake() }) {
-                Text("Clear Responses")  // Clear button
-            }
+            //            Button(onClick = { viewModel.clearFoodIntake() }) {
+            //                Text("Clear Responses")  // Clear button
+            //            }
         }
         Spacer(modifier = Modifier.height(32.dp))  // Spacer for layout spacing
     }
