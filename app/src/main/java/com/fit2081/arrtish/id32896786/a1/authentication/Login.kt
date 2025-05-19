@@ -185,6 +185,19 @@ fun LoginPage(
             ) {
                 Text("Change Password")
             }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Button(
+                onClick = {
+                    navController.navigate("register") {
+                        popUpTo("login") { inclusive = true }
+                    }
+                },
+                modifier = Modifier
+            ) {
+                Text("New to this app? Register here")
+            }
         }
     }
 }
