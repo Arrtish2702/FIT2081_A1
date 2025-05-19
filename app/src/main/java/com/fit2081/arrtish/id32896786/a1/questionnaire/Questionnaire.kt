@@ -2,6 +2,7 @@ package com.fit2081.arrtish.id32896786.a1.questionnaire
 
 import android.app.TimePickerDialog
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -42,11 +43,9 @@ fun QuestionnairePage(
         factory = AppViewModelFactory(LocalContext.current)
     )
 ) {
-
     val context = LocalContext.current
 
     Log.v(MainActivity.TAG, "Questionnaire: Vm made")
-    // Ensure we call loadPatientDataByIdAndIntake only once
     val hasLoaded = remember { mutableStateOf(false) }
     if (!hasLoaded.value) {
         viewModel.loadPatientDataByIdAndIntake(userId)
@@ -66,6 +65,16 @@ fun QuestionnairePage(
 
     var expanded by remember { mutableStateOf(false) }  // State for dropdown menu expansion
     var showModal by remember { mutableStateOf(false) }  // State for modal dialog visibility
+    val questionnaireMessage by viewModel.questionnaireMessage
+
+    LaunchedEffect(questionnaireMessage) {
+        questionnaireMessage?.let {
+            if (it.isNotBlank()) {
+                Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+                viewModel.questionnaireMessage.value = "" // reset message after showing
+            }
+        }
+    }
 
     LaunchedEffect(foodIntake) {
         if (foodIntake != null) {
@@ -270,12 +279,6 @@ fun QuestionnairePage(
             }) {
                 Text("Save Responses")  // Save button
             }
-
-            //            Spacer(modifier = Modifier.width(4.dp))  // Spacer for layout spacing
-
-            //            Button(onClick = { viewModel.clearFoodIntake() }) {
-            //                Text("Clear Responses")  // Clear button
-            //            }
         }
         Spacer(modifier = Modifier.height(32.dp))  // Spacer for layout spacing
     }

@@ -63,9 +63,9 @@ fun LoginPage(
     )
 ){
     var context = LocalContext.current
-    var selectedUserId by remember { mutableStateOf("") } // State to store selected user ID
+    var selectedUserId by remember { mutableStateOf("") }
     val userIds by viewModel.registeredPatientIds.observeAsState(initial = emptyList())
-    var expanded by remember { mutableStateOf(false) } // State to control dropdown menu expansion
+    var expanded by remember { mutableStateOf(false) }
     var password by remember { mutableStateOf("") }
 
     val loginMessage by viewModel.loginMessage
@@ -79,7 +79,6 @@ fun LoginPage(
             }
         }
     }
-
 
     if (isLoading) {
         Box(

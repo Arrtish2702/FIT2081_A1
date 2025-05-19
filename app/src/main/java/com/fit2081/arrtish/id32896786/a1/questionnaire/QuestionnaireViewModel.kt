@@ -3,6 +3,8 @@ package com.fit2081.arrtish.id32896786.a1.questionnaire
 import android.app.TimePickerDialog
 import android.content.Context
 import android.util.Log
+import android.widget.Toast
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -14,12 +16,12 @@ import com.fit2081.arrtish.id32896786.a1.databases.patientdb.Patient
 import com.fit2081.arrtish.id32896786.a1.databases.patientdb.PatientRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
-// 3) ViewModel
 class QuestionnaireViewModel(
     private val foodIntakeRepository: FoodIntakeRepository,
     private val patientRepository: PatientRepository           // inject via factory or pass in after login
@@ -27,6 +29,9 @@ class QuestionnaireViewModel(
 
     private val _patient = MutableLiveData<Patient?>()
     val patient: LiveData<Patient?> = _patient
+
+    var questionnaireMessage = mutableStateOf<String?>(null)
+        private set
 
     // This will hold the current userId
     private var patientId: Int? = null
@@ -81,9 +86,14 @@ class QuestionnaireViewModel(
 
         viewModelScope.launch {
             foodIntakeRepository.insertFoodIntake(intake)
+
+            withContext(Dispatchers.Main) {
+                questionnaireMessage.value = "Responses saved successfully."
+            }
+            Log.v(MainActivity.TAG, "QuestionnaireVM: data saved to db")
         }
-        Log.v(MainActivity.TAG, "QuestionnaireVM: data saved to db")
     }
+
 
     /** Clears the saved questionnaire for this patient */
     fun clearFoodIntake() {
