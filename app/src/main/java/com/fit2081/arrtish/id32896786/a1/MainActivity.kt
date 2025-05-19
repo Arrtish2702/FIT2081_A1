@@ -304,11 +304,32 @@ private fun openMonashClinic(context: Context) {
  *
  * FIX THE HTTP CONNECTION TO SEND DATASET TO LLM FOR 3 KEY DATA PATTERNS - CLINICIAN PART
  *
+ * FIX THE INSERT CHECK FOR QUESTIONNAIRE
+ *
+ * FIX ROUTING FOR LOGIN AND QUESTIONNAIRE TO HAVE THE NAV CONTROLLER IN THE UI
+ *
+ * DO CHECK RUN OF ALL REQUIREMENTS FOR THE ASSIGNMENT
+ *
+ * DO DOCUMENT LIST OF HD REQUIREMENTS
+ *  - put in pw hashing for user pws
+ *  - put in change pw page for users whom logged out and forgot their pw
+ *      - can add one inside of the app in settings page
+ *  - saved ai tips into db for users to skim through
+ *  - refactored routing and userid referencing for user ids in login/register/change pw
+ *  - add more hd stuff here for doc
+ *
+ *
+ *
+ *
 **/
 
 /** TO TEST
  *
  * FIX UP THE CLINICIAN LOGIN BACKEND IN THE SETTINGS PART.
+ *
+ * TEST FRUITYVICEAPI AGAIN
+ *
+ * DO SYSTEM WIDE APP TEST
  *
 **/
 
