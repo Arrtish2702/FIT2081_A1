@@ -12,6 +12,7 @@ import com.fit2081.arrtish.id32896786.a1.databases.patientdb.PatientRepository
 import com.fit2081.arrtish.id32896786.a1.gpt.ChatGptApi
 import com.fit2081.arrtish.id32896786.a1.gpt.ChatGptRequest
 import com.fit2081.arrtish.id32896786.a1.gpt.Message
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.Date
 
@@ -35,15 +36,15 @@ class NutriCoachViewModel(
     val tipsList: LiveData<List<AITips>> = _tipsList
 
     fun loadAllTips(patientId: Int) {
-        viewModelScope.launch {
-            _tipsList.value = aiTipsRepository.getTipsByPatientId(patientId)
-            val valuse = tipsList.value
-            Log.v(MainActivity.TAG, "$valuse")
+        viewModelScope.launch (Dispatchers.IO) {
+            _tipsList.postValue(aiTipsRepository.getTipsByPatientId(patientId))
+            val values = tipsList.value
+            Log.v(MainActivity.TAG, "$values")
         }
     }
 
     fun fetchFruit(name: String) {
-        viewModelScope.launch {
+        viewModelScope.launch (Dispatchers.IO) {
             try {
                 val fruits = fruityViceApi.getAllFruits() // get all fruits
                 val fruit = fruits.firstOrNull { it.name.equals(name.trim(), ignoreCase = true) }
@@ -51,29 +52,29 @@ class NutriCoachViewModel(
                 if (fruit != null) {
                     Log.v(MainActivity.TAG, "fruit: $fruit")
 
-                    _fruitDetails.value = mapOf(
+                    _fruitDetails.postValue(mapOf(
                         "family" to fruit.family,
                         "calories" to fruit.nutritions.calories.toString(),
                         "fat" to fruit.nutritions.fat.toString(),
                         "sugar" to fruit.nutritions.sugar.toString(),
                         "carbohydrates" to fruit.nutritions.carbohydrates.toString(),
                         "protein" to fruit.nutritions.protein.toString()
-                    )
-                    _errorMessage.value = null
+                    ))
+                    _errorMessage.postValue(null)
                 } else {
-                    _fruitDetails.value = emptyMap()
-                    _errorMessage.value = "Fruit not found: \"$name\""
+                    _fruitDetails.postValue(emptyMap())
+                    _errorMessage.postValue("Fruit not found: \"$name\"")
                 }
 
             } catch (t: Throwable) {
-                _fruitDetails.value = emptyMap()
-                _errorMessage.value = "Network error: ${t.localizedMessage}"
+                _fruitDetails.postValue(emptyMap())
+                _errorMessage.postValue("Network error: ${t.localizedMessage}")
             }
         }
     }
 
     fun generateMotivationalMessage(patientId: Int) {
-        viewModelScope.launch {
+        viewModelScope.launch (Dispatchers.IO){
             try {
                 val responseText = openAiApi.getChatResponse(
                     ChatGptRequest(
@@ -85,7 +86,7 @@ class NutriCoachViewModel(
                     )
                 ).choices.firstOrNull()?.message?.content ?: "Stay healthy!"
 
-                _motivationalMessage.value = responseText
+                _motivationalMessage.postValue(responseText)
 
                 val newTip = AITips(
                     tipsId = 0, // autoGenerate
@@ -98,7 +99,7 @@ class NutriCoachViewModel(
                 aiTipsRepository.insertTip(newTip)
 
             } catch (e: Exception) {
-                _motivationalMessage.value = "Failed to fetch inspiration: ${e.localizedMessage}"
+                _motivationalMessage.postValue("Failed to fetch inspiration: ${e.localizedMessage}")
             }
         }
     }

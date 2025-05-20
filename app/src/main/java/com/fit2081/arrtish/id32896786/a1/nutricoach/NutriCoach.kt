@@ -18,6 +18,7 @@ import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
 import com.fit2081.arrtish.id32896786.a1.MainActivity
 import androidx.compose.foundation.lazy.items
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.window.Dialog
 
 @Composable
 fun NutriCoachPage(
@@ -32,6 +33,8 @@ fun NutriCoachPage(
     val fruitDetails by viewModel.fruitDetails.observeAsState(emptyMap())
     val errorMessage by viewModel.errorMessage.observeAsState()
     val tipsList by viewModel.tipsList.observeAsState(emptyList())
+
+    var showTipsDialog by remember { mutableStateOf(false) }
 
     Box(
         modifier = Modifier
@@ -120,44 +123,68 @@ fun NutriCoachPage(
             Button(
                 onClick = {
                     viewModel.loadAllTips(userId)
+                    showTipsDialog = true
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Show All Tips")
             }
 
-            if (tipsList.isNotEmpty()) {
-                Spacer(Modifier.height(12.dp))
-                Text("Saved Tips", fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                Spacer(Modifier.height(8.dp))
 
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(500.dp) // Or use Modifier.weight(1f) if in a flexible layout
-                ) {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize()
+            if (showTipsDialog) {
+                Dialog(onDismissRequest = { showTipsDialog = false }) {
+                    Surface(
+                        shape = MaterialTheme.shapes.medium,
+                        tonalElevation = 4.dp,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
                     ) {
-                        items(items = tipsList, key = { it.tipsId }) { tip ->
-                            Card(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 4.dp),
-                                elevation = CardDefaults.cardElevation(2.dp)
-                            ) {
-                                Column(modifier = Modifier.padding(12.dp)) {
-                                    Text(
-                                        text = tip.responseString,
-                                        fontStyle = FontStyle.Italic
-                                    )
-                                    Spacer(modifier = Modifier.height(4.dp))
-                                    Text(
-                                        text = "Saved on: ${tip.responseTimeStamp}",
-                                        fontSize = 12.sp,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
+                        Column(
+                            modifier = Modifier
+                                .padding(16.dp)
+                                .fillMaxWidth()
+                                .heightIn(min = 100.dp, max = 500.dp)
+                        ) {
+                            Text("Saved Tips", fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                            Spacer(Modifier.height(8.dp))
+
+                            if (tipsList.isNotEmpty()) {
+                                LazyColumn(
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    items(items = tipsList, key = { it.tipsId }) { tip ->
+                                        Card(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(vertical = 4.dp),
+                                            elevation = CardDefaults.cardElevation(2.dp)
+                                        ) {
+                                            Column(modifier = Modifier.padding(12.dp)) {
+                                                Text(
+                                                    text = tip.responseString,
+                                                    fontStyle = FontStyle.Italic
+                                                )
+                                                Spacer(modifier = Modifier.height(4.dp))
+                                                Text(
+                                                    text = "Saved on: ${tip.responseTimeStamp}",
+                                                    fontSize = 12.sp,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                )
+                                            }
+                                        }
+                                    }
                                 }
+                            } else {
+                                Text("No tips available.")
+                            }
+
+                            Spacer(Modifier.height(16.dp))
+                            Button(
+                                onClick = { showTipsDialog = false },
+                                modifier = Modifier.align(Alignment.End)
+                            ) {
+                                Text("Close")
                             }
                         }
                     }
