@@ -34,7 +34,8 @@ fun SettingsPage(
     navController: NavHostController,
     viewModel: SettingsViewModel = viewModel(
         factory = AppViewModelFactory(LocalContext.current)
-    )
+    ),
+    isDarkTheme: MutableState<Boolean>
 ) {
     var expanded by remember { mutableStateOf(false) }
     var context = LocalContext.current
@@ -89,6 +90,14 @@ fun SettingsPage(
             Text("OTHER SETTINGS", fontWeight = FontWeight.SemiBold)
 
             Spacer(modifier = Modifier.height(12.dp))
+
+            Text("Dark Mode")
+            Switch(
+                checked = isDarkTheme.value,
+                onCheckedChange = { isDarkTheme.value = it }
+            )
+
+            Spacer(Modifier.width(8.dp))
 
             Button(
                 onClick = {
