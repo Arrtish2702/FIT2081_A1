@@ -53,6 +53,8 @@ class MainActivity : ComponentActivity() {
         ViewModelProvider(this)[MainViewModel::class.java]
     }
 
+    private val isDarkTheme = mutableStateOf(true)
+
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
@@ -69,7 +71,7 @@ class MainActivity : ComponentActivity() {
             val currentRoute = navBackStackEntry?.destination?.route
             val hideBottomBarRoutes = listOf("welcome", "login", "register", "changePassword", "questionnaire")
 
-            A1Theme {
+            A1Theme(darkTheme = isDarkTheme.value) {
                 Scaffold(
                     bottomBar = {
                         if (currentRoute !in hideBottomBarRoutes) {
@@ -77,7 +79,7 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 ) { innerPadding ->
-                    AppInitialisation(Modifier.padding(innerPadding), navController)
+                    AppInitialisation(Modifier.padding(innerPadding), navController, isDarkTheme = isDarkTheme)
                 }
             }
         }
@@ -90,7 +92,7 @@ class MainActivity : ComponentActivity() {
 
 
 @Composable
-fun AppInitialisation(modifier: Modifier, navController: NavHostController) {
+fun AppInitialisation(modifier: Modifier, navController: NavHostController, isDarkTheme: MutableState<Boolean>) {
     val context = LocalContext.current
     val userId by AuthManager._userId
 
@@ -128,7 +130,7 @@ fun AppInitialisation(modifier: Modifier, navController: NavHostController) {
             NutriCoachPage(userId ?: -1, modifier)
         }
         composable("settings") {
-            SettingsPage(userId ?: -1, modifier, navController)
+            SettingsPage(userId ?: -1, modifier, navController, isDarkTheme = isDarkTheme)
         }
         composable("clinician login") {
             ClinicianLogin(navController)
@@ -318,8 +320,13 @@ private fun openMonashClinic(context: Context) {
  *  - refactored routing and userid referencing for user ids in login/register/change pw
  *  - add more hd stuff here for doc
  *
+ * CHANGE SHOW ALL TIPS TO USE A MODAL POP UP FOR STATELIFECYCLE - UI CHANGE
  *
+ * ADD UNIQUE PASSWORD IDENTIFIER CHECKER FOR PASSWD
  *
+ * FIX SCREEN ROTATION ISSUES
+ *
+ * FIX QUESTIONNAIRE NOT HOLDING STATE FOR SCREEN ROTATE
  *
 **/
 
