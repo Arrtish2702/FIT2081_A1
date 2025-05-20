@@ -8,7 +8,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
 
-    private const val FRUITYVICE_BASE_URL = "https://www.fruityvice.com/api/"
+    private const val FRUITYVICE_BASE_URL = "https://www.fruityvice.com/"
     private const val OPENAI_BASE_URL    = "https://api.openai.com/"
 
     fun createFruityViceApi(): FruityViceApi =
