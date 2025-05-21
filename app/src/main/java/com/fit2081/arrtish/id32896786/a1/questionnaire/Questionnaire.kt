@@ -70,7 +70,14 @@ fun QuestionnairePage(
         questionnaireMessage?.let {
             if (it.isNotBlank()) {
                 Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
-                viewModel.questionnaireMessage.value = "" // reset message after showing
+
+                if (it == "Responses saved successfully.") {
+                    navController.navigate("home") {
+                        popUpTo("questionnaire") { inclusive = true }
+                    }
+                }
+
+                viewModel.questionnaireMessage.value = "" // reset message
             }
         }
     }
@@ -249,11 +256,8 @@ fun QuestionnairePage(
                     wakeTime = wakeTime.value,
                     selectedPersona = selectedPersona.value
                 )
-                navController.navigate("home") {
-                    popUpTo("questionnaire") { inclusive = true }
-                }
             }) {
-                Text("Save Responses")  // Save button
+                Text("Save Responses")
             }
         }
         Spacer(modifier = Modifier.height(32.dp))  // Spacer for layout spacing

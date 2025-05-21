@@ -96,33 +96,50 @@ class QuestionnaireViewModel(
         selectedPersona: String
     ) {
         val fmt = SimpleDateFormat("hh:mm a", Locale.getDefault())
+        val sleepDate = fmt.parse(sleepTime)
+        val wakeDate = fmt.parse(wakeTime)
+        val mealDate = fmt.parse(biggestMealTime)
+
+        if (selectedCategories.isEmpty()) {
+            questionnaireMessage.value = "Please select at least one food category."
+            return
+        }
+
+        if (selectedPersona.isBlank()) {
+            questionnaireMessage.value = "Please select your persona."
+            return
+        }
+
+        if (sleepDate == wakeDate || wakeDate == mealDate || sleepDate == mealDate) {
+            questionnaireMessage.value = "Sleep, wake, and meal times must be different."
+            return
+        }
+
         val intake = FoodIntake(
-            patientId        = patientId?:-1,
-            sleepTime        = fmt.parse(sleepTime)     ?: Date(),
-            wakeTime         = fmt.parse(wakeTime)      ?: Date(),
-            biggestMealTime  = fmt.parse(biggestMealTime) ?: Date(),
-            selectedPersona  = selectedPersona,
-            eatsFruits       = "Fruits"      in selectedCategories,
-            eatsVegetables   = "Vegetables"  in selectedCategories,
-            eatsGrains       = "Grains"      in selectedCategories,
-            eatsRedMeat      = "Red Meat"    in selectedCategories,
-            eatsSeafood      = "Seafood"     in selectedCategories,
-            eatsPoultry      = "Poultry"     in selectedCategories,
-            eatsFish         = "Fish"        in selectedCategories,
-            eatsEggs         = "Eggs"        in selectedCategories,
-            eatsNutsOrSeeds  = "Nuts/Seeds"  in selectedCategories
+            patientId = patientId ?: -1,
+            sleepTime = sleepDate ?: Date(),
+            wakeTime = wakeDate ?: Date(),
+            biggestMealTime = mealDate ?: Date(),
+            selectedPersona = selectedPersona,
+            eatsFruits = "Fruits" in selectedCategories,
+            eatsVegetables = "Vegetables" in selectedCategories,
+            eatsGrains = "Grains" in selectedCategories,
+            eatsRedMeat = "Red Meat" in selectedCategories,
+            eatsSeafood = "Seafood" in selectedCategories,
+            eatsPoultry = "Poultry" in selectedCategories,
+            eatsFish = "Fish" in selectedCategories,
+            eatsEggs = "Eggs" in selectedCategories,
+            eatsNutsOrSeeds = "Nuts/Seeds" in selectedCategories
         )
-        Log.v(MainActivity.TAG, "QuestionnaireVM: intake to save $intake ")
 
         viewModelScope.launch(Dispatchers.IO) {
             foodIntakeRepository.insertFoodIntake(intake)
-
             withContext(Dispatchers.Main) {
                 questionnaireMessage.value = "Responses saved successfully."
             }
-            Log.v(MainActivity.TAG, "QuestionnaireVM: data saved to db")
         }
     }
+
 
 
     /** Clears the saved questionnaire for this patient */
