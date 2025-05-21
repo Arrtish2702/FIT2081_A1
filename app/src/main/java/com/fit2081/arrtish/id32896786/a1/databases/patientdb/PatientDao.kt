@@ -27,6 +27,9 @@ interface PatientDao {
     @Query("SELECT patientId FROM patients WHERE patientName IS NOT NULL AND TRIM(patientName) != '' AND patientPassword IS NOT NULL AND TRIM(patientPassword) != ''")
     fun getRegisteredPatientIds(): LiveData<List<Int>>
 
+    @Query("SELECT * FROM patients WHERE patientName IS NOT NULL AND TRIM(patientName) != '' AND patientPassword IS NOT NULL AND TRIM(patientPassword) != ''")
+    fun getRegisteredPatients(): LiveData<List<Patient>>
+
     @Query("SELECT patientId FROM patients WHERE patientName IS NULL OR TRIM(patientName) = '' AND patientPassword IS NULL OR TRIM(patientPassword) = ''")
     fun getUnregisteredPatientIds(): LiveData<List<Int>>
 
