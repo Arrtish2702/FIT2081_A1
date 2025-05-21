@@ -141,7 +141,7 @@ fun NutriCoachPage(
             ) {
                 Icon(Icons.Default.Star, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
-                Text("Insightful Message (AI)")
+                Text("Motivational Message (AI)")
             }
 
             Spacer(Modifier.height(12.dp))
@@ -152,7 +152,14 @@ fun NutriCoachPage(
             ) {
                 when {
                     isGenerating -> {
-                        CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                        Box(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
                     }
                     motivationalMessage.isNotBlank() -> {
                         Text(
@@ -187,13 +194,13 @@ fun NutriCoachPage(
                         tonalElevation = 4.dp,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp)
+                            .padding(8.dp)
                     ) {
                         Column(
                             modifier = Modifier
-                                .padding(16.dp)
+                                .padding(8.dp)
                                 .fillMaxWidth()
-                                .heightIn(min = 100.dp, max = 500.dp)
+                                .heightIn(min = 300.dp, max = 700.dp)
                         ) {
                             Text("Saved Tips", fontWeight = FontWeight.Bold, fontSize = 20.sp)
                             Spacer(Modifier.height(8.dp))

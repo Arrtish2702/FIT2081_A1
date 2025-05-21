@@ -105,20 +105,32 @@ class NutriCoachViewModel(
         viewModelScope.launch(Dispatchers.IO) {
             _isGeneratingMessage.postValue(true)
             _motivationalMessage.postValue("") // Clear previous message
+
             try {
                 val patient = patientRepository.getPatientById(patientId)
                 val foodIntake = foodIntakeRepository.getFoodIntake(patientId)
+                val optimalFruit = _optimalFruitScore.value ?: false
 
                 if (patient != null && foodIntake != null) {
-                    val prompt = """
-                    Based on the following individual profile, provide 3 short dietary recommendations (max 2 sentences each) to improve overall health based on common dietary guidelines. Tailor tips to any weaknesses seen in the scores.
 
+                    val prompt = """
+                    You are a highly supportive and uplifting personal nutrition and wellness coach.
+
+                    The user has provided their health profile and nutrition data. Based on this, do ONE of the following:
+                    
+                    - If the user has an optimal fruit score (indicated as TRUE below), give a highly encouraging, personalized, celebratory message (max 3 sentences) to congratulate them and reinforce that habit.
+                    - Otherwise, give a brief and motivational dietary tips (3 sentences max per tip), tailored to the user’s profile, to help them improve their nutrition and habits.
+
+                    Make your tone empathetic, non-judgmental, empowering, and specific to the user.
+
+                    User Profile:
+                    Optimal Fruit Score: ${optimalFruit}
                     Name: ${patient.patientName}
                     Sex: ${patient.patientSex}
                     Sleep Time: ${foodIntake.sleepTime}
                     Wake Time: ${foodIntake.wakeTime}
                     Biggest Meal Time: ${foodIntake.biggestMealTime}
-                    Selected Persona: ${foodIntake.selectedPersona}
+                    Persona: ${foodIntake.selectedPersona}
 
                     Eats:
                     - Fruits: ${foodIntake.eatsFruits}
@@ -131,11 +143,11 @@ class NutriCoachViewModel(
                     - Eggs: ${foodIntake.eatsEggs}
                     - Nuts/Seeds: ${foodIntake.eatsNutsOrSeeds}
 
-                    Nutrition Scores:
-                    - Vegetables: ${patient.vegetables}
+                    Scores:
                     - Fruits: ${patient.fruits}
                     - Fruit Variation: ${patient.fruitsVariation}
                     - Fruit Serving Size: ${patient.fruitsServingSize}
+                    - Vegetables: ${patient.vegetables}
                     - Grains & Cereals: ${patient.grainsAndCereals}
                     - Whole Grains: ${patient.wholeGrains}
                     - Meat & Alternatives: ${patient.meatAndAlternatives}
@@ -153,21 +165,16 @@ class NutriCoachViewModel(
                         ChatGptRequest(
                             model = "gpt-4.1",
                             messages = listOf(
-                                Message("system", "You are a friendly fitness and nutrition coach."),
+                                Message("system", "You are a supportive and friendly nutrition coach."),
                                 Message("user", prompt)
                             )
                         )
                     )
 
-                    val tipsRaw = response.choices.firstOrNull()?.message?.content ?: "Eat more whole foods, drink plenty of water, and stay active."
-                    val tipsList = tipsRaw.split("\n")
-                        .map { it.trim() }
-                        .filter { it.isNotEmpty() && (it.first().isDigit() || it.startsWith("-")) }
-                        .map { it.removePrefix(Regex("""^\d+[\).]?\s*""").toString()) } // Remove leading numbering like "1. " or "1) "
+                    val fullResponse = response.choices.firstOrNull()?.message?.content
+                        ?: "You're doing great! Keep nourishing your body and celebrating your progress!"
 
-                    val selectedTip = if (tipsList.isNotEmpty()) tipsList.random() else "Stay consistent and make small healthy changes every day."
-
-                    _motivationalMessage.postValue(selectedTip)
+                    _motivationalMessage.postValue(fullResponse)
 
                     aiTipsRepository.insertTip(
                         AITips(
@@ -175,7 +182,7 @@ class NutriCoachViewModel(
                             patientId = patientId,
                             responseTimeStamp = Date(),
                             promptString = prompt,
-                            responseString = selectedTip
+                            responseString = fullResponse
                         )
                     )
                 } else {
