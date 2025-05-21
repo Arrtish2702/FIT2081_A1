@@ -1,10 +1,7 @@
-package com.fit2081.arrtish.id32896786.a1.authentication
+package com.fit2081.arrtish.id32896786.a1.authentication.login
 
-import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
-import androidx.activity.ComponentActivity
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -50,7 +47,7 @@ import androidx.navigation.NavController
 import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
 import com.fit2081.arrtish.id32896786.a1.MainActivity
 import com.fit2081.arrtish.id32896786.a1.R
-import com.fit2081.arrtish.id32896786.a1.home.HomeViewModel
+import com.fit2081.arrtish.id32896786.a1.authentication.login.LoginViewModel
 
 
 // Composable function for the login page UI

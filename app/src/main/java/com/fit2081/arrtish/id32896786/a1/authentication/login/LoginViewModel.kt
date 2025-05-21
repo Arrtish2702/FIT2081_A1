@@ -1,19 +1,19 @@
-package com.fit2081.arrtish.id32896786.a1.authentication
+package com.fit2081.arrtish.id32896786.a1.authentication.login
 
 import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.fit2081.arrtish.id32896786.a1.databases.patientdb.PatientRepository
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.launch
-import androidx.core.content.edit
-import androidx.lifecycle.LiveData
 import androidx.navigation.NavController
 import com.fit2081.arrtish.id32896786.a1.MainActivity
+import com.fit2081.arrtish.id32896786.a1.authentication.AuthManager
+import com.fit2081.arrtish.id32896786.a1.authentication.PasswordUtils
 import com.fit2081.arrtish.id32896786.a1.databases.foodintakedb.FoodIntakeRepository
+import com.fit2081.arrtish.id32896786.a1.databases.patientdb.PatientRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class LoginViewModel(private val foodIntakeRepository: FoodIntakeRepository, private val patientRepository: PatientRepository) : ViewModel() {
@@ -42,7 +42,7 @@ class LoginViewModel(private val foodIntakeRepository: FoodIntakeRepository, pri
     val changePasswordSuccessful = mutableStateOf(false)
 
     fun changePassword(selectedUserId: Int, inputPhoneNumber: String, new: String, confirm: String, context: Context) {
-        viewModelScope.launch (Dispatchers.IO){
+        viewModelScope.launch(Dispatchers.IO){
             val patient = patientRepository.getPatientById(selectedUserId)
 
             if (patient == null) {
@@ -82,18 +82,18 @@ class LoginViewModel(private val foodIntakeRepository: FoodIntakeRepository, pri
                 return@launch
             }
 
-            Log.v(MainActivity.TAG, "inside vm: $patientId")
+            Log.v(MainActivity.Companion.TAG, "inside vm: $patientId")
 
             val patient = patientRepository.getPatientById(patientId)
 
             val logpw = patient?.patientPassword
 
-            Log.v(MainActivity.TAG, "patient: $patient")
-            Log.v(MainActivity.TAG, "saved: $logpw")
-            Log.v(MainActivity.TAG, "input pw: $password")
+            Log.v(MainActivity.Companion.TAG, "patient: $patient")
+            Log.v(MainActivity.Companion.TAG, "saved: $logpw")
+            Log.v(MainActivity.Companion.TAG, "input pw: $password")
 
-            Log.v(MainActivity.TAG, "patient password length: ${patient?.patientPassword?.length}")
-            Log.v(MainActivity.TAG, "input password length: ${password.length}")
+            Log.v(MainActivity.Companion.TAG, "patient password length: ${patient?.patientPassword?.length}")
+            Log.v(MainActivity.Companion.TAG, "input password length: ${password.length}")
             when {
                 patient == null -> {
                     loginMessage.value = "User ID not found."
@@ -132,7 +132,7 @@ class LoginViewModel(private val foodIntakeRepository: FoodIntakeRepository, pri
 
     fun appRegister(selectedId: String, name: String, phone: String, password: String, confirmPassword: String) {
 
-        Log.d(MainActivity.TAG, "LoginViewModel: attempting appRegister")
+        Log.d(MainActivity.Companion.TAG, "LoginViewModel: attempting appRegister")
         viewModelScope.launch (Dispatchers.IO){
             registrationSuccessful.value = false
             val patientId = selectedId.toIntOrNull()

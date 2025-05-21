@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
+import com.fit2081.arrtish.id32896786.a1.authentication.login.LoginViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -40,7 +41,6 @@ fun ChangePasswordPage(
     var confirmNewPassword by remember { mutableStateOf("") }
     val userIds by viewModel.registeredPatientIds.observeAsState(initial = emptyList())
     var expanded by remember { mutableStateOf(false) } // State to control dropdown menu expansion
-    var password by remember { mutableStateOf("") }
 
     val message = viewModel.changePasswordMessage.value
     val passwordChangeSuccess = viewModel.changePasswordSuccessful.value
