@@ -22,6 +22,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
 import com.fit2081.arrtish.id32896786.a1.MainActivity
+import com.fit2081.arrtish.id32896786.a1.MainViewModel
 import com.fit2081.arrtish.id32896786.a1.authentication.AuthManager
 import com.fit2081.arrtish.id32896786.a1.questionnaire.QuestionnaireViewModel
 import com.fit2081.arrtish.id32896786.a1.ui.theme.A1Theme
@@ -32,16 +33,19 @@ fun SettingsPage(
     userId: Int,
     modifier: Modifier = Modifier,
     navController: NavHostController,
-    viewModel: SettingsViewModel = viewModel(
+    isDarkTheme: MutableState<Boolean>,
+    settingsViewModel: SettingsViewModel = viewModel(
         factory = AppViewModelFactory(LocalContext.current)
     ),
-    isDarkTheme: MutableState<Boolean>
+    mainViewModel: MainViewModel
 ) {
     var expanded by remember { mutableStateOf(false) }
     var context = LocalContext.current
-    val patient by viewModel.patient.observeAsState()
+    val patient by settingsViewModel.patient.observeAsState()
 
-    viewModel.loadPatientDataById(userId)
+    LaunchedEffect(userId) {
+        settingsViewModel.loadPatientDataById(userId)
+    }
 
     // Default values before patient data is loaded
     val phoneNumber = patient?.patientPhoneNumber ?: "Loading..."
@@ -94,8 +98,12 @@ fun SettingsPage(
             Text("Dark Mode")
             Switch(
                 checked = isDarkTheme.value,
-                onCheckedChange = { isDarkTheme.value = it }
+                onCheckedChange = { isDark ->
+                    isDarkTheme.value = isDark
+                    mainViewModel.saveThemePreference(context, isDark)
+                }
             )
+
 
             Spacer(Modifier.width(8.dp))
 

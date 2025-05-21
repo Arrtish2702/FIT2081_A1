@@ -3,6 +3,7 @@ package com.fit2081.arrtish.id32896786.a1
 import android.app.Application
 import android.content.Context
 import android.util.Log
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.fit2081.arrtish.id32896786.a1.databases.patientdb.Patient
@@ -17,17 +18,18 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.util.Date
 import androidx.core.content.edit
+import com.fit2081.arrtish.id32896786.a1.MainActivity.Companion.PREFS_NAME
 import com.fit2081.arrtish.id32896786.a1.authentication.AuthManager
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val patientDao = AppDataBase.getDatabase(application).patientDao()
     private val repository = PatientRepository(patientDao)
-    private val PREFS_NAME = "MyPrefs"
+    val isDarkTheme = mutableStateOf(false)
 
     fun loadAndInsertData(context: Context) {
 
-        val sharedPreferences = context.getSharedPreferences(PREFS_NAME,Context.MODE_PRIVATE)
+        val sharedPreferences = context.getSharedPreferences(MainActivity.PREFS_NAME,Context.MODE_PRIVATE)
         val allEntries = sharedPreferences.all
         for ((key, value) in allEntries) {
             Log.v(MainActivity.TAG, "SharedPref entry: $key = $value")
@@ -90,5 +92,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
             Log.v(MainActivity.TAG, "MainViewModel:Data loaded and inserted successfully.")
         }
+    }
+
+    fun loadThemePreference(context: Context) {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        isDarkTheme.value = prefs.getBoolean("dark_mode", false)
+    }
+
+    fun saveThemePreference(context: Context, isDark: Boolean) {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putBoolean("dark_mode", isDark).apply()
+        isDarkTheme.value = isDark
     }
 }

@@ -1,5 +1,6 @@
 package com.fit2081.arrtish.id32896786.a1
 
+import android.app.Application
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -17,7 +18,7 @@ import com.fit2081.arrtish.id32896786.a1.nutricoach.RetrofitClient
 import com.fit2081.arrtish.id32896786.a1.questionnaire.QuestionnaireViewModel
 
 class AppViewModelFactory(
-    context: Context
+    private val context: Context
 ) : ViewModelProvider.Factory {
     val db = AppDataBase.getDatabase(context)
     val patientRepository = PatientRepository(db.patientDao())
@@ -26,6 +27,9 @@ class AppViewModelFactory(
 
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return when {
+            modelClass.isAssignableFrom(MainViewModel::class.java) -> {
+                MainViewModel(context.applicationContext as Application) as T
+            }
             modelClass.isAssignableFrom(LoginViewModel::class.java) -> {
                 LoginViewModel(foodIntakeRepository, patientRepository) as T
             }

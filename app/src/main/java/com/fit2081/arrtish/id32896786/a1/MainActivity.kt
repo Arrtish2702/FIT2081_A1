@@ -48,16 +48,19 @@ import com.fit2081.arrtish.id32896786.a1.settings.SettingsPage
 
 class MainActivity : ComponentActivity() {
 
-    // Create MainViewModel using ViewModelProvider
-    private val viewModel: MainViewModel by lazy {
-        ViewModelProvider(this)[MainViewModel::class.java]
+    private val viewModelFactory by lazy {
+        AppViewModelFactory(this)  // pass Activity as Context
     }
 
-    private val isDarkTheme = mutableStateOf(true)
+    private val viewModel: MainViewModel by lazy {
+        ViewModelProvider(this, viewModelFactory)[MainViewModel::class.java]
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
+
+        viewModel.loadThemePreference(this)
 
         AuthManager.loadSession(this)
 
@@ -71,7 +74,7 @@ class MainActivity : ComponentActivity() {
             val currentRoute = navBackStackEntry?.destination?.route
             val hideBottomBarRoutes = listOf("welcome", "login", "register", "changePassword", "questionnaire")
 
-            A1Theme(darkTheme = isDarkTheme.value) {
+            A1Theme(darkTheme = viewModel.isDarkTheme.value) {
                 Scaffold(
                     bottomBar = {
                         if (currentRoute !in hideBottomBarRoutes) {
@@ -79,7 +82,7 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 ) { innerPadding ->
-                    AppInitialisation(Modifier.padding(innerPadding), navController, isDarkTheme = isDarkTheme)
+                    AppInitialisation(Modifier.padding(innerPadding), navController, isDarkTheme = viewModel.isDarkTheme, viewModel )
                 }
             }
         }
@@ -87,12 +90,13 @@ class MainActivity : ComponentActivity() {
 
     companion object {
         val TAG = "FIT2081-A3"
+        val PREFS_NAME = "MyPrefs"
     }
 }
 
 
 @Composable
-fun AppInitialisation(modifier: Modifier, navController: NavHostController, isDarkTheme: MutableState<Boolean>) {
+fun AppInitialisation(modifier: Modifier, navController: NavHostController, isDarkTheme: MutableState<Boolean>, viewModel: MainViewModel) {
     val context = LocalContext.current
     val userId by AuthManager._userId
 
@@ -130,7 +134,7 @@ fun AppInitialisation(modifier: Modifier, navController: NavHostController, isDa
             NutriCoachPage(userId ?: -1, modifier)
         }
         composable("settings") {
-            SettingsPage(userId ?: -1, modifier, navController, isDarkTheme = isDarkTheme)
+            SettingsPage(userId ?: -1, modifier, navController, isDarkTheme = isDarkTheme, mainViewModel = viewModel)
         }
         composable("clinician login") {
             ClinicianLogin(navController)
@@ -320,13 +324,11 @@ private fun openMonashClinic(context: Context) {
  *  - refactored routing and userid referencing for user ids in login/register/change pw
  *  - add more hd stuff here for doc
  *
- * CHANGE SHOW ALL TIPS TO USE A MODAL POP UP FOR STATELIFECYCLE - UI CHANGE
+ * FIX DARKTHEME TO HOLD ON APP DESTROY
  *
  * ADD UNIQUE PASSWORD IDENTIFIER CHECKER FOR PASSWD
  *
  * FIX SCREEN ROTATION ISSUES
- *
- * FIX QUESTIONNAIRE NOT HOLDING STATE FOR SCREEN ROTATE
  *
 **/
 
@@ -341,6 +343,10 @@ private fun openMonashClinic(context: Context) {
 **/
 
 /** DONE
+ *
+ * FIX QUESTIONNAIRE NOT HOLDING STATE FOR SCREEN ROTATE
+ *
+ * CHANGE SHOW ALL TIPS TO USE A MODAL POP UP FOR STATELIFECYCLE - UI CHANGE
  *
  * HASHED THE PASSWORD FOR THE USERS
  *
