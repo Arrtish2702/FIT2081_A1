@@ -91,6 +91,8 @@ class MainViewModel(
                     patientPhoneNumber = phone,
                     vegetables = tokens[if (isMale) 8 else 9].toFloat(),
                     fruits = tokens[if (isMale) 19 else 20].toFloat(),
+                    fruitsVariation = tokens[21].toFloat(),
+                    fruitsServingSize = tokens[22].toFloat(),
                     grainsAndCereals = tokens[if (isMale) 29 else 30].toFloat(),
                     wholeGrains = tokens[if (isMale) 33 else 34].toFloat(),
                     meatAndAlternatives = tokens[if (isMale) 36 else 37].toFloat(),

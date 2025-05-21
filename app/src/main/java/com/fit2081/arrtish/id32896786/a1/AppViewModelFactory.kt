@@ -49,7 +49,7 @@ class AppViewModelFactory(
             }
             modelClass.isAssignableFrom(NutriCoachViewModel::class.java) -> {
 //                @Suppress("UNCHECKED_CAST")
-                NutriCoachViewModel(aiTipsRepository, fruityViceApi, openAIApi) as T
+                NutriCoachViewModel(patientRepository, foodIntakeRepository, aiTipsRepository, fruityViceApi, openAIApi) as T
             }
             modelClass.isAssignableFrom(QuestionnaireViewModel::class.java) -> {
                 QuestionnaireViewModel(foodIntakeRepository, patientRepository) as T

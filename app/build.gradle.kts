@@ -80,5 +80,6 @@ dependencies {
     implementation(libs.androidx.runtime.livedata)
     implementation(libs.retrofit)                // Retrofit core :contentReference[oaicite:1]{index=1}
     implementation(libs.converter.gson)
+    implementation(libs.coil.compose)
 }
 

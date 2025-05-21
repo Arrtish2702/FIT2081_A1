@@ -12,11 +12,15 @@ import com.fit2081.arrtish.id32896786.a1.databases.aitipsdb.AITipsRepository
 import com.fit2081.arrtish.id32896786.a1.api.gpt.ChatGptApi
 import com.fit2081.arrtish.id32896786.a1.api.gpt.ChatGptRequest
 import com.fit2081.arrtish.id32896786.a1.api.gpt.Message
+import com.fit2081.arrtish.id32896786.a1.databases.foodintakedb.FoodIntakeRepository
+import com.fit2081.arrtish.id32896786.a1.databases.patientdb.PatientRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.Date
 
 class NutriCoachViewModel(
+    private val patientRepository: PatientRepository,
+    private val foodIntakeRepository: FoodIntakeRepository,
     private val aiTipsRepository: AITipsRepository,
     private val fruityViceApi: FruityViceApi,
     private val openAiApi: ChatGptApi
@@ -25,6 +29,9 @@ class NutriCoachViewModel(
     // Expose the details map as LiveData / State
     private val _fruitDetails = MutableLiveData<Map<String, String>>(emptyMap())
     val fruitDetails: LiveData<Map<String, String>> = _fruitDetails
+
+    private val _optimalFruitScore = MutableLiveData<Boolean>()
+    val optimalFruitScore: LiveData<Boolean> = _optimalFruitScore
 
     private val _motivationalMessage = MutableLiveData<String>("")
     val motivationalMessage: LiveData<String> = _motivationalMessage
@@ -42,6 +49,23 @@ class NutriCoachViewModel(
             Log.v(MainActivity.TAG, "$values")
         }
     }
+
+    fun optimalFruitScoreChecker(patientId: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val patient = patientRepository.getPatientById(patientId)
+
+            if (patient != null) {
+                val variation = patient.fruitsVariation
+                val servingSize = patient.fruitsServingSize
+                val isOptimal = variation >= 5.0f && servingSize >= 2.0f
+                _optimalFruitScore.postValue(isOptimal)
+                Log.v(MainActivity.TAG, "optimal score: $isOptimal | variation=$variation, servingSize=$servingSize")
+            } else {
+                _optimalFruitScore.postValue(false)
+            }
+        }
+    }
+
 
     fun fetchFruit(name: String) {
         viewModelScope.launch (Dispatchers.IO) {

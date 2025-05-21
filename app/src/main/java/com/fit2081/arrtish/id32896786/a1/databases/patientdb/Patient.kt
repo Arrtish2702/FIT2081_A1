@@ -16,6 +16,8 @@ data class Patient(
     var patientPhoneNumber: String,
     val vegetables: Float,
     val fruits: Float,
+    val fruitsVariation: Float,
+    val fruitsServingSize: Float,
     val grainsAndCereals: Float,
     val wholeGrains: Float,
     val meatAndAlternatives: Float,

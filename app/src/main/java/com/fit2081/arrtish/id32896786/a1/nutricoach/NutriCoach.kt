@@ -18,9 +18,12 @@ import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
 import com.fit2081.arrtish.id32896786.a1.MainActivity
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.window.Dialog
+import coil.compose.AsyncImage
 
 @Composable
 fun NutriCoachPage(
@@ -30,11 +33,16 @@ fun NutriCoachPage(
 ) {
     val viewModel: NutriCoachViewModel = viewModel(factory = viewModelFactory)
 
+    LaunchedEffect(Unit) {
+        viewModel.optimalFruitScoreChecker(userId)
+    }
+
     var fruitName by remember { mutableStateOf("") }
     val motivationalMessage by viewModel.motivationalMessage.observeAsState("")
     val fruitDetails by viewModel.fruitDetails.observeAsState(emptyMap())
     val errorMessage by viewModel.errorMessage.observeAsState()
     val tipsList by viewModel.tipsList.observeAsState(emptyList())
+    val optimalFruitScore by viewModel.optimalFruitScore.observeAsState()
 
     var showTipsDialog by remember { mutableStateOf(false) }
 
@@ -57,43 +65,71 @@ fun NutriCoachPage(
 
             Spacer(Modifier.height(24.dp))
 
-            OutlinedTextField(
-                value = fruitName,
-                onValueChange = { fruitName = it },
-                label = { Text("Fruit Name") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(Modifier.height(8.dp))
-
-            Button(
-                onClick = {
-                    viewModel.fetchFruit(fruitName)
-                },
-                modifier = Modifier.align(Alignment.End)
-            ) {
-                Text("Details")
-            }
-
-            Spacer(Modifier.height(16.dp))
-
-            // Show error if any
-            errorMessage?.let { err ->
-                Text(
-                    text = err,
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(Modifier.height(8.dp))
-            }
-
             // Render the details
-            if (fruitDetails.isNotEmpty()) {
-                fruitDetails.forEach { (label, value) ->
-                    Row(modifier = Modifier.fillMaxWidth()) {
-                        Text("$label :", fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
-                        Text(value, modifier = Modifier.weight(1f))
+            when (optimalFruitScore) {
+                true -> {
+                    // Show passive image when fruit score is optimal
+                    AsyncImage(
+                        model = "https://picsum.photos/600/400", // size can be changed
+                        contentDescription = "Random Fruit Image",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp)
+                            .padding(8.dp),
+                        contentScale = ContentScale.Crop
+                    )
+                }
+                false -> {
+                    OutlinedTextField(
+                        value = fruitName,
+                        onValueChange = { fruitName = it },
+                        label = { Text("Fruit Name") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(Modifier.height(8.dp))
+
+                    Button(
+                        onClick = {
+                            viewModel.fetchFruit(fruitName)
+                        },
+                        modifier = Modifier.align(Alignment.End),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text("Details")
                     }
-                    Spacer(Modifier.height(4.dp))
+
+                    Spacer(Modifier.height(16.dp))
+
+                    // Show error if any
+                    errorMessage?.let { err ->
+                        Text(
+                            text = err,
+                            color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Spacer(Modifier.height(8.dp))
+                    }
+
+                    // Show fruit details if not optimal
+                    if (fruitDetails.isNotEmpty()) {
+                        fruitDetails.forEach { (label, value) ->
+                            Row(modifier = Modifier.fillMaxWidth()) {
+                                Text("$label :", fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
+                                Text(value, modifier = Modifier.weight(1f))
+                            }
+                            Spacer(Modifier.height(4.dp))
+                        }
+                    }
+                }
+                null -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(150.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
                 }
             }
 
@@ -103,7 +139,8 @@ fun NutriCoachPage(
                 onClick = {
                     viewModel.generateMotivationalMessage(userId)
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp)
             ) {
                 Icon(Icons.Default.Star, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
@@ -130,7 +167,8 @@ fun NutriCoachPage(
                     viewModel.loadAllTips(userId)
                     showTipsDialog = true
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp)
             ) {
                 Text("Show All Tips")
             }
@@ -187,7 +225,8 @@ fun NutriCoachPage(
                             Spacer(Modifier.height(16.dp))
                             Button(
                                 onClick = { showTipsDialog = false },
-                                modifier = Modifier.align(Alignment.End)
+                                modifier = Modifier.align(Alignment.End),
+                                shape = RoundedCornerShape(12.dp)
                             ) {
                                 Text("Close")
                             }
