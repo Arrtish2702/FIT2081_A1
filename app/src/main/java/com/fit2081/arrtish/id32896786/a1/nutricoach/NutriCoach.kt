@@ -17,6 +17,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
 import com.fit2081.arrtish.id32896786.a1.MainActivity
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.Dialog
 
@@ -36,6 +38,8 @@ fun NutriCoachPage(
 
     var showTipsDialog by remember { mutableStateOf(false) }
 
+    val scrollState = rememberScrollState()
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -45,6 +49,7 @@ fun NutriCoachPage(
         Column(
             modifier = modifier
                 .fillMaxSize()
+                .verticalScroll(scrollState)
                 .padding(16.dp)
 
         ) {

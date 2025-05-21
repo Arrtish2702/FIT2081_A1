@@ -11,11 +11,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.unit.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -52,6 +55,8 @@ fun SettingsPage(
     val phoneNumber = patient?.patientPhoneNumber ?: "Loading..."
     val userName = patient?.patientName ?: "Loading..."
 
+    val scrollState = rememberScrollState()
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -60,6 +65,7 @@ fun SettingsPage(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .verticalScroll(scrollState)
                 .padding(16.dp)
         ) {
             Text("Settings", fontSize = 24.sp, fontWeight = FontWeight.Bold)
@@ -96,15 +102,19 @@ fun SettingsPage(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            Text("Dark Mode")
-            Switch(
-                checked = isDarkTheme.value,
-                onCheckedChange = { isDark ->
-                    isDarkTheme.value = isDark
-                    mainViewModel.saveThemePreference(context, isDark)
-                }
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("Dark Mode")
 
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Switch(
+                    checked = isDarkTheme.value,
+                    onCheckedChange = { isDark ->
+                        isDarkTheme.value = isDark
+                        mainViewModel.saveThemePreference(context, isDark)
+                    }
+                )
+            }
 
             Spacer(Modifier.width(8.dp))
 

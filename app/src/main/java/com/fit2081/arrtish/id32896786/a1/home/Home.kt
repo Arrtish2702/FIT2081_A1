@@ -3,6 +3,8 @@ package com.fit2081.arrtish.id32896786.a1.home
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
@@ -27,6 +29,7 @@ fun HomePage(userId: Int,
 ) {
     val viewModel: HomeViewModel = viewModel(factory = viewModelFactory)
     val patient by viewModel.patient.observeAsState()
+    val scrollState = rememberScrollState()
 
     // Call the ViewModel function to load data when userId changes
     viewModel.loadPatientDataById(userId)
@@ -53,6 +56,7 @@ fun HomePage(userId: Int,
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp), // Space between elements
                 modifier = Modifier.fillMaxSize()
+                .verticalScroll(scrollState)
             ) {
                 Spacer(modifier = Modifier.height(4.dp))
                 Row(
@@ -85,7 +89,7 @@ fun HomePage(userId: Int,
 
                 // Display greeting with the user's ID
                 Text(
-                    text = "Hello, ${name ?: "Guest"}!", // If userId is null, show "Guest"
+                    text = "Hello, ${name}!", // If userId is null, show "Guest"
                     fontSize = 24.sp, // Font size for greeting
                     style = MaterialTheme.typography.titleMedium,
                     textAlign = TextAlign.Center // Center align the text

@@ -13,7 +13,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Person
@@ -65,6 +67,8 @@ fun LoginPage(
     var expanded by remember { mutableStateOf(false) }
     var password by remember { mutableStateOf("") }
 
+    val scrollState = rememberScrollState()
+
     val loginMessage by viewModel.loginMessage
     val isLoading = viewModel.isLoading.value
 
@@ -88,114 +92,111 @@ fun LoginPage(
         }
     }
 
-    Box(
-        modifier = modifier
-            .fillMaxSize() // Fill the screen with the Box
-            .padding(16.dp) // Apply padding
+    Column(
+        modifier = modifier.fillMaxSize()
+            .verticalScroll(scrollState)
+            .padding(16.dp), // Fill screen and add padding
+        verticalArrangement = Arrangement.Top, // Center vertically
+        horizontalAlignment = Alignment.CenterHorizontally // Center horizontally
     ) {
-        // Display logo image at the top of the screen
+        // Display "Login" header text
         Image(
             painter = painterResource(id = R.drawable.logo_for_an_app_called_nutritrack),
             contentDescription = "NutriTrack Logo",
             modifier = Modifier
                 .size(200.dp) // Set logo size
-                .align(Alignment.TopCenter) // Align logo to the top center
+//                    .align(Alignment.TopCenter) // Align logo to the top center
                 .padding(top = 60.dp) // Apply top padding to space out the logo
         )
-        // Column to arrange UI elements vertically
-        Column(
-            modifier = modifier.fillMaxSize().padding(16.dp), // Fill screen and add padding
-            verticalArrangement = Arrangement.Center, // Center vertically
-            horizontalAlignment = Alignment.CenterHorizontally // Center horizontally
-        ) {
-            // Display "Login" header text
-            Text(
-                "Login",
-                style = MaterialTheme.typography.headlineLarge, // Use the large headline style
-                fontWeight = FontWeight.Bold // Set bold font weight
-            )
 
-            // Exposed dropdown menu for user selection
-            ExposedDropdownMenuBox(
-                expanded = expanded,
-                onExpandedChange = { expanded = !expanded }) { // Toggle dropdown expansion on click
-                OutlinedTextField(
-                    value = selectedUserId, // Bind selected user ID to text field
-                    onValueChange = {}, // No action on value change, read-only field
-                    label = { Text("User ID") }, // Label for the input
-                    leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) }, // Person icon
-                    trailingIcon = { Icon(Icons.Filled.ArrowDropDown, contentDescription = null) }, // Dropdown icon
-                    readOnly = true, // Make the field read-only
-                    modifier = Modifier.fillMaxWidth().menuAnchor() // Full width and position dropdown
-                )
+        Spacer(modifier = Modifier.height(36.dp))
 
-                // Dropdown menu that shows all user IDs
-                ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                    userIds.forEach { userId -> // Loop through user IDs
-                        DropdownMenuItem(text = { Text(userId.toString()) }, onClick = {
-                            selectedUserId = userId.toString() // Set selected user ID
-                            expanded = false // Close dropdown
-                        })
-                    }
-                }
-            }
+        Text(
+            "Login",
+            style = MaterialTheme.typography.headlineLarge, // Use the large headline style
+            fontWeight = FontWeight.Bold // Set bold font weight
+        )
 
+        // Exposed dropdown menu for user selection
+        ExposedDropdownMenuBox(
+            expanded = expanded,
+            onExpandedChange = { expanded = !expanded }) { // Toggle dropdown expansion on click
             OutlinedTextField(
-                value = password,
-                onValueChange = { password = it },
-                label = { Text("Password") },
-                placeholder = { Text("Enter your password") },
-                visualTransformation = PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                modifier = Modifier.fillMaxWidth()
+                value = selectedUserId, // Bind selected user ID to text field
+                onValueChange = {}, // No action on value change, read-only field
+                label = { Text("User ID") }, // Label for the input
+                leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) }, // Person icon
+                trailingIcon = { Icon(Icons.Filled.ArrowDropDown, contentDescription = null) }, // Dropdown icon
+                readOnly = true, // Make the field read-only
+                modifier = Modifier.fillMaxWidth().menuAnchor() // Full width and position dropdown
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Login button that triggers authentication
-            Button(onClick = {
-                if (selectedUserId.isNotEmpty() && password.isNotEmpty()) {
-                    Log.v(MainActivity.TAG, "input user: $selectedUserId")
-                    Log.v(MainActivity.TAG, "password on login: $password")
-                    viewModel.loginSuccessful.value = false
-                    viewModel.appLogin(selectedUserId, password, navController, context)
-                } else {
-                    Toast.makeText(
-                        context,
-                        "Please select a user ID and enter a phone number",
-                        Toast.LENGTH_SHORT
-                    ).show()
+            // Dropdown menu that shows all user IDs
+            ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                userIds.forEach { userId -> // Loop through user IDs
+                    DropdownMenuItem(text = { Text(userId.toString()) }, onClick = {
+                        selectedUserId = userId.toString() // Set selected user ID
+                        expanded = false // Close dropdown
+                    })
                 }
-            }, modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Login") // Button label
             }
+        }
 
-            Spacer(modifier = Modifier.height(12.dp))
+        OutlinedTextField(
+            value = password,
+            onValueChange = { password = it },
+            label = { Text("Password") },
+            placeholder = { Text("Enter your password") },
+            visualTransformation = PasswordVisualTransformation(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            modifier = Modifier.fillMaxWidth()
+        )
 
-            Button(
-                onClick = {
-                    navController.navigate("changePassword") {
-                        popUpTo("login") { inclusive = true }
-                    }
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Change Password")
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Login button that triggers authentication
+        Button(onClick = {
+            if (selectedUserId.isNotEmpty() && password.isNotEmpty()) {
+                Log.v(MainActivity.TAG, "input user: $selectedUserId")
+                Log.v(MainActivity.TAG, "password on login: $password")
+                viewModel.loginSuccessful.value = false
+                viewModel.appLogin(selectedUserId, password, navController, context)
+            } else {
+                Toast.makeText(
+                    context,
+                    "Please select a user ID and enter a phone number",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
+        }, modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Login") // Button label
+        }
 
-            Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
-            Button(
-                onClick = {
-                    navController.navigate("register") {
-                        popUpTo("login") { inclusive = true }
-                    }
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("New to this app? Register here")
-            }
+        Button(
+            onClick = {
+                navController.navigate("changePassword") {
+                    popUpTo("login") { inclusive = true }
+                }
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Change Password")
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Button(
+            onClick = {
+                navController.navigate("register") {
+                    popUpTo("login") { inclusive = true }
+                }
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("New to this app? Register here")
         }
     }
 }

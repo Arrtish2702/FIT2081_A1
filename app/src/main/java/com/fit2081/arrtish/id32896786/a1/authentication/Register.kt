@@ -6,7 +6,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Person
@@ -35,13 +37,16 @@ fun RegisterPage(
 ) {
     var context = LocalContext.current
     val viewModel: LoginViewModel = viewModel(factory = viewModelFactory)
-    var selectedUserId by remember { mutableStateOf("") } // State to store selected user ID
     val userIds by viewModel.unregisteredPatientIds.observeAsState(initial = emptyList())
-    var phone by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var confirmPassword by remember { mutableStateOf("") }
-    var name by remember { mutableStateOf("") }
+    val selectedUserId by viewModel.regSelectedUserId
+    val name by viewModel.regName
+    val phone by viewModel.regPhone
+    val password by viewModel.regPassword
+    val confirmPassword by viewModel.regConfirmPassword
+
     val message = viewModel.registrationMessage.value
+
+    val scrollState = rememberScrollState()
 
     LaunchedEffect(message) {
         message?.let {
@@ -62,6 +67,7 @@ fun RegisterPage(
     Column(
         modifier = modifier
             .fillMaxSize()
+            .verticalScroll(scrollState)
             .padding(24.dp),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -93,7 +99,7 @@ fun RegisterPage(
             ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                 userIds.forEach { userId -> // Loop through user IDs
                     DropdownMenuItem(text = { Text(userId.toString()) }, onClick = {
-                        selectedUserId = userId.toString() // Set selected user ID
+                        viewModel.regSelectedUserId.value = userId.toString() // Set selected user ID
                         expanded = false // Close dropdown
                     })
                 }
@@ -104,7 +110,7 @@ fun RegisterPage(
 
         OutlinedTextField(
             value = name,
-            onValueChange = { name = it },
+            onValueChange = { viewModel.regName.value = it },
             label = { Text("Name") },
             placeholder = { Text("Enter your name") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
@@ -115,7 +121,7 @@ fun RegisterPage(
 
         OutlinedTextField(
             value = phone,
-            onValueChange = { phone = it },
+            onValueChange = { viewModel.regPhone.value = it },
             label = { Text("Phone Number") },
             placeholder = { Text("Enter your phone number") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
@@ -126,7 +132,7 @@ fun RegisterPage(
 
         OutlinedTextField(
             value = password,
-            onValueChange = { password = it },
+            onValueChange = { viewModel.regPassword.value = it },
             label = { Text("Password") },
             placeholder = { Text("Enter your password") },
             visualTransformation = PasswordVisualTransformation(),
@@ -138,7 +144,7 @@ fun RegisterPage(
 
         OutlinedTextField(
             value = confirmPassword,
-            onValueChange = { confirmPassword = it },
+            onValueChange = { viewModel.regConfirmPassword.value = it },
             label = { Text("Confirm Password") },
             placeholder = { Text("Enter your password again") },
             visualTransformation = PasswordVisualTransformation(),

@@ -14,7 +14,9 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.ui.graphics.Color
@@ -30,7 +32,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.fit2081.arrtish.id32896786.a1.authentication.AuthManager
-import com.fit2081.arrtish.id32896786.a1.authentication.ChangePasswordPage
+import com.fit2081.arrtish.id32896786.a1.authentication.ForgotPasswordPage
 import com.fit2081.arrtish.id32896786.a1.authentication.login.LoginPage
 import com.fit2081.arrtish.id32896786.a1.authentication.RegisterPage
 import com.fit2081.arrtish.id32896786.a1.clinician.ClinicianLogin
@@ -121,7 +123,7 @@ fun AppInitialisation(
             RegisterPage(modifier, navController, viewModelFactory)
         }
         composable("changePassword") {
-            ChangePasswordPage(modifier, navController)
+            ForgotPasswordPage(modifier, navController)
         }
         composable("home") {
             HomePage(userId ?: -1, modifier, navController, viewModelFactory)
@@ -205,11 +207,13 @@ fun WelcomePage(
 ) {
     // Get the current context to use it for navigation actions
     val context = LocalContext.current
+    val scrollState = rememberScrollState()
 
     // Column layout to arrange components vertically
     Column(
         modifier = modifier
             .fillMaxSize() // Fill the entire screen
+            .verticalScroll(scrollState)
             .padding(16.dp), // Add padding around the edges
         verticalArrangement = Arrangement.Center, // Center the items vertically
         horizontalAlignment = Alignment.CenterHorizontally // Center the items horizontally

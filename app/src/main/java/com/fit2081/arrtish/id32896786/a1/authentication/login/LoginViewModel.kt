@@ -38,6 +38,19 @@ class LoginViewModel(private val foodIntakeRepository: FoodIntakeRepository, pri
         isLoading.value = value
     }
 
+    // Registration Form State
+    var regSelectedUserId = mutableStateOf("")
+    var regName = mutableStateOf("")
+    var regPhone = mutableStateOf("")
+    var regPassword = mutableStateOf("")
+    var regConfirmPassword = mutableStateOf("")
+
+    // Change Password Form State
+    var changeSelectedUserId = mutableStateOf("")
+    var changePhoneNumber = mutableStateOf("")
+    var changeNewPassword = mutableStateOf("")
+    var changeConfirmPassword = mutableStateOf("")
+
     val changePasswordMessage = mutableStateOf<String?>(null)
     val changePasswordSuccessful = mutableStateOf(false)
 

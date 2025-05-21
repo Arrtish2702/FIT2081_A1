@@ -2,7 +2,9 @@ package com.fit2081.arrtish.id32896786.a1.authentication
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Person
@@ -29,18 +31,20 @@ import com.fit2081.arrtish.id32896786.a1.authentication.login.LoginViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChangePasswordPage(
+fun ForgotPasswordPage(
     modifier: Modifier = Modifier,
     navController: NavController,
     viewModel: LoginViewModel = viewModel(factory = AppViewModelFactory(LocalContext.current))
 ) {
     val context = LocalContext.current
-    var selectedUserId by remember { mutableStateOf("") }
-    var phoneNumber by remember { mutableStateOf("") }
-    var newPassword by remember { mutableStateOf("") }
-    var confirmNewPassword by remember { mutableStateOf("") }
+    val selectedUserId by viewModel.changeSelectedUserId
+    val phoneNumber by viewModel.changePhoneNumber
+    val newPassword by viewModel.changeNewPassword
+    val confirmNewPassword by viewModel.changeConfirmPassword
     val userIds by viewModel.registeredPatientIds.observeAsState(initial = emptyList())
     var expanded by remember { mutableStateOf(false) } // State to control dropdown menu expansion
+    val scrollState = rememberScrollState()
+
 
     val message = viewModel.changePasswordMessage.value
     val passwordChangeSuccess = viewModel.changePasswordSuccessful.value
@@ -63,6 +67,7 @@ fun ChangePasswordPage(
     Column(
         modifier = modifier
             .fillMaxSize()
+            .verticalScroll(scrollState)
             .padding(24.dp),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -90,7 +95,7 @@ fun ChangePasswordPage(
             ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                 userIds.forEach { userId -> // Loop through user IDs
                     DropdownMenuItem(text = { Text(userId.toString()) }, onClick = {
-                        selectedUserId = userId.toString() // Set selected user ID
+                        viewModel.changeSelectedUserId.value = userId.toString() // Set selected user ID
                         expanded = false // Close dropdown
                     })
                 }
@@ -101,7 +106,7 @@ fun ChangePasswordPage(
 
         OutlinedTextField(
             value = phoneNumber,
-            onValueChange = { phoneNumber = it },
+            onValueChange = { viewModel.regPhone.value = it },
             label = { Text("Phone Number") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
             modifier = Modifier.fillMaxWidth()
@@ -111,7 +116,7 @@ fun ChangePasswordPage(
 
         OutlinedTextField(
             value = newPassword,
-            onValueChange = { newPassword = it },
+            onValueChange = { viewModel.regPassword.value = it },
             label = { Text("New Password") },
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
@@ -122,7 +127,7 @@ fun ChangePasswordPage(
 
         OutlinedTextField(
             value = confirmNewPassword,
-            onValueChange = { confirmNewPassword = it },
+            onValueChange = { viewModel.regConfirmPassword.value = it },
             label = { Text("Confirm New Password") },
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
