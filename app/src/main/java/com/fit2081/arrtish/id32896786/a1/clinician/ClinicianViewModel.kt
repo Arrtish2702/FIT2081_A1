@@ -49,7 +49,6 @@ class ClinicianViewModel(
     fun generateInterestingPatterns() {
         viewModelScope.launch {
             try {
-                // Fetch current data snapshot
                 val patients = allPatients.value ?: emptyList()
                 val foodIntakes = allFoodIntakes.value ?: emptyList()
 
@@ -61,30 +60,32 @@ class ClinicianViewModel(
                     return@launch
                 }
 
-                // Build a summary text for the prompt
                 val patientCount = patients.size
-
+                val avgTotalScore = patients.map { it.totalScore }.average()
                 val avgFruitBySex = patients.groupBy { it.patientSex.lowercase() }
-                    .mapValues { (_, group) ->
-                        group.map { it.fruits }.average()
-                    }
+                    .mapValues { (_, group) -> group.map { it.fruits }.average() }
 
                 val avgVegBySex = patients.groupBy { it.patientSex.lowercase() }
-                    .mapValues { (_, group) ->
-                        group.map { it.vegetables }.average()
-                    }
+                    .mapValues { (_, group) -> group.map { it.vegetables }.average() }
 
-                // You can add more data points here...
+                val eatsFruitsPercent = foodIntakes.count { it.eatsFruits } * 100 / foodIntakes.size
+                val lateSleepers = foodIntakes.count { it.sleepTime.hours > 22 }  // crude example
+                val commonPersona = foodIntakes.groupBy { it.selectedPersona }
+                    .maxByOrNull { it.value.size }?.key ?: "Not specified"
 
                 val prompt = """
-                    Analyze the following dataset summary and provide 3 interesting patterns in simple sentences:
+                You are a clinical nutrition data analyst. Analyze the summary data below and extract 5 key clinician insights. Focus on identifying trends, health flags, and meaningful behavior or score patterns.
 
-                    - Total patients: $patientCount
-                    - Average fruit scores by sex: $avgFruitBySex
-                    - Average vegetable scores by sex: $avgVegBySex
+                - Total patients: $patientCount
+                - Average total HEIFA score: ${"%.2f".format(avgTotalScore)}
+                - Average fruit score by sex: $avgFruitBySex
+                - Average vegetable score by sex: $avgVegBySex
+                - Percentage of patients who eat fruits: $eatsFruitsPercent%
+                - Most common dietary persona: $commonPersona
+                - Number of patients sleeping after 10 PM: $lateSleepers
 
-                    Use insights such as correlations, differences between groups, or other meaningful trends.
-                    """.trimIndent()
+                Return 5 unique, comprehensive, and useful clinician insights based on this data.
+            """.trimIndent()
 
                 val messages = listOf(
                     Message(role = "system", content = "You are a helpful data analyst."),
@@ -92,23 +93,23 @@ class ClinicianViewModel(
                 )
 
                 val request = ChatGptRequest(
-                    model = "gpt-4.1",  // use your model
+                    model = "gpt-4.1",
                     messages = messages,
                     temperature = 0.7
                 )
 
                 val response = openAiApi.getChatResponse(request)
-
-                // Extract text response
                 val content = response.choices.firstOrNull()?.message?.content ?: "No insights found."
 
-                // Split into lines or sentences (basic split by newline or period)
-                val patternsList = content.split("\n")
-                    .map { it.trim() }
+                val allInsights = content
+                    .split("\n")
+                    .map { it.trim().removePrefix("-").removePrefix("•").trim() }
                     .filter { it.isNotEmpty() }
-                    .take(3)
 
-                _patterns.postValue(patternsList)
+                // Randomly pick 3 insights
+                val selected = allInsights.shuffled().take(3)
+
+                _patterns.postValue(selected)
 
             } catch (e: Exception) {
                 _patterns.postValue(listOf("Error generating patterns: ${e.message}"))

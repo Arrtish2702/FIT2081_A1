@@ -405,5 +405,4 @@ private fun openMonashClinic(context: Context) {
  *
  * FIX UP THE CLINICIAN PAGE FOR THE AVG SCORE MALE & FEMALE
  *
- *
  **/
