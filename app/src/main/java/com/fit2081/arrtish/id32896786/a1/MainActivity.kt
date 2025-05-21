@@ -335,11 +335,7 @@ private fun openMonashClinic(context: Context) {
 
 /**TODO LIST:
  *
- * DO THE NONSENSE FRUIT SCORE FOR FRUITYVICE
- *
- * UPDATE THE NUTRICOACH GPT QUERY WITH ADDITIONAL PATIENT AND FOODINTAKE DATA
- *
- * ENHANCE THE PROMPTS OF BOTH CLINICIAN AND NUTRICOACH
+ * ENHANCE THE PROMPTS OF CLINICIAN
  *
  * ADD UNIQUE PASSWORD IDENTIFIER CHECKER FOR PASSWD
  *
@@ -354,8 +350,6 @@ private fun openMonashClinic(context: Context) {
  *  - light/dark theme with rmb state
  *  - unique password requirements
  *
- *
- *
 **/
 
 /** TO TEST
@@ -365,6 +359,10 @@ private fun openMonashClinic(context: Context) {
 **/
 
 /** DONE
+ *
+ * UPDATE THE NUTRICOACH GPT QUERY WITH ADDITIONAL PATIENT AND FOODINTAKE DATA
+ *
+ * DO THE NONSENSE FRUIT SCORE FOR FRUITYVICE
  *
  * FIX ROUTING FOR LOGIN AND QUESTIONNAIRE TO HAVE THE NAV CONTROLLER IN THE UI
  *

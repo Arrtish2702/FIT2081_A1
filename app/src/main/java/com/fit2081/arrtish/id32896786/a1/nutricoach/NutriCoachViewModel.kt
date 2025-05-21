@@ -42,6 +42,10 @@ class NutriCoachViewModel(
     private val _tipsList = MutableLiveData<List<AITips>>(emptyList())
     val tipsList: LiveData<List<AITips>> = _tipsList
 
+    private val _isGeneratingMessage = MutableLiveData(false)
+    val isGeneratingMessage: LiveData<Boolean> = _isGeneratingMessage
+
+
     fun loadAllTips(patientId: Int) {
         viewModelScope.launch (Dispatchers.IO) {
             _tipsList.postValue(aiTipsRepository.getTipsByPatientId(patientId))
@@ -97,33 +101,91 @@ class NutriCoachViewModel(
         }
     }
 
-    fun generateMotivationalMessage(patientId: Int) {
-        viewModelScope.launch (Dispatchers.IO){
+    fun generateInsightfulMessage(patientId: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            _isGeneratingMessage.postValue(true)
+            _motivationalMessage.postValue("") // Clear previous message
             try {
-                val responseText = openAiApi.getChatResponse(
-                    ChatGptRequest(
-                        model = "gpt-4.1",
-                        messages = listOf(
-                            Message("system", "You are a friendly fitness and nutrition coach."),
-                            Message("user", "Give me a short inspirational message about healthy eating.")
+                val patient = patientRepository.getPatientById(patientId)
+                val foodIntake = foodIntakeRepository.getFoodIntake(patientId)
+
+                if (patient != null && foodIntake != null) {
+                    val prompt = """
+                    Based on the following individual profile, provide 3 short dietary recommendations (max 2 sentences each) to improve overall health based on common dietary guidelines. Tailor tips to any weaknesses seen in the scores.
+
+                    Name: ${patient.patientName}
+                    Sex: ${patient.patientSex}
+                    Sleep Time: ${foodIntake.sleepTime}
+                    Wake Time: ${foodIntake.wakeTime}
+                    Biggest Meal Time: ${foodIntake.biggestMealTime}
+                    Selected Persona: ${foodIntake.selectedPersona}
+
+                    Eats:
+                    - Fruits: ${foodIntake.eatsFruits}
+                    - Vegetables: ${foodIntake.eatsVegetables}
+                    - Grains: ${foodIntake.eatsGrains}
+                    - Red Meat: ${foodIntake.eatsRedMeat}
+                    - Seafood: ${foodIntake.eatsSeafood}
+                    - Poultry: ${foodIntake.eatsPoultry}
+                    - Fish: ${foodIntake.eatsFish}
+                    - Eggs: ${foodIntake.eatsEggs}
+                    - Nuts/Seeds: ${foodIntake.eatsNutsOrSeeds}
+
+                    Nutrition Scores:
+                    - Vegetables: ${patient.vegetables}
+                    - Fruits: ${patient.fruits}
+                    - Fruit Variation: ${patient.fruitsVariation}
+                    - Fruit Serving Size: ${patient.fruitsServingSize}
+                    - Grains & Cereals: ${patient.grainsAndCereals}
+                    - Whole Grains: ${patient.wholeGrains}
+                    - Meat & Alternatives: ${patient.meatAndAlternatives}
+                    - Dairy & Alternatives: ${patient.dairyAndAlternatives}
+                    - Water: ${patient.water}
+                    - Unsaturated Fats: ${patient.unsaturatedFats}
+                    - Sodium: ${patient.sodium}
+                    - Sugar: ${patient.sugar}
+                    - Alcohol: ${patient.alcohol}
+                    - Discretionary Foods: ${patient.discretionaryFoods}
+                    - Total HEIFA Score: ${patient.totalScore}
+                """.trimIndent()
+
+                    val response = openAiApi.getChatResponse(
+                        ChatGptRequest(
+                            model = "gpt-4.1",
+                            messages = listOf(
+                                Message("system", "You are a friendly fitness and nutrition coach."),
+                                Message("user", prompt)
+                            )
                         )
                     )
-                ).choices.firstOrNull()?.message?.content ?: "Stay healthy!"
 
-                _motivationalMessage.postValue(responseText)
+                    val tipsRaw = response.choices.firstOrNull()?.message?.content ?: "Eat more whole foods, drink plenty of water, and stay active."
+                    val tipsList = tipsRaw.split("\n")
+                        .map { it.trim() }
+                        .filter { it.isNotEmpty() && (it.first().isDigit() || it.startsWith("-")) }
+                        .map { it.removePrefix(Regex("""^\d+[\).]?\s*""").toString()) } // Remove leading numbering like "1. " or "1) "
 
-                val newTip = AITips(
-                    tipsId = 0, // autoGenerate
-                    patientId = patientId,
-                    responseTimeStamp = Date(),
-                    promptString = "Give me a short inspirational message about healthy eating.",
-                    responseString = responseText
-                )
+                    val selectedTip = if (tipsList.isNotEmpty()) tipsList.random() else "Stay consistent and make small healthy changes every day."
 
-                aiTipsRepository.insertTip(newTip)
+                    _motivationalMessage.postValue(selectedTip)
+
+                    aiTipsRepository.insertTip(
+                        AITips(
+                            tipsId = 0,
+                            patientId = patientId,
+                            responseTimeStamp = Date(),
+                            promptString = prompt,
+                            responseString = selectedTip
+                        )
+                    )
+                } else {
+                    _motivationalMessage.postValue("Data missing: Could not generate tip.")
+                }
 
             } catch (e: Exception) {
-                _motivationalMessage.postValue("Failed to fetch inspiration: ${e.localizedMessage}")
+                _motivationalMessage.postValue("Failed to fetch tip: ${e.localizedMessage}")
+            } finally {
+                _isGeneratingMessage.postValue(false)
             }
         }
     }

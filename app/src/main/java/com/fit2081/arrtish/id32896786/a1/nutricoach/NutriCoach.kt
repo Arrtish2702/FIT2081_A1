@@ -1,6 +1,5 @@
 package com.fit2081.arrtish.id32896786.a1.nutricoach
 
-import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
@@ -9,13 +8,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.*
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
-import com.fit2081.arrtish.id32896786.a1.MainActivity
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -36,7 +33,7 @@ fun NutriCoachPage(
     LaunchedEffect(Unit) {
         viewModel.optimalFruitScoreChecker(userId)
     }
-
+    val isGenerating by viewModel.isGeneratingMessage.observeAsState(false)
     var fruitName by remember { mutableStateOf("") }
     val motivationalMessage by viewModel.motivationalMessage.observeAsState("")
     val fruitDetails by viewModel.fruitDetails.observeAsState(emptyMap())
@@ -137,14 +134,14 @@ fun NutriCoachPage(
 
             Button(
                 onClick = {
-                    viewModel.generateMotivationalMessage(userId)
+                    viewModel.generateInsightfulMessage(userId)
                 },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Icon(Icons.Default.Star, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
-                Text("Motivational Message (AI)")
+                Text("Insightful Message (AI)")
             }
 
             Spacer(Modifier.height(12.dp))
@@ -153,11 +150,20 @@ fun NutriCoachPage(
                 modifier = Modifier.fillMaxWidth(),
                 elevation = CardDefaults.cardElevation(4.dp)
             ) {
-                Text(
-                    motivationalMessage,
-                    modifier = Modifier.padding(12.dp),
-                    fontStyle = FontStyle.Italic
-                )
+                when {
+                    isGenerating -> {
+                        CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                    }
+                    motivationalMessage.isNotBlank() -> {
+                        Text(
+                            motivationalMessage,
+                            fontStyle = FontStyle.Italic
+                        )
+                    }
+                    else -> {
+                        Text("Press the button above to receive a motivational insight.", fontStyle = FontStyle.Italic)
+                    }
+                }
             }
 
             Spacer(Modifier.height(20.dp))
