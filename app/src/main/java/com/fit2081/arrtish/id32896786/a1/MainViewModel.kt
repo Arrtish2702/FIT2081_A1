@@ -18,14 +18,35 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.util.Date
 import androidx.core.content.edit
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import com.fit2081.arrtish.id32896786.a1.MainActivity.Companion.PREFS_NAME
 import com.fit2081.arrtish.id32896786.a1.authentication.AuthManager
+import com.fit2081.arrtish.id32896786.a1.databases.foodintakedb.FoodIntakeDao
+import com.fit2081.arrtish.id32896786.a1.databases.foodintakedb.FoodIntakeRepository
+import com.fit2081.arrtish.id32896786.a1.databases.patientdb.PatientDao
 
-class MainViewModel(application: Application) : AndroidViewModel(application) {
+class MainViewModel(
+    application: Application,
+    private val patientRepository: PatientRepository,
+    private val foodIntakeRepository: FoodIntakeRepository)
+: AndroidViewModel(application) {
 
-    private val patientDao = AppDataBase.getDatabase(application).patientDao()
-    private val repository = PatientRepository(patientDao)
     val isDarkTheme = mutableStateOf(false)
+
+    private val _hasAnsweredQuestionnaire = MutableLiveData(false)
+    val hasAnsweredQuestionnaire: LiveData<Boolean> = _hasAnsweredQuestionnaire
+
+    private val _questionnaireCheckComplete = MutableLiveData(false)
+    val questionnaireCheckComplete: LiveData<Boolean> = _questionnaireCheckComplete
+
+    fun checkIfQuestionnaireAnswered(userId: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val intake = foodIntakeRepository.getFoodIntake(userId)
+            _hasAnsweredQuestionnaire.postValue(intake != null)
+            _questionnaireCheckComplete.postValue(true)
+        }
+    }
 
     fun loadAndInsertData(context: Context) {
 
@@ -82,7 +103,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     discretionaryFoods = tokens[if (isMale) 5 else 6].toFloat(),
                     totalScore = tokens[if (isMale) 3 else 4].toFloat()
                 )
-                repository.safeInsert(patient)
+                patientRepository.safeInsert(patient)
             }
 
             // After data insertion, set the flag in SharedPreferences

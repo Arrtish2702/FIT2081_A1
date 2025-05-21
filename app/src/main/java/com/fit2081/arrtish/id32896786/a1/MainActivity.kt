@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -101,50 +102,69 @@ fun AppInitialisation(
     viewModel: MainViewModel,
     viewModelFactory: AppViewModelFactory
 ) {
-    val context = LocalContext.current
     val userId by AuthManager._userId
 
-    Log.v(MainActivity.TAG, "userID on login: $userId")
+    val hasAnsweredQuestionnaire by viewModel.hasAnsweredQuestionnaire.observeAsState(initial = false)
+    val questionnaireCheckComplete by viewModel.questionnaireCheckComplete.observeAsState(initial = false)
+    var startDestination by remember { mutableStateOf<String?>(null) }
 
-    val startDestination = if (userId != null && userId != -1) {
-        "home"
-    } else {
-        "welcome"
+    // Trigger check and only update startDestination after completion
+    LaunchedEffect(userId, questionnaireCheckComplete) {
+        if (userId != null && userId != -1 && !questionnaireCheckComplete) {
+            viewModel.checkIfQuestionnaireAnswered(userId!!)
+        } else if (userId == null || userId == -1) {
+            startDestination = "welcome"
+        } else if (questionnaireCheckComplete) {
+            startDestination = if (!hasAnsweredQuestionnaire) "questionnaire" else "home"
+        }
     }
-
-    NavHost(navController = navController, startDestination = startDestination) {
-        composable("welcome") {
-            WelcomePage(modifier, navController)
+    Log.v(MainActivity.TAG, "userID on login: $userId")
+    // 🌀 Show a loading indicator until startDestination is ready
+    if (startDestination == null) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
         }
-        composable("login") {
-            LoginPage(modifier, navController, viewModelFactory)
-        }
-        composable("register") {
-            RegisterPage(modifier, navController, viewModelFactory)
-        }
-        composable("changePassword") {
-            ForgotPasswordPage(modifier, navController)
-        }
-        composable("home") {
-            HomePage(userId ?: -1, modifier, navController, viewModelFactory)
-        }
-        composable("questionnaire") {
-            QuestionnairePage(userId ?: -1, navController, viewModelFactory)
-        }
-        composable("insights") {
-            InsightsPage(userId ?: -1, modifier, navController, viewModelFactory)
-        }
-        composable("nutricoach") {
-            NutriCoachPage(userId ?: -1, modifier, viewModelFactory)
-        }
-        composable("settings") {
-            SettingsPage(userId ?: -1, modifier, navController, isDarkTheme = isDarkTheme, viewModelFactory)
-        }
-        composable("clinician login") {
-            ClinicianLogin(navController, viewModelFactory)
-        }
-        composable("clinician") {
-            ClinicianPage(userId ?: -1, modifier, navController, viewModelFactory)
+    } else {
+        NavHost(navController = navController, startDestination = startDestination!!) {
+            composable("welcome") {
+                WelcomePage(modifier, navController)
+            }
+            composable("login") {
+                LoginPage(modifier, navController, viewModelFactory)
+            }
+            composable("register") {
+                RegisterPage(modifier, navController, viewModelFactory)
+            }
+            composable("changePassword") {
+                ForgotPasswordPage(modifier, navController)
+            }
+            composable("home") {
+                HomePage(userId ?: -1, modifier, navController, viewModelFactory)
+            }
+            composable("questionnaire") {
+                QuestionnairePage(userId ?: -1, navController, viewModelFactory)
+            }
+            composable("insights") {
+                InsightsPage(userId ?: -1, modifier, navController, viewModelFactory)
+            }
+            composable("nutricoach") {
+                NutriCoachPage(userId ?: -1, modifier, viewModelFactory)
+            }
+            composable("settings") {
+                SettingsPage(
+                    userId ?: -1,
+                    modifier,
+                    navController,
+                    isDarkTheme = isDarkTheme,
+                    viewModelFactory
+                )
+            }
+            composable("clinician login") {
+                ClinicianLogin(navController, viewModelFactory)
+            }
+            composable("clinician") {
+                ClinicianPage(userId ?: -1, modifier, navController, viewModelFactory)
+            }
         }
     }
 }
@@ -316,8 +336,6 @@ private fun openMonashClinic(context: Context) {
  *
  * FIX THE HTTP CONNECTION TO SEND DATASET TO LLM FOR 3 KEY DATA PATTERNS - CLINICIAN PART
  *
- * FIX THE INSERT CHECK FOR QUESTIONNAIRE
- *
  * FIX ROUTING FOR LOGIN AND QUESTIONNAIRE TO HAVE THE NAV CONTROLLER IN THE UI
  *
  * DO CHECK RUN OF ALL REQUIREMENTS FOR THE ASSIGNMENT
@@ -333,8 +351,6 @@ private fun openMonashClinic(context: Context) {
  *
  * ADD UNIQUE PASSWORD IDENTIFIER CHECKER FOR PASSWD
  *
- * FIX SCREEN ROTATION ISSUES
- *
 **/
 
 /** TO TEST
@@ -348,6 +364,10 @@ private fun openMonashClinic(context: Context) {
 **/
 
 /** DONE
+ *
+ * FIX THE INSERT CHECK FOR QUESTIONNAIRE
+ *
+ * FIX SCREEN ROTATION ISSUES
  *
  * FIX DARKTHEME TO HOLD ON APP DESTROY
  *

@@ -123,11 +123,10 @@ class LoginViewModel(private val foodIntakeRepository: FoodIntakeRepository, pri
                 else -> {
                     AuthManager.login(patientId, context)
                     val foodIntake = foodIntakeRepository.getFoodIntake(patientId)
-
+                    Log.v(MainActivity.TAG, "foodintake: $foodIntake")
                     withContext(Dispatchers.Main) {
                         loginMessage.value = "Login successful!"
                         loginSuccessful.value = true
-
                         if (foodIntake == null) {
                             navController.navigate("questionnaire") {
                                 popUpTo("login") { inclusive = true }
