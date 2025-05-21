@@ -36,13 +36,13 @@ import com.fit2081.arrtish.id32896786.a1.authentication.AuthManager
 import com.fit2081.arrtish.id32896786.a1.authentication.ForgotPasswordPage
 import com.fit2081.arrtish.id32896786.a1.authentication.login.LoginPage
 import com.fit2081.arrtish.id32896786.a1.authentication.RegisterPage
-import com.fit2081.arrtish.id32896786.a1.clinician.ClinicianLogin
-import com.fit2081.arrtish.id32896786.a1.clinician.ClinicianPage
-import com.fit2081.arrtish.id32896786.a1.home.HomePage
-import com.fit2081.arrtish.id32896786.a1.insights.InsightsPage
-import com.fit2081.arrtish.id32896786.a1.nutricoach.NutriCoachPage
-import com.fit2081.arrtish.id32896786.a1.questionnaire.QuestionnairePage
-import com.fit2081.arrtish.id32896786.a1.settings.SettingsPage
+import com.fit2081.arrtish.id32896786.a1.internalpages.clinician.ClinicianLogin
+import com.fit2081.arrtish.id32896786.a1.internalpages.clinician.ClinicianPage
+import com.fit2081.arrtish.id32896786.a1.internalpages.home.HomePage
+import com.fit2081.arrtish.id32896786.a1.internalpages.insights.InsightsPage
+import com.fit2081.arrtish.id32896786.a1.internalpages.nutricoach.NutriCoachPage
+import com.fit2081.arrtish.id32896786.a1.internalpages.questionnaire.QuestionnairePage
+import com.fit2081.arrtish.id32896786.a1.internalpages.settings.SettingsPage
 
 
 class MainActivity : ComponentActivity() {
@@ -335,7 +335,6 @@ private fun openMonashClinic(context: Context) {
 
 /**TODO LIST:
  *
- * ENHANCE THE PROMPTS OF CLINICIAN
  *
  * ADD UNIQUE PASSWORD IDENTIFIER CHECKER FOR PASSWD
  *
@@ -349,6 +348,8 @@ private fun openMonashClinic(context: Context) {
  *  - refactored routing and userid referencing for user ids in login/register/change pw
  *  - light/dark theme with rmb state
  *  - unique password requirements
+ *  - stylised nutricoach prompts to encourage/congratulate users with high/low scores
+ *  - stylised clinician prompts to give analysis/encourage more users based on the dataset for the insights
  *
 **/
 
@@ -359,6 +360,8 @@ private fun openMonashClinic(context: Context) {
 **/
 
 /** DONE
+ *
+ * ENHANCE THE PROMPTS OF CLINICIAN AND NUTRICOACH GEN AI
  *
  * UPDATE THE NUTRICOACH GPT QUERY WITH ADDITIONAL PATIENT AND FOODINTAKE DATA
  *

@@ -1,7 +1,6 @@
-package com.fit2081.arrtish.id32896786.a1.insights
+package com.fit2081.arrtish.id32896786.a1.internalpages.insights
 
 
-import android.graphics.Paint
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape

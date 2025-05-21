@@ -1,4 +1,4 @@
-package com.fit2081.arrtish.id32896786.a1.questionnaire
+package com.fit2081.arrtish.id32896786.a1.internalpages.questionnaire
 
 import com.fit2081.arrtish.id32896786.a1.R
 

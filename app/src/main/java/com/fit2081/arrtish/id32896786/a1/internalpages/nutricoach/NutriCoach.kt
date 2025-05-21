@@ -1,4 +1,4 @@
-package com.fit2081.arrtish.id32896786.a1.nutricoach
+package com.fit2081.arrtish.id32896786.a1.internalpages.nutricoach
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn

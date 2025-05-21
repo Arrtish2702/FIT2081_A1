@@ -1,12 +1,10 @@
-package com.fit2081.arrtish.id32896786.a1.questionnaire
+package com.fit2081.arrtish.id32896786.a1.internalpages.questionnaire
 
-import android.app.TimePickerDialog
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.*
 import androidx.compose.ui.unit.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -25,9 +23,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
 import com.fit2081.arrtish.id32896786.a1.MainActivity
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
 import kotlin.String
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier

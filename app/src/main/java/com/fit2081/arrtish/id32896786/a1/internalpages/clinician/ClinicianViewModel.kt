@@ -1,9 +1,8 @@
-package com.fit2081.arrtish.id32896786.a1.clinician
+package com.fit2081.arrtish.id32896786.a1.internalpages.clinician
 
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.fit2081.arrtish.id32896786.a1.databases.patientdb.Patient
 import com.fit2081.arrtish.id32896786.a1.databases.patientdb.PatientRepository

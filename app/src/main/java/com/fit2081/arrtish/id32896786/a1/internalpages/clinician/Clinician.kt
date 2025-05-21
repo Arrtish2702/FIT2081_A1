@@ -1,10 +1,6 @@
-package com.fit2081.arrtish.id32896786.a1.clinician
+package com.fit2081.arrtish.id32896786.a1.internalpages.clinician
 
-import android.os.Bundle
 import android.widget.Toast
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -24,7 +20,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
 import com.fit2081.arrtish.id32896786.a1.authentication.login.LoginViewModel
-import com.fit2081.arrtish.id32896786.a1.ui.theme.A1Theme
 
 
 @Composable

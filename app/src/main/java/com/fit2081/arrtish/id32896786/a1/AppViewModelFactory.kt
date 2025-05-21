@@ -5,17 +5,17 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.fit2081.arrtish.id32896786.a1.authentication.login.LoginViewModel
-import com.fit2081.arrtish.id32896786.a1.clinician.ClinicianViewModel
+import com.fit2081.arrtish.id32896786.a1.internalpages.clinician.ClinicianViewModel
 import com.fit2081.arrtish.id32896786.a1.databases.AppDataBase
 import com.fit2081.arrtish.id32896786.a1.databases.aitipsdb.AITipsRepository
 import com.fit2081.arrtish.id32896786.a1.databases.foodintakedb.FoodIntakeRepository
-import com.fit2081.arrtish.id32896786.a1.insights.InsightsViewModel
-import com.fit2081.arrtish.id32896786.a1.home.HomeViewModel
-import com.fit2081.arrtish.id32896786.a1.settings.SettingsViewModel
+import com.fit2081.arrtish.id32896786.a1.internalpages.insights.InsightsViewModel
+import com.fit2081.arrtish.id32896786.a1.internalpages.home.HomeViewModel
+import com.fit2081.arrtish.id32896786.a1.internalpages.settings.SettingsViewModel
 import com.fit2081.arrtish.id32896786.a1.databases.patientdb.PatientRepository
-import com.fit2081.arrtish.id32896786.a1.nutricoach.NutriCoachViewModel
+import com.fit2081.arrtish.id32896786.a1.internalpages.nutricoach.NutriCoachViewModel
 import com.fit2081.arrtish.id32896786.a1.api.RetrofitClient
-import com.fit2081.arrtish.id32896786.a1.questionnaire.QuestionnaireViewModel
+import com.fit2081.arrtish.id32896786.a1.internalpages.questionnaire.QuestionnaireViewModel
 
 class AppViewModelFactory(
     private val context: Context

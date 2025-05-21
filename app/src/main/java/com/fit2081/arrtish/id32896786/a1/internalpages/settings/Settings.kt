@@ -1,11 +1,7 @@
-package com.fit2081.arrtish.id32896786.a1.settings
+package com.fit2081.arrtish.id32896786.a1.internalpages.settings
 
-import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
@@ -28,8 +24,6 @@ import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
 import com.fit2081.arrtish.id32896786.a1.MainActivity
 import com.fit2081.arrtish.id32896786.a1.MainViewModel
 import com.fit2081.arrtish.id32896786.a1.authentication.AuthManager
-import com.fit2081.arrtish.id32896786.a1.questionnaire.QuestionnaireViewModel
-import com.fit2081.arrtish.id32896786.a1.ui.theme.A1Theme
 
 
 @Composable
