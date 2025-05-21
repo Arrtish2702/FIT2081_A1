@@ -47,20 +47,28 @@ fun QuestionnairePage(
 
     Log.v(MainActivity.TAG, "Questionnaire: Vm made")
     val hasLoaded = remember { mutableStateOf(false) }
-    if (!hasLoaded.value) {
+//    if (!hasLoaded.value) {
+//        viewModel.loadPatientDataByIdAndIntake(userId)
+//        hasLoaded.value = true
+//
+//        // Set ViewModel state from food intake after loading
+//        viewModel.existingIntake.value?.let {
+//            viewModel.setExistingFoodIntake(it)
+//        }
+//    }
+    LaunchedEffect(userId) {
         viewModel.loadPatientDataByIdAndIntake(userId)
-        hasLoaded.value = true
     }
 
     val foodIntake by viewModel.existingIntake.observeAsState()
 
     val personas = listOf("Health Devotee", "Mindful Eater", "Wellness Striver", "Balance Seeker", "Health Procrastinator", "Food Carefree")
 
-    val selectedCategories = remember { mutableStateListOf<String>() }
-    val biggestMealTime = remember { mutableStateOf("12:00 PM") }
-    val sleepTime = remember { mutableStateOf("10:00 PM") }
-    val wakeTime = remember { mutableStateOf("6:00 AM") }
-    val selectedPersona = remember { mutableStateOf("") }
+    val selectedCategories = viewModel.selectedCategories
+    val biggestMealTime = viewModel.biggestMealTime
+    val sleepTime = viewModel.sleepTime
+    val wakeTime = viewModel.wakeTime
+    val selectedPersona = viewModel.selectedPersona
     val scrollState = rememberScrollState()  // Scroll state for vertical scrolling
 
     var expanded by remember { mutableStateOf(false) }  // State for dropdown menu expansion
@@ -76,34 +84,9 @@ fun QuestionnairePage(
         }
     }
 
-    LaunchedEffect(foodIntake) {
-        if (foodIntake != null) {
-            val fmt = SimpleDateFormat("hh:mm a", Locale.getDefault())
-
-            // Convert Date back to the desired string format
-            biggestMealTime.value = fmt.format(foodIntake!!.biggestMealTime)
-            sleepTime.value = fmt.format(foodIntake!!.sleepTime)
-            wakeTime.value = fmt.format(foodIntake!!.wakeTime)
-            selectedPersona.value = foodIntake!!.selectedPersona
-
-            selectedCategories.clear()
-            if (foodIntake!!.eatsFruits) selectedCategories.add("Fruits")
-            if (foodIntake!!.eatsVegetables) selectedCategories.add("Vegetables")
-            if (foodIntake!!.eatsGrains) selectedCategories.add("Grains")
-            if (foodIntake!!.eatsRedMeat) selectedCategories.add("Red Meat")
-            if (foodIntake!!.eatsSeafood) selectedCategories.add("Seafood")
-            if (foodIntake!!.eatsPoultry) selectedCategories.add("Poultry")
-            if (foodIntake!!.eatsFish) selectedCategories.add("Fish")
-            if (foodIntake!!.eatsEggs) selectedCategories.add("Eggs")
-            if (foodIntake!!.eatsNutsOrSeeds) selectedCategories.add("Nuts/Seeds")
-        }
-    }
-
-
     foodIntake?.let {
         Log.v(MainActivity.TAG, "UI: existing intake updated: $it")
     }
-
 
     Column(
         modifier = Modifier
@@ -138,11 +121,11 @@ fun QuestionnairePage(
                 key(index) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Checkbox(
-                            checked = selectedCategories.contains(category),
+                            checked = selectedCategories.value.contains(category),
                             onCheckedChange = {
-                                if (it) selectedCategories.add(category) else selectedCategories.remove(
-                                    category
-                                )
+                                val current = selectedCategories.value.toMutableList()
+                                if (it) current.add(category) else current.remove(category)
+                                viewModel.selectedCategories.value = current
                             }
                         )
                         Text(text = category, fontSize = 12.sp)
@@ -167,7 +150,7 @@ fun QuestionnairePage(
                 key(index) {
                     Button(
                         onClick = {
-                            selectedPersona.value = persona
+                            viewModel.selectedPersona.value = persona
                             showModal = true
                         },
                         modifier = Modifier
@@ -229,7 +212,7 @@ fun QuestionnairePage(
                 viewModel.openTimePicker(
                     context,
                     biggestMealTime.value
-                ) { biggestMealTime.value = it }
+                ) { viewModel.biggestMealTime.value = it }
             }  // Open time picker for biggest meal time
         ) {
             Text(biggestMealTime.value)  // Display selected meal time
@@ -240,9 +223,10 @@ fun QuestionnairePage(
         Text("Select Your Sleep Time:", fontSize = 20.sp)  // Label for sleep time selection
         Button(
             onClick = {
-                viewModel.openTimePicker(context, sleepTime.value) {
-                    sleepTime.value = it
-                }
+                viewModel.openTimePicker(
+                    context,
+                    sleepTime.value,
+                ) { viewModel.sleepTime.value = it }
             }  // Open time picker for sleep time
         ) {
             Text(sleepTime.value)  // Display selected sleep time
@@ -253,9 +237,10 @@ fun QuestionnairePage(
         Text("Select Your Wake Time:", fontSize = 20.sp)  // Label for wake time selection
         Button(
             onClick = {
-                viewModel.openTimePicker(context, wakeTime.value) {
-                    wakeTime.value = it
-                }
+                viewModel.openTimePicker(
+                    context,
+                    wakeTime.value
+                ) { viewModel.wakeTime.value = it }
             }  // Open time picker for wake time
         ) {
             Text(wakeTime.value)  // Display selected wake time
@@ -267,7 +252,7 @@ fun QuestionnairePage(
         Row(horizontalArrangement = Arrangement.SpaceEvenly) {
             Button(onClick = {
                 viewModel.saveFoodIntake(
-                    selectedCategories = selectedCategories,
+                    selectedCategories = selectedCategories.value,
                     biggestMealTime = biggestMealTime.value,
                     sleepTime = sleepTime.value,
                     wakeTime = wakeTime.value,

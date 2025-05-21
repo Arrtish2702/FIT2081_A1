@@ -39,6 +39,12 @@ class QuestionnaireViewModel(
     private val _existingIntake = MutableLiveData<FoodIntake?>()
     val existingIntake: LiveData<FoodIntake?> = _existingIntake
 
+    val selectedCategories = mutableStateOf<List<String>>(emptyList())
+    val biggestMealTime = mutableStateOf("12:00 PM")
+    val sleepTime = mutableStateOf("10:00 PM")
+    val wakeTime = mutableStateOf("6:00 AM")
+    val selectedPersona = mutableStateOf("")
+
     fun loadPatientDataByIdAndIntake(id: Int) {
         if (id != patientId) {
             patientId = id
@@ -48,12 +54,36 @@ class QuestionnaireViewModel(
 //                Log.v(MainActivity.TAG, "QuestionnaireVM: loaded intakeData from method: $intakeData")
                 _patient.postValue(patientData)
                 _existingIntake.postValue(intakeData)
+
+                intakeData?.let { setExistingFoodIntake(it) }
+
                 Log.v(MainActivity.TAG, "QuestionnaireVM: loaded intakeData: $intakeData")
                 Log.v(MainActivity.TAG, "QuestionnaireVM: loaded existingIntake: $existingIntake")
             }
+
         } else {
             Log.v(MainActivity.TAG, "QuestionnaireVM: no intake")
         }
+    }
+
+    fun setExistingFoodIntake(intake: FoodIntake) {
+        val fmt = SimpleDateFormat("hh:mm a", Locale.getDefault())
+        biggestMealTime.value = fmt.format(intake.biggestMealTime)
+        sleepTime.value = fmt.format(intake.sleepTime)
+        wakeTime.value = fmt.format(intake.wakeTime)
+        selectedPersona.value = intake.selectedPersona
+
+        val categories = mutableListOf<String>()
+        if (intake.eatsFruits) categories.add("Fruits")
+        if (intake.eatsVegetables) categories.add("Vegetables")
+        if (intake.eatsGrains) categories.add("Grains")
+        if (intake.eatsRedMeat) categories.add("Red Meat")
+        if (intake.eatsSeafood) categories.add("Seafood")
+        if (intake.eatsPoultry) categories.add("Poultry")
+        if (intake.eatsFish) categories.add("Fish")
+        if (intake.eatsEggs) categories.add("Eggs")
+        if (intake.eatsNutsOrSeeds) categories.add("Nuts/Seeds")
+        selectedCategories.value = categories
     }
 
 
@@ -84,7 +114,7 @@ class QuestionnaireViewModel(
         )
         Log.v(MainActivity.TAG, "QuestionnaireVM: intake to save $intake ")
 
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             foodIntakeRepository.insertFoodIntake(intake)
 
             withContext(Dispatchers.Main) {
@@ -97,7 +127,7 @@ class QuestionnaireViewModel(
 
     /** Clears the saved questionnaire for this patient */
     fun clearFoodIntake() {
-        viewModelScope.launch {
+        viewModelScope.launch (Dispatchers.IO) {
             foodIntakeRepository.deleteFoodIntake(patientId?:-1)
         }
         Log.v(MainActivity.TAG, "QuestionnaireVM: data cleared from db")
