@@ -2,7 +2,6 @@ package com.fit2081.arrtish.id32896786.a1
 
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 import androidx.compose.material3.*
@@ -15,15 +14,17 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.core.content.edit
 import com.fit2081.arrtish.id32896786.a1.ui.theme.A1Theme
 import androidx.core.net.toUri
 import androidx.navigation.NavController
@@ -32,38 +33,37 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.fit2081.arrtish.id32896786.a1.authentication.AuthManager
-import com.fit2081.arrtish.id32896786.a1.authentication.AuthManager.getStudentId
-import com.fit2081.arrtish.id32896786.a1.authentication.LoginPage
+import com.fit2081.arrtish.id32896786.a1.authentication.ForgotPasswordPage
+import com.fit2081.arrtish.id32896786.a1.authentication.login.LoginPage
 import com.fit2081.arrtish.id32896786.a1.authentication.RegisterPage
-import com.fit2081.arrtish.id32896786.a1.clinician.ClinicianLogin
-import com.fit2081.arrtish.id32896786.a1.clinician.ClinicianPage
-import com.fit2081.arrtish.id32896786.a1.home.HomePage
-import com.fit2081.arrtish.id32896786.a1.insights.InsightsPage
-import com.fit2081.arrtish.id32896786.a1.nutricoach.NutriCoachPage
-import com.fit2081.arrtish.id32896786.a1.questionnaire.QuestionnairePage
-import com.fit2081.arrtish.id32896786.a1.settings.SettingsPage
+import com.fit2081.arrtish.id32896786.a1.internalpages.clinician.ClinicianLogin
+import com.fit2081.arrtish.id32896786.a1.internalpages.clinician.ClinicianPage
+import com.fit2081.arrtish.id32896786.a1.internalpages.home.HomePage
+import com.fit2081.arrtish.id32896786.a1.internalpages.insights.InsightsPage
+import com.fit2081.arrtish.id32896786.a1.internalpages.nutricoach.NutriCoachPage
+import com.fit2081.arrtish.id32896786.a1.internalpages.questionnaire.QuestionnairePage
+import com.fit2081.arrtish.id32896786.a1.internalpages.settings.SettingsPage
 
 
 class MainActivity : ComponentActivity() {
 
-    // Create MainViewModel using ViewModelProvider
+    private val viewModelFactory by lazy {
+        AppViewModelFactory(this)  // pass Activity as Context
+    }
+
     private val viewModel: MainViewModel by lazy {
-        ViewModelProvider(this)[MainViewModel::class.java]
+        ViewModelProvider(this, viewModelFactory)[MainViewModel::class.java]
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
 
-        //TEMP CODE TO CLEAR SHARED PREF
-        //COMMENT OUT DURING ACTUAL APP BUILD
-//        val sharedPref = getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
-//        sharedPref.edit() { clear() }
+        viewModel.loadThemePreference(this)
+
+        AuthManager.loadSession(this)
 
         viewModel.loadAndInsertData(this)
-
-        // Load saved user session before Compose runs
-        AuthManager.loadSession(this)
 
         enableEdgeToEdge()
 
@@ -71,9 +71,9 @@ class MainActivity : ComponentActivity() {
             val navController = rememberNavController()
             val navBackStackEntry by navController.currentBackStackEntryAsState()
             val currentRoute = navBackStackEntry?.destination?.route
-            val hideBottomBarRoutes = listOf("welcome", "login", "register")
+            val hideBottomBarRoutes = listOf("welcome", "login", "register", "changePassword", "questionnaire")
 
-            A1Theme {
+            A1Theme(darkTheme = viewModel.isDarkTheme.value) {
                 Scaffold(
                     bottomBar = {
                         if (currentRoute !in hideBottomBarRoutes) {
@@ -81,7 +81,7 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 ) { innerPadding ->
-                    AppInitialisation(Modifier.padding(innerPadding), navController)
+                    AppInitialisation(Modifier.padding(innerPadding), navController, isDarkTheme = viewModel.isDarkTheme, viewModel, viewModelFactory)
                 }
             }
         }
@@ -89,53 +89,82 @@ class MainActivity : ComponentActivity() {
 
     companion object {
         val TAG = "FIT2081-A3"
+        val PREFS_NAME = "MyPrefs"
     }
 }
 
 
 @Composable
-fun AppInitialisation(modifier: Modifier, navController: NavHostController) {
-    val context = LocalContext.current
+fun AppInitialisation(
+    modifier: Modifier,
+    navController: NavHostController,
+    isDarkTheme: MutableState<Boolean>,
+    viewModel: MainViewModel,
+    viewModelFactory: AppViewModelFactory
+) {
     val userId by AuthManager._userId
 
-    Log.v(MainActivity.TAG, "userID on login: $userId")
+    val hasAnsweredQuestionnaire by viewModel.hasAnsweredQuestionnaire.observeAsState(initial = false)
+    val questionnaireCheckComplete by viewModel.questionnaireCheckComplete.observeAsState(initial = false)
+    var startDestination by remember { mutableStateOf<String?>(null) }
 
-    val startDestination = if (userId != null && userId != -1) {
-        "home"
-    } else {
-        "welcome"
+    // Trigger check and only update startDestination after completion
+    LaunchedEffect(userId, questionnaireCheckComplete) {
+        if (userId != null && userId != -1 && !questionnaireCheckComplete) {
+            viewModel.checkIfQuestionnaireAnswered(userId!!)
+        } else if (userId == null || userId == -1) {
+            startDestination = "welcome"
+        } else if (questionnaireCheckComplete) {
+            startDestination = if (!hasAnsweredQuestionnaire) "questionnaire" else "home"
+        }
     }
-
-    NavHost(navController = navController, startDestination = startDestination) {
-        composable("welcome") {
-            WelcomePage(modifier, navController)
+    Log.v(MainActivity.TAG, "userID on login: $userId")
+    // 🌀 Show a loading indicator until startDestination is ready
+    if (startDestination == null) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
         }
-        composable("login") {
-            LoginPage(modifier, navController)
-        }
-        composable("register") {
-            RegisterPage(modifier, navController)
-        }
-        composable("home") {
-            HomePage(userId ?: -1, modifier, navController)
-        }
-        composable("questionnaire") {
-            QuestionnairePage(userId ?: -1, navController)
-        }
-        composable("insights") {
-            InsightsPage(userId ?: -1, modifier, navController)
-        }
-        composable("nutricoach") {
-            NutriCoachPage(userId ?: -1, modifier)
-        }
-        composable("settings") {
-            SettingsPage(userId ?: -1, modifier, navController)
-        }
-        composable("clinician login") {
-            ClinicianLogin(navController)
-        }
-        composable("clinician") {
-            ClinicianPage(userId ?: -1, modifier, navController)
+    } else {
+        NavHost(navController = navController, startDestination = startDestination!!) {
+            composable("welcome") {
+                WelcomePage(modifier, navController)
+            }
+            composable("login") {
+                LoginPage(modifier, navController, viewModelFactory)
+            }
+            composable("register") {
+                RegisterPage(modifier, navController, viewModelFactory)
+            }
+            composable("changePassword") {
+                ForgotPasswordPage(modifier, navController)
+            }
+            composable("home") {
+                HomePage(userId ?: -1, modifier, navController, viewModelFactory)
+            }
+            composable("questionnaire") {
+                QuestionnairePage(userId ?: -1, navController, viewModelFactory)
+            }
+            composable("insights") {
+                InsightsPage(userId ?: -1, modifier, navController, viewModelFactory)
+            }
+            composable("nutricoach") {
+                NutriCoachPage(userId ?: -1, modifier, viewModelFactory)
+            }
+            composable("settings") {
+                SettingsPage(
+                    userId ?: -1,
+                    modifier,
+                    navController,
+                    isDarkTheme = isDarkTheme,
+                    viewModelFactory
+                )
+            }
+            composable("clinician login") {
+                ClinicianLogin(navController, viewModelFactory)
+            }
+            composable("clinician") {
+                ClinicianPage(userId ?: -1, modifier, navController, viewModelFactory)
+            }
         }
     }
 }
@@ -198,11 +227,13 @@ fun WelcomePage(
 ) {
     // Get the current context to use it for navigation actions
     val context = LocalContext.current
+    val scrollState = rememberScrollState()
 
     // Column layout to arrange components vertically
     Column(
         modifier = modifier
             .fillMaxSize() // Fill the entire screen
+            .verticalScroll(scrollState)
             .padding(16.dp), // Add padding around the edges
         verticalArrangement = Arrangement.Center, // Center the items vertically
         horizontalAlignment = Alignment.CenterHorizontally // Center the items horizontally
@@ -266,6 +297,22 @@ fun WelcomePage(
             Text("Login", fontSize = 18.sp) // Font size of 18sp
         }
 
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            onClick = {
+                navController.navigate("register") {
+                    popUpTo("welcome") { inclusive = true }
+                }
+            },
+            modifier = Modifier
+                .fillMaxWidth(0.8f) // Fill 80% of the screen width
+                .height(50.dp), // Set the button height to 50dp
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Text("New to this app? Register here")
+        }
+
         // Spacer to add vertical space between components
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -288,28 +335,77 @@ private fun openMonashClinic(context: Context) {
 
 /**TODO LIST:
  *
- * FIX UP THE BROKEN QUESTIONNAIRE AND HOOK IT UP (INSERT/RETRIEVAL) FROM THE DB IN IRL TIME
- * FIX THE FOOD INTAKE ENTITY/DAO/REPO/QUESTIONNAIRE VM TO DO THIS
  *
- * FIX UP THE BACKEND FOR THE NUTRICOACH ACTIVITY
- * USE THE VM TO MAKE HTTP CONNECTION TO FRUITYVICE AND CHATGPT API FOR BOTH
- * MAKE A SHOW ALL TIPS TO SAVE ALL PREVIOUS TIPS FROM THE LLM
+ * ADD UNIQUE PASSWORD IDENTIFIER CHECKER FOR PASSWD
  *
- * FIX THE HTTP CONNECTION TO SEND DATASET TO LLM FOR 3 KEY DATA PATTERNS
+ * DO CHECK RUN OF ALL REQUIREMENTS FOR THE ASSIGNMENT
  *
- * GIVE TO DR TAN ON WEDS TO SEE IF MISSING ANYTHING FURTHER
+ * DO DOCUMENT LIST OF HD REQUIREMENTS
+ *  - put in pw hashing for user pws
+ *  - put in change pw page for users whom logged out and forgot their pw
+ *      - can add one inside of the app in settings page
+ *  - saved ai tips into db for users to skim through
+ *  - refactored routing and userid referencing for user ids in login/register/change pw
+ *  - light/dark theme with rmb state
+ *  - unique password requirements
+ *  - stylised nutricoach prompts to encourage/congratulate users with high/low scores
+ *  - stylised clinician prompts to give analysis/encourage more users based on the dataset for the insights
  *
 **/
 
-/** TO TEST/DONE
+/** TO TEST
  *
- * REMOVE THE REMAINING LAUNCHED EFFECTS
+ * DO SYSTEM WIDE APP TEST
+ *
+**/
+
+/** DONE
+ *
+ * ENHANCE THE PROMPTS OF CLINICIAN AND NUTRICOACH GEN AI
+ *
+ * UPDATE THE NUTRICOACH GPT QUERY WITH ADDITIONAL PATIENT AND FOODINTAKE DATA
+ *
+ * DO THE NONSENSE FRUIT SCORE FOR FRUITYVICE
+ *
+ * FIX ROUTING FOR LOGIN AND QUESTIONNAIRE TO HAVE THE NAV CONTROLLER IN THE UI
+ *
+ * FIX THE HTTP CONNECTION TO SEND DATASET TO LLM FOR 3 KEY DATA PATTERNS - CLINICIAN PART
+ *
+ * TEST FRUITYVICEAPI AGAIN
  *
  * FIX UP THE CLINICIAN LOGIN BACKEND IN THE SETTINGS PART.
+ *
+ * FIX THE INSERT CHECK FOR QUESTIONNAIRE
+ *
+ * FIX SCREEN ROTATION ISSUES
+ *
+ * FIX DARKTHEME TO HOLD ON APP DESTROY
+ *
+ * FIX QUESTIONNAIRE NOT HOLDING STATE FOR SCREEN ROTATE
+ *
+ * CHANGE SHOW ALL TIPS TO USE A MODAL POP UP FOR STATELIFECYCLE - UI CHANGE
+ *
+ * HASHED THE PASSWORD FOR THE USERS
+ *
+ * IMPLEMENTED SAVED NUTRICOACH TIPS INTO A DB SYSTEM PER THE USER
+ *
+ * FIX UP THE BACKEND FOR THE NUTRICOACH ACTIVITY
+ * USE THE VM TO MAKE HTTP CONNECTION TO CHATGPT API - NEED TO TEST WITH PROPER KEY
+ * MAKE A SHOW ALL TIPS TO SAVE ALL PREVIOUS TIPS FROM THE LLM
+ *
+ * FIX QUESTIONNAIRE TO USE CORRECT TIMESTAMP
+ *
+ * FIX UP THE BROKEN QUESTIONNAIRE AND HOOK IT UP (INSERT/RETRIEVAL) FROM THE DB IN IRL TIME
+ * FIX THE FOOD INTAKE ENTITY/DAO/REPO/QUESTIONNAIRE VM TO DO THIS
+ *
+ * USE THE VM TO MAKE HTTP CONNECTION TO FRUITYVICE
+ *
+ * REMOVE THE REMAINING LAUNCHED EFFECTS
  *
  * FIX LOGIN, SO LOGIN CREDENTIALS ARE RETAINED AFTER USER ONDESTROYS APP
  *
  * FIX DB/REPO/DAO TO USE LIVEDATA INSTEAD OF FLOW
  *
  * FIX UP THE CLINICIAN PAGE FOR THE AVG SCORE MALE & FEMALE
-**/
+ *
+ **/

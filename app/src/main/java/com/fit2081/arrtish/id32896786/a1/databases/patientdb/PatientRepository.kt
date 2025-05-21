@@ -8,20 +8,20 @@ class PatientRepository(private val patientDao: PatientDao) {
         return patientDao.getAllPatientIds()
     }
 
-    fun getPatientByIdLive(id: Int): LiveData<Patient?> {
-        return patientDao.getPatientById(id)
+    fun allRegisteredPatientIds(): LiveData<List<Int>> {
+        return patientDao.getRegisteredPatientIds()
     }
 
-    fun getPatientByPhoneNumber(phone: String): LiveData<Patient?> {
-        return patientDao.getPatientByPhoneNumber(phone)
+    fun allUnregisteredPatientIds(): LiveData<List<Int>> {
+        return patientDao.getUnregisteredPatientIds()
     }
 
     fun getAllPatients(): LiveData<List<Patient>> {
         return patientDao.getAllPatients()
     }
 
-    fun getPatientsBySex(sex: String): LiveData<List<Patient>> {
-        return patientDao.getPatientsBySex(sex)
+    fun getAllRegisteredPatients(): LiveData<List<Patient>> {
+        return patientDao.getRegisteredPatients()
     }
 
     suspend fun getPatientById(id: Int): Patient? {

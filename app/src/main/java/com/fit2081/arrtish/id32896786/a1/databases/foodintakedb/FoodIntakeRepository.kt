@@ -2,11 +2,18 @@ package com.fit2081.arrtish.id32896786.a1.databases.foodintakedb
 
 import androidx.lifecycle.LiveData
 
+
 class FoodIntakeRepository(private val foodIntakeDao: FoodIntakeDao) {
 
-    /** LiveData stream of the patient’s questionnaire (or null if not answered) */
-    fun getFoodIntake(patientId: Int): LiveData<FoodIntake?> =
-        foodIntakeDao.getFoodIntakeForPatient(patientId)
+    /** Get the patient’s questionnaire data (or null if not answered) */
+    fun getFoodIntake(patientId: Int): FoodIntake? {
+        return foodIntakeDao.getFoodIntakeForPatient(patientId)
+    }
+
+    /** LiveData stream of all food intake records */
+    fun getAllFoodIntakes(): LiveData<List<FoodIntake>> {
+        return foodIntakeDao.getAllFoodIntakes()
+    }
 
     /** Insert or update the patient’s questionnaire */
     suspend fun insertFoodIntake(foodIntake: FoodIntake) {

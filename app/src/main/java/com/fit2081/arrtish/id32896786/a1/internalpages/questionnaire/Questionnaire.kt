@@ -1,15 +1,10 @@
-package com.fit2081.arrtish.id32896786.a1.questionnaire
+package com.fit2081.arrtish.id32896786.a1.internalpages.questionnaire
 
-import android.app.TimePickerDialog
-import android.content.Context
-import android.os.Bundle
 import android.util.Log
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.*
 import androidx.compose.ui.unit.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -22,106 +17,68 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
 import com.fit2081.arrtish.id32896786.a1.MainActivity
-import com.fit2081.arrtish.id32896786.a1.ui.theme.A1Theme
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
-import com.fit2081.arrtish.id32896786.a1.R
-import com.fit2081.arrtish.id32896786.a1.databases.AppDataBase
-import com.fit2081.arrtish.id32896786.a1.databases.foodintakedb.FoodIntakeRepository
-import com.fit2081.arrtish.id32896786.a1.home.HomeViewModel
 import kotlin.String
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 
-// QuestionnaireActivity for the questionnaire form
-class QuestionnaireActivity : ComponentActivity() {
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            A1Theme {  // Apply app theme
-            }
-        }
-    }
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QuestionnairePage(
     userId: Int,
-    navController: NavController
+    navController: NavController,
+    viewModelFactory: AppViewModelFactory
 ) {
-
     val context = LocalContext.current
-    val viewModel: QuestionnaireViewModel = viewModel(factory = AppViewModelFactory(context))
+    val viewModel: QuestionnaireViewModel = viewModel(factory = viewModelFactory)
+
     Log.v(MainActivity.TAG, "Questionnaire: Vm made")
-    // Ensure we call loadPatientDataByIdAndIntake only once
-    val hasLoaded = remember { mutableStateOf(false) }
-    if (!hasLoaded.value) {
+
+
+    LaunchedEffect(userId) {
         viewModel.loadPatientDataByIdAndIntake(userId)
-        hasLoaded.value = true
     }
 
     val foodIntake by viewModel.existingIntake.observeAsState()
 
     val personas = listOf("Health Devotee", "Mindful Eater", "Wellness Striver", "Balance Seeker", "Health Procrastinator", "Food Carefree")
 
-    val selectedCategories = remember { mutableStateListOf<String>() }
-    val biggestMealTime = remember { mutableStateOf("12:00 PM") }
-    val sleepTime = remember { mutableStateOf("10:00 PM") }
-    val wakeTime = remember { mutableStateOf("6:00 AM") }
-    val selectedPersona = remember { mutableStateOf("") }
+    val selectedCategories = viewModel.selectedCategories
+    val biggestMealTime = viewModel.biggestMealTime
+    val sleepTime = viewModel.sleepTime
+    val wakeTime = viewModel.wakeTime
+    val selectedPersona = viewModel.selectedPersona
     val scrollState = rememberScrollState()  // Scroll state for vertical scrolling
 
     var expanded by remember { mutableStateOf(false) }  // State for dropdown menu expansion
     var showModal by remember { mutableStateOf(false) }  // State for modal dialog visibility
+    val questionnaireMessage by viewModel.questionnaireMessage
 
-    LaunchedEffect(foodIntake) {
-        if (foodIntake != null) {
-            biggestMealTime.value = foodIntake!!.biggestMealTime.toString()
-            sleepTime.value = foodIntake!!.sleepTime.toString()
-            wakeTime.value = foodIntake!!.wakeTime.toString()
-            selectedPersona.value = foodIntake!!.selectedPersona
+    LaunchedEffect(questionnaireMessage) {
+        questionnaireMessage?.let {
+            if (it.isNotBlank()) {
+                Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
 
-            selectedCategories.clear()
-            if (foodIntake!!.eatsFruits) selectedCategories.add("Fruits")
-            if (foodIntake!!.eatsVegetables) selectedCategories.add("Vegetables")
-            if (foodIntake!!.eatsGrains) selectedCategories.add("Grains")
-            if (foodIntake!!.eatsRedMeat) selectedCategories.add("Red Meat")
-            if (foodIntake!!.eatsSeafood) selectedCategories.add("Seafood")
-            if (foodIntake!!.eatsPoultry) selectedCategories.add("Poultry")
-            if (foodIntake!!.eatsFish) selectedCategories.add("Fish")
-            if (foodIntake!!.eatsEggs) selectedCategories.add("Eggs")
-            if (foodIntake!!.eatsNutsOrSeeds) selectedCategories.add("Nuts/Seeds")
+                if (it == "Responses saved successfully.") {
+                    navController.navigate("home") {
+                        popUpTo("questionnaire") { inclusive = true }
+                    }
+                }
+
+                viewModel.questionnaireMessage.value = "" // reset message
+            }
         }
     }
 
-
     foodIntake?.let {
         Log.v(MainActivity.TAG, "UI: existing intake updated: $it")
-    }
-
-
-    // Function to open a time picker dialog and set the time
-    fun openTimePicker(initialTime: String, onTimeSet: (String) -> Unit) {
-        val calendar = Calendar.getInstance()  // Get current calendar instance
-        val initialHour = calendar.get(Calendar.HOUR_OF_DAY)  // Initial hour of the day
-        val initialMinute = calendar.get(Calendar.MINUTE)  // Initial minute of the day
-
-        // Create and show time picker dialog
-        val timePickerDialog = TimePickerDialog(
-            context,
-            { _, hourOfDay, minute ->
-                val time = formatTime(hourOfDay, minute)  // Format time
-                onTimeSet(time)  // Set the chosen time
-            },
-            initialHour, initialMinute, false
-        )
-        timePickerDialog.show()  // Show time picker dialog
     }
 
     Column(
@@ -131,11 +88,13 @@ fun QuestionnairePage(
                 start = 16.dp,
                 end = 16.dp,
                 top = 16.dp,
-                bottom = 120.dp // Ensures buttons at the bottom are visible
+                bottom = 16.dp // Ensures buttons at the bottom are visible
             )
             .verticalScroll(scrollState),  // Make column scrollable
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Text("Questionnaire", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+
         Spacer(modifier = Modifier.height(24.dp))
 
         Text("Select Food Categories:", fontSize = 20.sp)  // Label for food categories selection
@@ -155,9 +114,11 @@ fun QuestionnairePage(
                 key(index) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Checkbox(
-                            checked = selectedCategories.contains(category),
+                            checked = selectedCategories.value.contains(category),
                             onCheckedChange = {
-                                if (it) selectedCategories.add(category) else selectedCategories.remove(category)
+                                val current = selectedCategories.value.toMutableList()
+                                if (it) current.add(category) else current.remove(category)
+                                viewModel.selectedCategories.value = current
                             }
                         )
                         Text(text = category, fontSize = 12.sp)
@@ -166,8 +127,6 @@ fun QuestionnairePage(
             }
 
         }
-
-        Spacer(modifier = Modifier.height(16.dp))  // Spacer for layout spacing
 
         Text("Select Your Persona:", fontSize = 20.sp)  // Label for persona selection
 
@@ -184,12 +143,13 @@ fun QuestionnairePage(
                 key(index) {
                     Button(
                         onClick = {
-                            selectedPersona.value = persona
+                            viewModel.selectedPersona.value = persona
                             showModal = true
                         },
                         modifier = Modifier
                             .padding(vertical = 4.dp)
-                            .size(width = 200.dp, height = 50.dp)
+                            .size(width = 200.dp, height = 50.dp),
+                        shape = RoundedCornerShape(12.dp)
                     ) {
                         Text(text = persona, fontSize = 12.sp)
                     }
@@ -199,7 +159,9 @@ fun QuestionnairePage(
 
         // Show persona modal dialog if `showModal` is true
         if (showModal) {
-            PersonaModal(selectedPersona = selectedPersona.value, onDismiss = { showModal = false })
+            PersonaModal(
+                selectedPersona = selectedPersona.value,
+                onDismiss = { showModal = false })
         }
 
         Spacer(modifier = Modifier.height(16.dp))  // Spacer for layout spacing
@@ -240,7 +202,13 @@ fun QuestionnairePage(
 
         Text("Select Your Meal Time:", fontSize = 20.sp)  // Label for meal time selection
         Button(
-            onClick = { openTimePicker(biggestMealTime.value) { biggestMealTime.value = it } }  // Open time picker for biggest meal time
+            onClick = {
+                viewModel.openTimePicker(
+                    context,
+                    biggestMealTime.value
+                ) { viewModel.biggestMealTime.value = it }
+            },
+            shape = RoundedCornerShape(12.dp)
         ) {
             Text(biggestMealTime.value)  // Display selected meal time
         }
@@ -249,7 +217,13 @@ fun QuestionnairePage(
 
         Text("Select Your Sleep Time:", fontSize = 20.sp)  // Label for sleep time selection
         Button(
-            onClick = { openTimePicker(sleepTime.value) { sleepTime.value = it } }  // Open time picker for sleep time
+            onClick = {
+                viewModel.openTimePicker(
+                    context,
+                    sleepTime.value,
+                ) { viewModel.sleepTime.value = it }
+            },
+            shape = RoundedCornerShape(12.dp)
         ) {
             Text(sleepTime.value)  // Display selected sleep time
         }
@@ -258,7 +232,13 @@ fun QuestionnairePage(
 
         Text("Select Your Wake Time:", fontSize = 20.sp)  // Label for wake time selection
         Button(
-            onClick = { openTimePicker(wakeTime.value) { wakeTime.value = it } }  // Open time picker for wake time
+            onClick = {
+                viewModel.openTimePicker(
+                    context,
+                    wakeTime.value
+                ) { viewModel.wakeTime.value = it }
+            },
+            shape = RoundedCornerShape(12.dp)
         ) {
             Text(wakeTime.value)  // Display selected wake time
         }
@@ -269,48 +249,31 @@ fun QuestionnairePage(
         Row(horizontalArrangement = Arrangement.SpaceEvenly) {
             Button(onClick = {
                 viewModel.saveFoodIntake(
-                    selectedCategories = selectedCategories,
+                    selectedCategories = selectedCategories.value,
                     biggestMealTime = biggestMealTime.value,
                     sleepTime = sleepTime.value,
                     wakeTime = wakeTime.value,
                     selectedPersona = selectedPersona.value
                 )
-            }) {
-                Text("Save Responses")  // Save button
-            }
-
-            Spacer(modifier = Modifier.width(4.dp))  // Spacer for layout spacing
-
-            Button(onClick = { viewModel.clearFoodIntake() }) {
-                Text("Clear Responses")  // Clear button
+            },
+            shape = RoundedCornerShape(12.dp)
+            ) {
+                Text("Save Responses")
             }
         }
         Spacer(modifier = Modifier.height(32.dp))  // Spacer for layout spacing
     }
 }
 
-// Function to format time to "hh:mm a" format
-fun formatTime(hour: Int, minute: Int): String {
-    val calendar = Calendar.getInstance()
-    calendar.set(Calendar.HOUR_OF_DAY, hour)
-    calendar.set(Calendar.MINUTE, minute)
 
-    val format = SimpleDateFormat("hh:mm a", Locale.getDefault())  // Date format for time
-    return format.format(calendar.time)  // Return formatted time
-}
 
 // Modal to display selected persona details
 @Composable
 fun PersonaModal(selectedPersona: String, onDismiss: () -> Unit) {
-    val (textInput, imageResId) = when (selectedPersona) {
-        "Health Devotee" -> "You are highly committed to your health and wellness goals." to R.drawable.persona_1
-        "Mindful Eater" -> "You pay close attention to your food choices and eat with awareness." to R.drawable.persona_2
-        "Wellness Striver" -> "You make efforts to improve your well-being but seek more guidance." to R.drawable.persona_3
-        "Balance Seeker" -> "You value a balanced lifestyle and strive for moderation in eating." to R.drawable.persona_4
-        "Health Procrastinator" -> "You want to be healthier but often postpone taking action." to R.drawable.persona_5
-        "Food Carefree" -> "You enjoy food freely without strict rules or limitations." to R.drawable.persona_6
-        else -> "Invalid Persona" to R.drawable.default_image
-    }
+    val persona = PersonaEnum.fromDisplayName(selectedPersona)
+
+    val textInput = persona.description
+    val imageResId = persona.imageResId
 
     AlertDialog(
         onDismissRequest = onDismiss,  // Dismiss modal on request
@@ -329,7 +292,9 @@ fun PersonaModal(selectedPersona: String, onDismiss: () -> Unit) {
             }
         },
         confirmButton = {
-            Button(onClick = onDismiss) {
+            Button(onClick = onDismiss,
+                shape = RoundedCornerShape(12.dp)
+            ) {
                 Text("Close")  // Close button to dismiss modal
             }
         }

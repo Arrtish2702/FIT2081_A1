@@ -1,11 +1,9 @@
-package com.fit2081.arrtish.id32896786.a1.insights
+package com.fit2081.arrtish.id32896786.a1.internalpages.insights
 
 
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -13,34 +11,23 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.*
 import androidx.compose.ui.unit.*
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
-import com.fit2081.arrtish.id32896786.a1.settings.SettingsViewModel
 
-// InsightsActivity class - Activity for displaying food insights
-class InsightsActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        setContent {
-
-        }
-    }
-}
 
 @Composable
 fun InsightsPage(
     userId: Int,
     modifier: Modifier = Modifier,
-    navController: NavHostController
+    navController: NavHostController,
+    viewModelFactory: AppViewModelFactory
 ) {
 
+    val viewModel: InsightsViewModel = viewModel(factory = viewModelFactory)
     val context = LocalContext.current
-    val viewModel: InsightsViewModel = viewModel(
-        factory = AppViewModelFactory(context)
-    )
-
     val patient by viewModel.patient.observeAsState()
 
     // Call the ViewModel function to load data when userId changes
@@ -67,19 +54,25 @@ fun InsightsPage(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp)
+                .padding(top = 32.dp, bottom = 128.dp, start = 16.dp, end = 16.dp)
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(16.dp)
-                    .verticalScroll(rememberScrollState()),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .verticalScroll(rememberScrollState())
             ) {
+                Text("Insights", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+
+                Spacer(Modifier.height(24.dp))
+
                 Text(
-                    text = "Insights: Food Score",
+                    text = "Food Score",
                     fontSize = 20.sp,
-                    modifier = Modifier.padding(bottom = 16.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp),
+                    textAlign = TextAlign.Center
                 )
 
                 userScores.forEach { (name, score) ->
@@ -88,7 +81,14 @@ fun InsightsPage(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Text(text = "Total Food Quality Score", fontSize = 16.sp)
+                Text(
+                    text = "Total Food Quality Score",
+                    fontSize = 16.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp)
+                )
 
                 Slider(
                     value = totalScore,
@@ -101,7 +101,14 @@ fun InsightsPage(
                     )
                 )
 
-                Text(text = "%.2f / 100".format(totalScore))
+                Text(
+                    text = "%.2f / 100"
+                        .format(totalScore),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp)
+                )
 
                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -109,7 +116,8 @@ fun InsightsPage(
                     onClick = {
                         viewModel.sharingInsights(context, userScores, totalScore, 100f)
                     },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp)
                 ) {
                     Text(text = "Share with someone")
                 }
@@ -120,7 +128,8 @@ fun InsightsPage(
                     onClick = {
                         navController.navigate("nutricoach")
                     },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp)
                 ) {
                     Text(text = "Improve my diet!")
                 }

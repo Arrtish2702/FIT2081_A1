@@ -4,16 +4,19 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.fit2081.arrtish.id32896786.a1.databases.aitipsdb.AITips
+import com.fit2081.arrtish.id32896786.a1.databases.aitipsdb.AITipsDao
 import com.fit2081.arrtish.id32896786.a1.databases.foodintakedb.FoodIntake
 import com.fit2081.arrtish.id32896786.a1.databases.foodintakedb.FoodIntakeDao
 import com.fit2081.arrtish.id32896786.a1.databases.patientdb.PatientDao
 import com.fit2081.arrtish.id32896786.a1.databases.patientdb.Patient
 
-@Database(entities = [Patient::class, FoodIntake::class], version = 2)
+@Database(entities = [Patient::class, FoodIntake::class, AITips::class], version = 4)
 abstract class AppDataBase : RoomDatabase() {
 
     abstract fun patientDao(): PatientDao
     abstract fun foodIntakeDao(): FoodIntakeDao
+    abstract fun aiTipsDao(): AITipsDao
 
     companion object {
         @Volatile private var INSTANCE: AppDataBase? = null
@@ -24,7 +27,9 @@ abstract class AppDataBase : RoomDatabase() {
                     context.applicationContext,
                     AppDataBase::class.java,
                     "app_database"
-                ).build()
+                )
+                    .fallbackToDestructiveMigration(true)
+                    .build()
                 INSTANCE = instance
                 instance
             }

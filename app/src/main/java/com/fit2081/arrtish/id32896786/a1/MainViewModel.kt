@@ -3,6 +3,7 @@ package com.fit2081.arrtish.id32896786.a1
 import android.app.Application
 import android.content.Context
 import android.util.Log
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.fit2081.arrtish.id32896786.a1.databases.patientdb.Patient
@@ -17,15 +18,43 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.util.Date
 import androidx.core.content.edit
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import com.fit2081.arrtish.id32896786.a1.MainActivity.Companion.PREFS_NAME
+import com.fit2081.arrtish.id32896786.a1.authentication.AuthManager
+import com.fit2081.arrtish.id32896786.a1.databases.foodintakedb.FoodIntakeDao
+import com.fit2081.arrtish.id32896786.a1.databases.foodintakedb.FoodIntakeRepository
+import com.fit2081.arrtish.id32896786.a1.databases.patientdb.PatientDao
 
-class MainViewModel(application: Application) : AndroidViewModel(application) {
+class MainViewModel(
+    application: Application,
+    private val patientRepository: PatientRepository,
+    private val foodIntakeRepository: FoodIntakeRepository)
+: AndroidViewModel(application) {
 
-    private val patientDao = AppDataBase.getDatabase(application).patientDao()
-    private val repository = PatientRepository(patientDao)
+    val isDarkTheme = mutableStateOf(false)
+
+    private val _hasAnsweredQuestionnaire = MutableLiveData(false)
+    val hasAnsweredQuestionnaire: LiveData<Boolean> = _hasAnsweredQuestionnaire
+
+    private val _questionnaireCheckComplete = MutableLiveData(false)
+    val questionnaireCheckComplete: LiveData<Boolean> = _questionnaireCheckComplete
+
+    fun checkIfQuestionnaireAnswered(userId: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val intake = foodIntakeRepository.getFoodIntake(userId)
+            _hasAnsweredQuestionnaire.postValue(intake != null)
+            _questionnaireCheckComplete.postValue(true)
+        }
+    }
 
     fun loadAndInsertData(context: Context) {
-        // Check if the data has already been loaded by reading SharedPreferences
-        val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
+
+        val sharedPreferences = context.getSharedPreferences(MainActivity.PREFS_NAME,Context.MODE_PRIVATE)
+        val allEntries = sharedPreferences.all
+        for ((key, value) in allEntries) {
+            Log.v(MainActivity.TAG, "SharedPref entry: $key = $value")
+        }
         val isDataLoaded = sharedPreferences.getBoolean("isDataLoaded", false)
 
         // If data has already been loaded, return early
@@ -62,6 +91,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     patientPhoneNumber = phone,
                     vegetables = tokens[if (isMale) 8 else 9].toFloat(),
                     fruits = tokens[if (isMale) 19 else 20].toFloat(),
+                    fruitsVariation = tokens[21].toFloat(),
+                    fruitsServingSize = tokens[22].toFloat(),
                     grainsAndCereals = tokens[if (isMale) 29 else 30].toFloat(),
                     wholeGrains = tokens[if (isMale) 33 else 34].toFloat(),
                     meatAndAlternatives = tokens[if (isMale) 36 else 37].toFloat(),
@@ -74,7 +105,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     discretionaryFoods = tokens[if (isMale) 5 else 6].toFloat(),
                     totalScore = tokens[if (isMale) 3 else 4].toFloat()
                 )
-                repository.safeInsert(patient)
+                patientRepository.safeInsert(patient)
             }
 
             // After data insertion, set the flag in SharedPreferences
@@ -84,5 +115,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
             Log.v(MainActivity.TAG, "MainViewModel:Data loaded and inserted successfully.")
         }
+    }
+
+    fun loadThemePreference(context: Context) {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        isDarkTheme.value = prefs.getBoolean("dark_mode", false)
+    }
+
+    fun saveThemePreference(context: Context, isDark: Boolean) {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putBoolean("dark_mode", isDark).apply()
+        isDarkTheme.value = isDark
     }
 }

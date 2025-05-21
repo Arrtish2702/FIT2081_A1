@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -11,46 +13,6 @@
         android:roundIcon="@drawable/logo_for_an_app_called_nutritrack"
         android:supportsRtl="true"
         android:theme="@style/Theme.A1">
-        <activity
-            android:name=".clinician.ClinicianActivity"
-            android:exported="false"
-            android:label="@string/title_activity_clinician"
-            android:theme="@style/Theme.A1" />
-        <activity
-            android:name=".nutricoach.NutriCoachActivity"
-            android:exported="false"
-            android:label="@string/title_activity_nutri_coach"
-            android:theme="@style/Theme.A1" />
-        <activity
-            android:name=".settings.SettingsActivity"
-            android:exported="false"
-            android:label="@string/title_activity_settings"
-            android:theme="@style/Theme.A1" />
-        <activity
-            android:name=".authentication.RegisterActivity"
-            android:exported="false"
-            android:label="@string/title_activity_register"
-            android:theme="@style/Theme.A1" />
-        <activity
-            android:name=".home.HomeActivity"
-            android:exported="false"
-            android:label="@string/title_activity_home"
-            android:theme="@style/Theme.A1" />
-        <activity
-            android:name=".insights.InsightsActivity"
-            android:exported="false"
-            android:label="@string/title_activity_insights"
-            android:theme="@style/Theme.A1" />
-        <activity
-            android:name=".questionnaire.QuestionnaireActivity"
-            android:exported="false"
-            android:label="@string/title_activity_questionnaire"
-            android:theme="@style/Theme.A1" />
-        <activity
-            android:name=".authentication.LoginActivity"
-            android:exported="false"
-            android:label="@string/title_activity_login"
-            android:theme="@style/Theme.A1" />
         <activity
             android:name=".MainActivity"
             android:exported="true"

@@ -11,7 +11,10 @@ interface FoodIntakeDao {
 
     /** Observe the (single) FoodIntake record for this patient, or null if none exists */
     @Query("SELECT * FROM food_intake WHERE patientId = :patientId LIMIT 1")
-    fun getFoodIntakeForPatient(patientId: Int): LiveData<FoodIntake?>
+    fun getFoodIntakeForPatient(patientId: Int): FoodIntake?
+
+    @Query("SELECT * FROM food_intake")
+    fun getAllFoodIntakes(): LiveData<List<FoodIntake>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(foodIntake: FoodIntake)

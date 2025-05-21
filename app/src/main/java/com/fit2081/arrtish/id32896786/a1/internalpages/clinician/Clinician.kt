@@ -1,11 +1,10 @@
-package com.fit2081.arrtish.id32896786.a1.clinician
+package com.fit2081.arrtish.id32896786.a1.internalpages.clinician
 
-import android.os.Bundle
 import android.widget.Toast
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material3.*
@@ -14,40 +13,31 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
-import com.fit2081.arrtish.id32896786.a1.authentication.LoginViewModel
-import com.fit2081.arrtish.id32896786.a1.ui.theme.A1Theme
+import com.fit2081.arrtish.id32896786.a1.authentication.login.LoginViewModel
 
-class ClinicianActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            A1Theme {
-
-            }
-        }
-    }
-}
 
 @Composable
 fun ClinicianLogin(
-    navController: NavHostController
+    navController: NavHostController,
+    viewModelFactory: AppViewModelFactory
 ) {
-
+    val viewModel: LoginViewModel = viewModel(factory = viewModelFactory)
     var context = LocalContext.current
-    val viewModel: LoginViewModel = viewModel(
-        factory = AppViewModelFactory(context)
-    )
+
     var clinicianKey by remember { mutableStateOf("") }
+
+    val scrollState = rememberScrollState()
 
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(scrollState)
             .padding(24.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -75,7 +65,8 @@ fun ClinicianLogin(
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(48.dp)
+                .height(48.dp),
+            shape = RoundedCornerShape(12.dp)
         ) {
             Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = null, tint = Color.White)
             Spacer(modifier = Modifier.width(8.dp))
@@ -83,21 +74,30 @@ fun ClinicianLogin(
         }
     }
 }
+
+
+
 @Composable
 fun ClinicianPage(
     userId: Int,
     modifier: Modifier = Modifier,
-    navController: NavHostController
+    navController: NavHostController,
+    viewModelFactory: AppViewModelFactory
 ) {
-    val viewModel: ClinicianViewModel = viewModel(
-        factory = AppViewModelFactory(LocalContext.current)
-    )
-
+    val viewModel: ClinicianViewModel = viewModel(factory = viewModelFactory)
+    val isLoading by viewModel.isLoading.observeAsState(initial = false)
     val avgScores by viewModel.generateAvgScores.observeAsState(Pair(0f, 0f))
+
+    // Observe generated patterns (insights) LiveData from ViewModel
+    val insights by viewModel.patterns.observeAsState(initial = emptyList())
+    val foodIntakes by viewModel.allFoodIntakes.observeAsState(emptyList())
+
+    val scrollState = rememberScrollState()
 
     Column(
         modifier = modifier
             .fillMaxSize()
+            .verticalScroll(scrollState)
             .padding(24.dp)
     ) {
         Text("Clinician Dashboard", fontSize = 24.sp, fontWeight = FontWeight.Bold)
@@ -110,8 +110,9 @@ fun ClinicianPage(
         Spacer(modifier = Modifier.height(24.dp))
 
         Button(
-            onClick = { /* trigger data pattern generation */ },
+            onClick = { viewModel.generateInterestingPatterns() },  // Trigger data pattern generation
             modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6A1B9A))
         ) {
             Text("Find Data Pattern", color = Color.White)
@@ -119,15 +120,34 @@ fun ClinicianPage(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        val insights = listOf(
-            "Variable Water Intake: Consumption of water varies greatly among users...",
-            "Low Wholegrain Consumption: Intake of wholegrains appears generally low...",
-            "Potential Gender Difference in HEIFA Scoring: The data includes columns for both..."
-        )
+        when {
+            isLoading -> {
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+            }
 
-        insights.forEach { insight ->
-            Text("• $insight", fontSize = 14.sp, modifier = Modifier.padding(bottom = 12.dp))
+            insights.isEmpty() -> {
+                Text(
+                    "No insights available. Press 'Find Data Pattern' to generate insights.",
+                    fontSize = 14.sp,
+                    fontStyle = FontStyle.Italic,
+                    color = Color.Gray
+                )
+            }
+
+            else -> {
+                insights.forEach { insight ->
+                    Text("• $insight", fontSize = 14.sp, modifier = Modifier.padding(bottom = 12.dp))
+                }
+            }
         }
+
 
         Spacer(modifier = Modifier.weight(1f))
 
@@ -136,7 +156,8 @@ fun ClinicianPage(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
+            colors = ButtonDefaults.buttonColors(containerColor = Color.Gray),
+            shape = RoundedCornerShape(12.dp)
         ) {
             Text("Done", color = Color.White)
         }
