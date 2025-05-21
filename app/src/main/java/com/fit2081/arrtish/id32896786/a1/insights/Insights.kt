@@ -4,6 +4,7 @@ package com.fit2081.arrtish.id32896786.a1.insights
 import android.graphics.Paint
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -116,7 +117,8 @@ fun InsightsPage(
                     onClick = {
                         viewModel.sharingInsights(context, userScores, totalScore, 100f)
                     },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp)
                 ) {
                     Text(text = "Share with someone")
                 }
@@ -127,7 +129,8 @@ fun InsightsPage(
                     onClick = {
                         navController.navigate("nutricoach")
                     },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp)
                 ) {
                     Text(text = "Improve my diet!")
                 }

@@ -308,6 +308,7 @@ fun WelcomePage(
             modifier = Modifier
                 .fillMaxWidth(0.8f) // Fill 80% of the screen width
                 .height(50.dp), // Set the button height to 50dp
+            shape = RoundedCornerShape(12.dp)
         ) {
             Text("New to this app? Register here")
         }
@@ -334,9 +335,13 @@ private fun openMonashClinic(context: Context) {
 
 /**TODO LIST:
  *
- * FIX THE HTTP CONNECTION TO SEND DATASET TO LLM FOR 3 KEY DATA PATTERNS - CLINICIAN PART
+ * DO THE NONSENSE FRUIT SCORE FOR FRUITYVICE
  *
- * FIX ROUTING FOR LOGIN AND QUESTIONNAIRE TO HAVE THE NAV CONTROLLER IN THE UI
+ * UPDATE THE NUTRICOACH GPT QUERY WITH ADDITIONAL PATIENT AND FOODINTAKE DATA
+ *
+ * ENHANCE THE PROMPTS OF BOTH CLINICIAN AND NUTRICOACH
+ *
+ * ADD UNIQUE PASSWORD IDENTIFIER CHECKER FOR PASSWD
  *
  * DO CHECK RUN OF ALL REQUIREMENTS FOR THE ASSIGNMENT
  *
@@ -349,21 +354,25 @@ private fun openMonashClinic(context: Context) {
  *  - light/dark theme with rmb state
  *  - unique password requirements
  *
- * ADD UNIQUE PASSWORD IDENTIFIER CHECKER FOR PASSWD
+ *
  *
 **/
 
 /** TO TEST
- *
- * FIX UP THE CLINICIAN LOGIN BACKEND IN THE SETTINGS PART.
- *
- * TEST FRUITYVICEAPI AGAIN
  *
  * DO SYSTEM WIDE APP TEST
  *
 **/
 
 /** DONE
+ *
+ * FIX ROUTING FOR LOGIN AND QUESTIONNAIRE TO HAVE THE NAV CONTROLLER IN THE UI
+ *
+ * FIX THE HTTP CONNECTION TO SEND DATASET TO LLM FOR 3 KEY DATA PATTERNS - CLINICIAN PART
+ *
+ * TEST FRUITYVICEAPI AGAIN
+ *
+ * FIX UP THE CLINICIAN LOGIN BACKEND IN THE SETTINGS PART.
  *
  * FIX THE INSERT CHECK FOR QUESTIONNAIRE
  *

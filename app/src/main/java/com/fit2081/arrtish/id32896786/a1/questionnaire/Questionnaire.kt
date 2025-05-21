@@ -153,7 +153,8 @@ fun QuestionnairePage(
                         },
                         modifier = Modifier
                             .padding(vertical = 4.dp)
-                            .size(width = 200.dp, height = 50.dp)
+                            .size(width = 200.dp, height = 50.dp),
+                        shape = RoundedCornerShape(12.dp)
                     ) {
                         Text(text = persona, fontSize = 12.sp)
                     }
@@ -211,7 +212,8 @@ fun QuestionnairePage(
                     context,
                     biggestMealTime.value
                 ) { viewModel.biggestMealTime.value = it }
-            }  // Open time picker for biggest meal time
+            },
+            shape = RoundedCornerShape(12.dp)
         ) {
             Text(biggestMealTime.value)  // Display selected meal time
         }
@@ -225,7 +227,8 @@ fun QuestionnairePage(
                     context,
                     sleepTime.value,
                 ) { viewModel.sleepTime.value = it }
-            }  // Open time picker for sleep time
+            },
+            shape = RoundedCornerShape(12.dp)
         ) {
             Text(sleepTime.value)  // Display selected sleep time
         }
@@ -239,7 +242,8 @@ fun QuestionnairePage(
                     context,
                     wakeTime.value
                 ) { viewModel.wakeTime.value = it }
-            }  // Open time picker for wake time
+            },
+            shape = RoundedCornerShape(12.dp)
         ) {
             Text(wakeTime.value)  // Display selected wake time
         }
@@ -256,7 +260,9 @@ fun QuestionnairePage(
                     wakeTime = wakeTime.value,
                     selectedPersona = selectedPersona.value
                 )
-            }) {
+            },
+            shape = RoundedCornerShape(12.dp)
+            ) {
                 Text("Save Responses")
             }
         }
@@ -291,7 +297,9 @@ fun PersonaModal(selectedPersona: String, onDismiss: () -> Unit) {
             }
         },
         confirmButton = {
-            Button(onClick = onDismiss) {
+            Button(onClick = onDismiss,
+                shape = RoundedCornerShape(12.dp)
+            ) {
                 Text("Close")  // Close button to dismiss modal
             }
         }

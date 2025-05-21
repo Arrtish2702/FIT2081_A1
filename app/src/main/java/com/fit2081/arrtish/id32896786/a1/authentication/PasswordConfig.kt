@@ -3,6 +3,7 @@ package com.fit2081.arrtish.id32896786.a1.authentication
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -140,7 +141,8 @@ fun ForgotPasswordPage(
             onClick = {
                 viewModel.changePassword(selectedUserId.toInt(), phoneNumber, newPassword, confirmNewPassword, context)
             },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp)
         ) {
             Text("Update Password")
         }
@@ -153,7 +155,8 @@ fun ForgotPasswordPage(
                     popUpTo("changePassword") { inclusive = true }
                 }
             },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp)
         ) {
             Text("Back to Login")
         }

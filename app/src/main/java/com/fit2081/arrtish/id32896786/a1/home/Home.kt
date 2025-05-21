@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -66,7 +67,8 @@ fun HomePage(userId: Int,
                     Button(
                         onClick = {
                             navController.navigate("questionnaire")
-                        }
+                        },
+                        shape = RoundedCornerShape(12.dp)
                     ) {
                         Text("Questionnaire")
                     }
@@ -114,7 +116,9 @@ fun HomePage(userId: Int,
                 // Button to edit questionnaire responses
                 Button(onClick = {
     //                onRouteToQuestionnaire(context, userId) // Navigate to questionnaire
-                }) {
+                },
+                shape = RoundedCornerShape(12.dp)
+                ) {
                     Text(text = "Edit Responses")
                 }
             }
