@@ -1,6 +1,5 @@
-package com.fit2081.arrtish.id32896786.a1.nutricoach
+package com.fit2081.arrtish.id32896786.a1.api.fruityvice
 
-import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Path
 

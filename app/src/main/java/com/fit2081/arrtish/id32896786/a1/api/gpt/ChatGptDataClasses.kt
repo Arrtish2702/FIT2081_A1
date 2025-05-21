@@ -1,4 +1,4 @@
-package com.fit2081.arrtish.id32896786.a1.gpt
+package com.fit2081.arrtish.id32896786.a1.api.gpt
 
 data class ChatGptRequest(
     val model: String = "gpt-4.1",

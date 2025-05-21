@@ -1,6 +1,7 @@
-package com.fit2081.arrtish.id32896786.a1.nutricoach
+package com.fit2081.arrtish.id32896786.a1.api
 
-import com.fit2081.arrtish.id32896786.a1.gpt.ChatGptApi
+import com.fit2081.arrtish.id32896786.a1.api.fruityvice.FruityViceApi
+import com.fit2081.arrtish.id32896786.a1.api.gpt.ChatGptApi
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
