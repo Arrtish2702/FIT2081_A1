@@ -90,7 +90,7 @@ fun ClinicianPage(
     viewModelFactory: AppViewModelFactory
 ) {
     val viewModel: ClinicianViewModel = viewModel(factory = viewModelFactory)
-
+    val isLoading by viewModel.isLoading.observeAsState(initial = false)
     val avgScores by viewModel.generateAvgScores.observeAsState(Pair(0f, 0f))
 
     // Observe generated patterns (insights) LiveData from ViewModel
@@ -125,18 +125,34 @@ fun ClinicianPage(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        if (insights.isEmpty()) {
-            Text(
-                "No insights available. Press 'Find Data Pattern' to generate insights.",
-                fontSize = 14.sp,
-                fontStyle = FontStyle.Italic,
-                color = Color.Gray
-            )
-        } else {
-            insights.forEach { insight ->
-                Text("• $insight", fontSize = 14.sp, modifier = Modifier.padding(bottom = 12.dp))
+        when {
+            isLoading -> {
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+            }
+
+            insights.isEmpty() -> {
+                Text(
+                    "No insights available. Press 'Find Data Pattern' to generate insights.",
+                    fontSize = 14.sp,
+                    fontStyle = FontStyle.Italic,
+                    color = Color.Gray
+                )
+            }
+
+            else -> {
+                insights.forEach { insight ->
+                    Text("• $insight", fontSize = 14.sp, modifier = Modifier.padding(bottom = 12.dp))
+                }
             }
         }
+
 
         Spacer(modifier = Modifier.weight(1f))
 
