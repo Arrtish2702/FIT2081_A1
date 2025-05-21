@@ -163,17 +163,17 @@ fun RegisterPage(
             Text("Register Account")
         }
 
-//        Spacer(modifier = Modifier.height(12.dp))
-//
-//        Button(
-//            onClick = {
-//                navController.navigate("login") {
-//                    popUpTo("register") { inclusive = true }
-//                }
-//            },
-//            modifier = Modifier.fillMaxWidth(),
-//        ) {
-//            Text("Login")
-//        }
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Button(
+            onClick = {
+                navController.navigate("login") {
+                    popUpTo("register") { inclusive = true }
+                }
+            },
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text("Return to Login")
+        }
     }
 }

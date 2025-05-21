@@ -42,7 +42,7 @@ class LoginViewModel(private val foodIntakeRepository: FoodIntakeRepository, pri
     val changePasswordSuccessful = mutableStateOf(false)
 
     fun changePassword(selectedUserId: Int, inputPhoneNumber: String, new: String, confirm: String, context: Context) {
-        viewModelScope.launch {
+        viewModelScope.launch (Dispatchers.IO){
             val patient = patientRepository.getPatientById(selectedUserId)
 
             if (patient == null) {
@@ -133,7 +133,7 @@ class LoginViewModel(private val foodIntakeRepository: FoodIntakeRepository, pri
     fun appRegister(selectedId: String, name: String, phone: String, password: String, confirmPassword: String) {
 
         Log.d(MainActivity.TAG, "LoginViewModel: attempting appRegister")
-        viewModelScope.launch {
+        viewModelScope.launch (Dispatchers.IO){
             registrationSuccessful.value = false
             val patientId = selectedId.toIntOrNull()
             if (patientId == null) {

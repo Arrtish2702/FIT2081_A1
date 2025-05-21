@@ -169,7 +169,8 @@ fun LoginPage(
                         Toast.LENGTH_SHORT
                     ).show()
                 }
-            }, modifier = Modifier.fillMaxWidth()) {
+            }, modifier = Modifier.fillMaxWidth()
+            ) {
                 Text("Login") // Button label
             }
 
@@ -181,7 +182,7 @@ fun LoginPage(
                         popUpTo("login") { inclusive = true }
                     }
                 },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Change Password")
             }
@@ -194,7 +195,7 @@ fun LoginPage(
                         popUpTo("login") { inclusive = true }
                     }
                 },
-                modifier = Modifier
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Text("New to this app? Register here")
             }
