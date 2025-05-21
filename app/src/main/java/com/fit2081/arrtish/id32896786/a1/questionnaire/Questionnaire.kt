@@ -39,23 +39,14 @@ import androidx.compose.ui.unit.dp
 fun QuestionnairePage(
     userId: Int,
     navController: NavController,
-    viewModel: QuestionnaireViewModel = viewModel(
-        factory = AppViewModelFactory(LocalContext.current)
-    )
+    viewModelFactory: AppViewModelFactory
 ) {
     val context = LocalContext.current
+    val viewModel: QuestionnaireViewModel = viewModel(factory = viewModelFactory)
 
     Log.v(MainActivity.TAG, "Questionnaire: Vm made")
-    val hasLoaded = remember { mutableStateOf(false) }
-//    if (!hasLoaded.value) {
-//        viewModel.loadPatientDataByIdAndIntake(userId)
-//        hasLoaded.value = true
-//
-//        // Set ViewModel state from food intake after loading
-//        viewModel.existingIntake.value?.let {
-//            viewModel.setExistingFoodIntake(it)
-//        }
-//    }
+
+
     LaunchedEffect(userId) {
         viewModel.loadPatientDataByIdAndIntake(userId)
     }

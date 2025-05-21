@@ -6,12 +6,12 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fit2081.arrtish.id32896786.a1.MainActivity
+import com.fit2081.arrtish.id32896786.a1.api.fruityvice.FruityViceApi
 import com.fit2081.arrtish.id32896786.a1.databases.aitipsdb.AITips
 import com.fit2081.arrtish.id32896786.a1.databases.aitipsdb.AITipsRepository
-import com.fit2081.arrtish.id32896786.a1.databases.patientdb.PatientRepository
-import com.fit2081.arrtish.id32896786.a1.gpt.ChatGptApi
-import com.fit2081.arrtish.id32896786.a1.gpt.ChatGptRequest
-import com.fit2081.arrtish.id32896786.a1.gpt.Message
+import com.fit2081.arrtish.id32896786.a1.api.gpt.ChatGptApi
+import com.fit2081.arrtish.id32896786.a1.api.gpt.ChatGptRequest
+import com.fit2081.arrtish.id32896786.a1.api.gpt.Message
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.Date

@@ -82,7 +82,7 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 ) { innerPadding ->
-                    AppInitialisation(Modifier.padding(innerPadding), navController, isDarkTheme = viewModel.isDarkTheme, viewModel )
+                    AppInitialisation(Modifier.padding(innerPadding), navController, isDarkTheme = viewModel.isDarkTheme, viewModel, viewModelFactory)
                 }
             }
         }
@@ -96,7 +96,13 @@ class MainActivity : ComponentActivity() {
 
 
 @Composable
-fun AppInitialisation(modifier: Modifier, navController: NavHostController, isDarkTheme: MutableState<Boolean>, viewModel: MainViewModel) {
+fun AppInitialisation(
+    modifier: Modifier,
+    navController: NavHostController,
+    isDarkTheme: MutableState<Boolean>,
+    viewModel: MainViewModel,
+    viewModelFactory: AppViewModelFactory
+) {
     val context = LocalContext.current
     val userId by AuthManager._userId
 
@@ -113,34 +119,34 @@ fun AppInitialisation(modifier: Modifier, navController: NavHostController, isDa
             WelcomePage(modifier, navController)
         }
         composable("login") {
-            LoginPage(modifier, navController)
+            LoginPage(modifier, navController, viewModelFactory)
         }
         composable("register") {
-            RegisterPage(modifier, navController)
+            RegisterPage(modifier, navController, viewModelFactory)
         }
         composable("changePassword") {
             ChangePasswordPage(modifier, navController)
         }
         composable("home") {
-            HomePage(userId ?: -1, modifier, navController)
+            HomePage(userId ?: -1, modifier, navController, viewModelFactory)
         }
         composable("questionnaire") {
-            QuestionnairePage(userId ?: -1, navController)
+            QuestionnairePage(userId ?: -1, navController, viewModelFactory)
         }
         composable("insights") {
-            InsightsPage(userId ?: -1, modifier, navController)
+            InsightsPage(userId ?: -1, modifier, navController, viewModelFactory)
         }
         composable("nutricoach") {
-            NutriCoachPage(userId ?: -1, modifier)
+            NutriCoachPage(userId ?: -1, modifier, viewModelFactory)
         }
         composable("settings") {
-            SettingsPage(userId ?: -1, modifier, navController, isDarkTheme = isDarkTheme, mainViewModel = viewModel)
+            SettingsPage(userId ?: -1, modifier, navController, isDarkTheme = isDarkTheme, viewModelFactory)
         }
         composable("clinician login") {
-            ClinicianLogin(navController)
+            ClinicianLogin(navController, viewModelFactory)
         }
         composable("clinician") {
-            ClinicianPage(userId ?: -1, modifier, navController)
+            ClinicianPage(userId ?: -1, modifier, navController, viewModelFactory)
         }
     }
 }
@@ -322,9 +328,8 @@ private fun openMonashClinic(context: Context) {
  *      - can add one inside of the app in settings page
  *  - saved ai tips into db for users to skim through
  *  - refactored routing and userid referencing for user ids in login/register/change pw
- *  - add more hd stuff here for doc
- *
- * FIX DARKTHEME TO HOLD ON APP DESTROY
+ *  - light/dark theme with rmb state
+ *  - unique password requirements
  *
  * ADD UNIQUE PASSWORD IDENTIFIER CHECKER FOR PASSWD
  *
@@ -343,6 +348,8 @@ private fun openMonashClinic(context: Context) {
 **/
 
 /** DONE
+ *
+ * FIX DARKTHEME TO HOLD ON APP DESTROY
  *
  * FIX QUESTIONNAIRE NOT HOLDING STATE FOR SCREEN ROTATE
  *

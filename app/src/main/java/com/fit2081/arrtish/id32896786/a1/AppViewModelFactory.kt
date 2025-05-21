@@ -14,7 +14,7 @@ import com.fit2081.arrtish.id32896786.a1.home.HomeViewModel
 import com.fit2081.arrtish.id32896786.a1.settings.SettingsViewModel
 import com.fit2081.arrtish.id32896786.a1.databases.patientdb.PatientRepository
 import com.fit2081.arrtish.id32896786.a1.nutricoach.NutriCoachViewModel
-import com.fit2081.arrtish.id32896786.a1.nutricoach.RetrofitClient
+import com.fit2081.arrtish.id32896786.a1.api.RetrofitClient
 import com.fit2081.arrtish.id32896786.a1.questionnaire.QuestionnaireViewModel
 
 class AppViewModelFactory(

@@ -34,13 +34,14 @@ fun SettingsPage(
     modifier: Modifier = Modifier,
     navController: NavHostController,
     isDarkTheme: MutableState<Boolean>,
-    settingsViewModel: SettingsViewModel = viewModel(
-        factory = AppViewModelFactory(LocalContext.current)
-    ),
-    mainViewModel: MainViewModel
+    viewModelFactory: AppViewModelFactory
+
 ) {
     var expanded by remember { mutableStateOf(false) }
     var context = LocalContext.current
+    val settingsViewModel: SettingsViewModel = viewModel(factory = viewModelFactory)
+    val mainViewModel: MainViewModel = viewModel(factory = viewModelFactory)
+
     val patient by settingsViewModel.patient.observeAsState()
 
     LaunchedEffect(userId) {

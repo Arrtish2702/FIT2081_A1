@@ -23,11 +23,10 @@ fun InsightsPage(
     userId: Int,
     modifier: Modifier = Modifier,
     navController: NavHostController,
-    viewModel: InsightsViewModel = viewModel(
-        factory = AppViewModelFactory(LocalContext.current)
-    )
+    viewModelFactory: AppViewModelFactory
 ) {
 
+    val viewModel: InsightsViewModel = viewModel(factory = viewModelFactory)
     val context = LocalContext.current
     val patient by viewModel.patient.observeAsState()
 

@@ -50,6 +50,7 @@ import androidx.navigation.NavController
 import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
 import com.fit2081.arrtish.id32896786.a1.MainActivity
 import com.fit2081.arrtish.id32896786.a1.R
+import com.fit2081.arrtish.id32896786.a1.home.HomeViewModel
 
 
 // Composable function for the login page UI
@@ -58,11 +59,10 @@ import com.fit2081.arrtish.id32896786.a1.R
 fun LoginPage(
     modifier: Modifier = Modifier,
     navController: NavController,
-    viewModel: LoginViewModel = viewModel(
-        factory = AppViewModelFactory(LocalContext.current)
-    )
+    viewModelFactory: AppViewModelFactory
 ){
     var context = LocalContext.current
+    val viewModel: LoginViewModel = viewModel(factory = viewModelFactory)
     var selectedUserId by remember { mutableStateOf("") }
     val userIds by viewModel.registeredPatientIds.observeAsState(initial = emptyList())
     var expanded by remember { mutableStateOf(false) }

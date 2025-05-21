@@ -30,11 +30,10 @@ import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
 fun RegisterPage(
     modifier: Modifier = Modifier,
     navController: NavController,
-    viewModel: LoginViewModel = viewModel(
-        factory = AppViewModelFactory(LocalContext.current)
-    )
+    viewModelFactory: AppViewModelFactory
 ) {
     var context = LocalContext.current
+    val viewModel: LoginViewModel = viewModel(factory = viewModelFactory)
     var selectedUserId by remember { mutableStateOf("") } // State to store selected user ID
     val userIds by viewModel.unregisteredPatientIds.observeAsState(initial = emptyList())
     var phone by remember { mutableStateOf("") }

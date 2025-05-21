@@ -24,10 +24,10 @@ import androidx.compose.ui.window.Dialog
 fun NutriCoachPage(
     userId: Int,
     modifier: Modifier = Modifier,
-    viewModel: NutriCoachViewModel = viewModel(
-       factory = AppViewModelFactory(LocalContext.current)
-    )
+    viewModelFactory: AppViewModelFactory
 ) {
+    val viewModel: NutriCoachViewModel = viewModel(factory = viewModelFactory)
+
     var fruitName by remember { mutableStateOf("") }
     val motivationalMessage by viewModel.motivationalMessage.observeAsState("")
     val fruitDetails by viewModel.fruitDetails.observeAsState(emptyMap())
