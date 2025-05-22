@@ -114,11 +114,11 @@ fun HomePage(userId: Int,
 
                 // Button to edit questionnaire responses
                 Button(onClick = {
-    //                onRouteToQuestionnaire(context, userId) // Navigate to questionnaire
+                    navController.navigate("insights")
                 },
                 shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text(text = "Edit Responses")
+                    Text(text = "Show all Scores")
                 }
             }
         }

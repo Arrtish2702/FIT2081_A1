@@ -35,6 +35,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.fit2081.arrtish.id32896786.a1.authentication.AuthManager
 import com.fit2081.arrtish.id32896786.a1.authentication.login.LoginPage
 import com.fit2081.arrtish.id32896786.a1.authentication.RegisterPage
+import com.fit2081.arrtish.id32896786.a1.authentication.passwordmanager.ChangePasswordPage
 import com.fit2081.arrtish.id32896786.a1.authentication.passwordmanager.ForgotPasswordPage
 import com.fit2081.arrtish.id32896786.a1.internalpages.clinician.ClinicianLogin
 import com.fit2081.arrtish.id32896786.a1.internalpages.clinician.ClinicianPage
@@ -138,6 +139,9 @@ fun AppInitialisation(
             composable("forgotPassword") {
                 ForgotPasswordPage(modifier, navController)
             }
+            composable("changePassword") {
+                ChangePasswordPage(modifier, navController)
+            }
             composable("home") {
                 HomePage(userId ?: -1, modifier, navController, viewModelFactory)
             }
@@ -174,6 +178,9 @@ fun AppInitialisation(
 fun MyBottomAppBar(navController: NavHostController) {
     // State to track the currently selected item in the bottom navigation bar.
     var selectedItem by remember { mutableStateOf(0) }
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentDestination = navBackStackEntry?.destination
+
 
     // List of navigation items: "home", "reports", "settings".
     val items = listOf(
@@ -204,8 +211,9 @@ fun MyBottomAppBar(navController: NavHostController) {
                 },
                 // Display the item's name as the label.
                 label = { Text(item) },
+
                 // Determine if this item is currently selected.
-                selected = selectedItem == index,
+                selected = currentDestination?.route == item,
                 // Actions to perform when this item is clicked.
                 onClick = {
                     // Update the selectedItem state to the current index.
@@ -335,9 +343,6 @@ private fun openMonashClinic(context: Context) {
 
 /**TODO LIST:
  *
- * DO A CHANGE PASSWORD TO COMPLIMENT THE FORGOT PASSWORD
- *  FORGOT PASSWORD - NEED TO USE SECURITY QUESTION OR NOT 
- *  CHANGE PASSWORD - IF THE USER HAS CHANGED PW, ROUTE TO CHANGE PW ON AFTER LOGIN
  *
  * DO CHECK RUN OF ALL REQUIREMENTS FOR THE ASSIGNMENT
  *
@@ -359,6 +364,9 @@ private fun openMonashClinic(context: Context) {
 **/
 
 /** DONE
+ *
+ * FORGOT PASSWORD - NEED TO USE SECURITY QUESTION OR NOT
+ * CHANGE PASSWORD - IF THE USER HAS CHANGED PW, ROUTE TO CHANGE PW ON AFTER LOGIN
  *
  * ADD UNIQUE PASSWORD IDENTIFIER CHECKER FOR PASSWD
  *
