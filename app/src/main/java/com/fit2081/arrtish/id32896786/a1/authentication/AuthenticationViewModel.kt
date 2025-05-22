@@ -1,4 +1,4 @@
-package com.fit2081.arrtish.id32896786.a1.authentication.login
+package com.fit2081.arrtish.id32896786.a1.authentication
 
 import android.content.Context
 import android.util.Log
@@ -8,7 +8,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.fit2081.arrtish.id32896786.a1.MainActivity
-import com.fit2081.arrtish.id32896786.a1.authentication.AuthManager
 import com.fit2081.arrtish.id32896786.a1.authentication.passwordmanager.PasswordUtils
 import com.fit2081.arrtish.id32896786.a1.databases.foodintakedb.FoodIntakeRepository
 import com.fit2081.arrtish.id32896786.a1.databases.patientdb.PatientRepository
@@ -51,6 +50,12 @@ class AuthenticationViewModel(private val foodIntakeRepository: FoodIntakeReposi
     var changeNewPassword = mutableStateOf("")
     var changeConfirmPassword = mutableStateOf("")
 
+    val forgotPasswordMessage = mutableStateOf<String?>(null)
+    val forgotPasswordSuccessful = mutableStateOf(false)
+
+    var oldPassword = mutableStateOf("")
+
+    // UI state for change password
     val changePasswordMessage = mutableStateOf<String?>(null)
     val changePasswordSuccessful = mutableStateOf(false)
 
@@ -59,18 +64,18 @@ class AuthenticationViewModel(private val foodIntakeRepository: FoodIntakeReposi
             val patient = patientRepository.getPatientById(selectedUserId)
 
             if (patient == null) {
-                changePasswordMessage.value = "User not found."
+                forgotPasswordMessage.value = "User not found."
                 return@launch
             }
 
             // Trim and compare phone numbers
             if (patient.patientPhoneNumber.trim() != inputPhoneNumber.trim()) {
-                changePasswordMessage.value = "Phone number does not match User Account."
+                forgotPasswordMessage.value = "Phone number does not match User Account."
                 return@launch
             }
 
             if (new != confirm) {
-                changePasswordMessage.value = "New passwords do not match."
+                forgotPasswordMessage.value = "New passwords do not match."
                 return@launch
             }
 
@@ -80,7 +85,57 @@ class AuthenticationViewModel(private val foodIntakeRepository: FoodIntakeReposi
             )
             patientRepository.updatePatient(updatedPatient)
 
-            changePasswordMessage.value = "Password updated successfully."
+            forgotPasswordMessage.value = "Password updated successfully."
+            forgotPasswordSuccessful.value = true
+        }
+    }
+
+    fun changePassword(
+        selectedUserId: Int,
+        oldPasswordInput: String,
+        newPasswordInput: String,
+        confirmNewPasswordInput: String,
+        context: Context
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val patient = patientRepository.getPatientById(selectedUserId)
+
+            if (patient == null) {
+                changePasswordMessage.value = "User not found."
+                return@launch
+            }
+
+            // Check if account is registered (i.e., password is set)
+            if (patient.patientPassword.isEmpty()) {
+                changePasswordMessage.value = "This account is not registered yet."
+                return@launch
+            }
+
+            // Verify the old password
+            if (!PasswordUtils.passwordsMatch(oldPasswordInput, patient.patientPassword)) {
+                changePasswordMessage.value = "Old password is incorrect."
+                return@launch
+            }
+
+            // Confirm new password match
+            if (newPasswordInput != confirmNewPasswordInput) {
+                changePasswordMessage.value = "New passwords do not match."
+                return@launch
+            }
+
+            // Check that new password is different
+            if (PasswordUtils.passwordsMatch(newPasswordInput, patient.patientPassword)) {
+                changePasswordMessage.value = "New password must be different from old password."
+                return@launch
+            }
+
+            // Update password
+            val updatedPatient = patient.copy(
+                patientPassword = PasswordUtils.hashPassword(newPasswordInput.trim())
+            )
+            patientRepository.updatePatient(updatedPatient)
+
+            changePasswordMessage.value = "Password changed successfully."
             changePasswordSuccessful.value = true
         }
     }
@@ -123,7 +178,7 @@ class AuthenticationViewModel(private val foodIntakeRepository: FoodIntakeReposi
                 else -> {
                     AuthManager.login(patientId, context)
                     val foodIntake = foodIntakeRepository.getFoodIntake(patientId)
-                    Log.v(MainActivity.TAG, "foodintake: $foodIntake")
+                    Log.v(MainActivity.Companion.TAG, "foodintake: $foodIntake")
                     withContext(Dispatchers.Main) {
                         loginMessage.value = "Login successful!"
                         loginSuccessful.value = true

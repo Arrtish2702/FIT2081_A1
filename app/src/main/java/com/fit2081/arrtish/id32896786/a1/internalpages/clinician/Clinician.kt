@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.*
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
-import com.fit2081.arrtish.id32896786.a1.authentication.login.AuthenticationViewModel
+import com.fit2081.arrtish.id32896786.a1.authentication.AuthenticationViewModel
 
 
 @Composable

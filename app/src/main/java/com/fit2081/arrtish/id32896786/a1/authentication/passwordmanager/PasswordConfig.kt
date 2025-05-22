@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
-import com.fit2081.arrtish.id32896786.a1.authentication.login.AuthenticationViewModel
+import com.fit2081.arrtish.id32896786.a1.authentication.AuthenticationViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -47,13 +47,13 @@ fun ForgotPasswordPage(
     val scrollState = rememberScrollState()
 
 
-    val message = viewModel.changePasswordMessage.value
-    val passwordChangeSuccess = viewModel.changePasswordSuccessful.value
+    val message = viewModel.forgotPasswordMessage.value
+    val passwordChangeSuccess = viewModel.forgotPasswordSuccessful.value
 
     LaunchedEffect(message) {
         message?.let {
             Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
-            viewModel.changePasswordMessage.value = null
+            viewModel.forgotPasswordMessage.value = null
         }
     }
 
@@ -162,3 +162,142 @@ fun ForgotPasswordPage(
         }
     }
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ChangePasswordPage(
+    modifier: Modifier = Modifier,
+    navController: NavController,
+    viewModel: AuthenticationViewModel = viewModel(factory = AppViewModelFactory(LocalContext.current))
+) {
+    val context = LocalContext.current
+    val selectedUserId by viewModel.changeSelectedUserId
+    val oldPassword by viewModel.oldPassword
+    val newPassword by viewModel.changeNewPassword
+    val confirmNewPassword by viewModel.changeConfirmPassword
+    val userIds by viewModel.registeredPatientIds.observeAsState(initial = emptyList())
+    var expanded by remember { mutableStateOf(false) }
+    val scrollState = rememberScrollState()
+
+    val message = viewModel.changePasswordMessage.value
+    val passwordChangeSuccess = viewModel.changePasswordSuccessful.value
+
+    LaunchedEffect(message) {
+        message?.let {
+            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+            viewModel.changePasswordMessage.value = null
+        }
+    }
+
+    if (passwordChangeSuccess) {
+        LaunchedEffect(Unit) {
+            navController.navigate("login") {
+                popUpTo("changePassword") { inclusive = true }
+            }
+        }
+    }
+
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .verticalScroll(scrollState)
+            .padding(24.dp),
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Spacer(modifier = Modifier.height(40.dp))
+
+        Text(text = "Change Password", style = MaterialTheme.typography.titleLarge)
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        ExposedDropdownMenuBox(
+            expanded = expanded,
+            onExpandedChange = { expanded = !expanded }) {
+            OutlinedTextField(
+                value = selectedUserId,
+                onValueChange = {},
+                label = { Text("User ID") },
+                leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
+                trailingIcon = { Icon(Icons.Filled.ArrowDropDown, contentDescription = null) },
+                readOnly = true,
+                modifier = Modifier.fillMaxWidth().menuAnchor()
+            )
+
+            ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                userIds.forEach { userId ->
+                    DropdownMenuItem(text = { Text(userId.toString()) }, onClick = {
+                        viewModel.changeSelectedUserId.value = userId.toString()
+                        expanded = false
+                    })
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        OutlinedTextField(
+            value = oldPassword,
+            onValueChange = { viewModel.oldPassword.value = it },
+            label = { Text("Old Password") },
+            visualTransformation = PasswordVisualTransformation(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        OutlinedTextField(
+            value = newPassword,
+            onValueChange = { viewModel.regPassword.value = it },
+            label = { Text("New Password") },
+            visualTransformation = PasswordVisualTransformation(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        OutlinedTextField(
+            value = confirmNewPassword,
+            onValueChange = { viewModel.regConfirmPassword.value = it },
+            label = { Text("Confirm New Password") },
+            visualTransformation = PasswordVisualTransformation(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Button(
+            onClick = {
+                viewModel.changePassword(
+                    selectedUserId.toInt(),
+                    oldPassword,
+                    newPassword,
+                    confirmNewPassword,
+                    context
+                )
+            },
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Text("Change Password")
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Button(
+            onClick = {
+                navController.navigate("login") {
+                    popUpTo("changePassword") { inclusive = true }
+                }
+            },
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Text("Back to Login")
+        }
+    }
+}
+

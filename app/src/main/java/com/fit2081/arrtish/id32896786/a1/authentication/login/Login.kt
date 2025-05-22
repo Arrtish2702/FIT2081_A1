@@ -50,6 +50,7 @@ import androidx.navigation.NavController
 import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
 import com.fit2081.arrtish.id32896786.a1.MainActivity
 import com.fit2081.arrtish.id32896786.a1.R
+import com.fit2081.arrtish.id32896786.a1.authentication.AuthenticationViewModel
 
 
 // Composable function for the login page UI

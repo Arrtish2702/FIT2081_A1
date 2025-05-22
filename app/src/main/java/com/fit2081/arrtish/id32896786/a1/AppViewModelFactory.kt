@@ -4,7 +4,7 @@ import android.app.Application
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.fit2081.arrtish.id32896786.a1.authentication.login.AuthenticationViewModel
+import com.fit2081.arrtish.id32896786.a1.authentication.AuthenticationViewModel
 import com.fit2081.arrtish.id32896786.a1.internalpages.clinician.ClinicianViewModel
 import com.fit2081.arrtish.id32896786.a1.databases.AppDataBase
 import com.fit2081.arrtish.id32896786.a1.databases.aitipsdb.AITipsRepository
