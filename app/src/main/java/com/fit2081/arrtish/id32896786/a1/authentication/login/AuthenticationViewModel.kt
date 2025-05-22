@@ -9,16 +9,16 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.fit2081.arrtish.id32896786.a1.MainActivity
 import com.fit2081.arrtish.id32896786.a1.authentication.AuthManager
-import com.fit2081.arrtish.id32896786.a1.authentication.PasswordUtils
+import com.fit2081.arrtish.id32896786.a1.authentication.passwordmanager.PasswordUtils
 import com.fit2081.arrtish.id32896786.a1.databases.foodintakedb.FoodIntakeRepository
 import com.fit2081.arrtish.id32896786.a1.databases.patientdb.PatientRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class LoginViewModel(private val foodIntakeRepository: FoodIntakeRepository, private val patientRepository: PatientRepository) : ViewModel() {
+class AuthenticationViewModel(private val foodIntakeRepository: FoodIntakeRepository, private val patientRepository: PatientRepository) : ViewModel() {
 
-    val patientIds: LiveData<List<Int>> = patientRepository.allPatientIds()
+//    val patientIds: LiveData<List<Int>> = patientRepository.allPatientIds()
     val registeredPatientIds: LiveData<List<Int>> = patientRepository.allRegisteredPatientIds()
     val unregisteredPatientIds: LiveData<List<Int>> = patientRepository.allUnregisteredPatientIds()
 
@@ -54,7 +54,7 @@ class LoginViewModel(private val foodIntakeRepository: FoodIntakeRepository, pri
     val changePasswordMessage = mutableStateOf<String?>(null)
     val changePasswordSuccessful = mutableStateOf(false)
 
-    fun changePassword(selectedUserId: Int, inputPhoneNumber: String, new: String, confirm: String, context: Context) {
+    fun forgotPassword(selectedUserId: Int, inputPhoneNumber: String, new: String, confirm: String, context: Context) {
         viewModelScope.launch(Dispatchers.IO){
             val patient = patientRepository.getPatientById(selectedUserId)
 

@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.*
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
-import com.fit2081.arrtish.id32896786.a1.authentication.login.LoginViewModel
+import com.fit2081.arrtish.id32896786.a1.authentication.login.AuthenticationViewModel
 
 
 @Composable
@@ -27,7 +27,7 @@ fun ClinicianLogin(
     navController: NavHostController,
     viewModelFactory: AppViewModelFactory
 ) {
-    val viewModel: LoginViewModel = viewModel(factory = viewModelFactory)
+    val viewModel: AuthenticationViewModel = viewModel(factory = viewModelFactory)
     var context = LocalContext.current
 
     var clinicianKey by remember { mutableStateOf("") }

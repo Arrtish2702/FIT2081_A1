@@ -4,7 +4,7 @@ import android.app.Application
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.fit2081.arrtish.id32896786.a1.authentication.login.LoginViewModel
+import com.fit2081.arrtish.id32896786.a1.authentication.login.AuthenticationViewModel
 import com.fit2081.arrtish.id32896786.a1.internalpages.clinician.ClinicianViewModel
 import com.fit2081.arrtish.id32896786.a1.databases.AppDataBase
 import com.fit2081.arrtish.id32896786.a1.databases.aitipsdb.AITipsRepository
@@ -32,8 +32,8 @@ class AppViewModelFactory(
             modelClass.isAssignableFrom(MainViewModel::class.java) -> {
                 MainViewModel(context.applicationContext as Application, patientRepository, foodIntakeRepository) as T
             }
-            modelClass.isAssignableFrom(LoginViewModel::class.java) -> {
-                LoginViewModel(foodIntakeRepository, patientRepository) as T
+            modelClass.isAssignableFrom(AuthenticationViewModel::class.java) -> {
+                AuthenticationViewModel(foodIntakeRepository, patientRepository) as T
             }
             modelClass.isAssignableFrom(HomeViewModel::class.java) -> {
                 HomeViewModel(patientRepository) as T

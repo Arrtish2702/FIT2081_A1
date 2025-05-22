@@ -1,4 +1,4 @@
-package com.fit2081.arrtish.id32896786.a1.authentication
+package com.fit2081.arrtish.id32896786.a1.authentication.passwordmanager
 
 
 import java.security.MessageDigest

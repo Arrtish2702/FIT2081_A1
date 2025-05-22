@@ -50,7 +50,6 @@ import androidx.navigation.NavController
 import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
 import com.fit2081.arrtish.id32896786.a1.MainActivity
 import com.fit2081.arrtish.id32896786.a1.R
-import com.fit2081.arrtish.id32896786.a1.authentication.login.LoginViewModel
 
 
 // Composable function for the login page UI
@@ -62,7 +61,7 @@ fun LoginPage(
     viewModelFactory: AppViewModelFactory
 ){
     var context = LocalContext.current
-    val viewModel: LoginViewModel = viewModel(factory = viewModelFactory)
+    val viewModel: AuthenticationViewModel = viewModel(factory = viewModelFactory)
     var selectedUserId by remember { mutableStateOf("") }
     val userIds by viewModel.registeredPatientIds.observeAsState(initial = emptyList())
     var expanded by remember { mutableStateOf(false) }
@@ -179,7 +178,7 @@ fun LoginPage(
 
         Button(
             onClick = {
-                navController.navigate("changePassword") {
+                navController.navigate("forgotPassword") {
                     popUpTo("login") { inclusive = true }
                 }
             },

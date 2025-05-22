@@ -1,4 +1,4 @@
-package com.fit2081.arrtish.id32896786.a1.authentication
+package com.fit2081.arrtish.id32896786.a1.authentication.passwordmanager
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
-import com.fit2081.arrtish.id32896786.a1.authentication.login.LoginViewModel
+import com.fit2081.arrtish.id32896786.a1.authentication.login.AuthenticationViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -35,7 +35,7 @@ import com.fit2081.arrtish.id32896786.a1.authentication.login.LoginViewModel
 fun ForgotPasswordPage(
     modifier: Modifier = Modifier,
     navController: NavController,
-    viewModel: LoginViewModel = viewModel(factory = AppViewModelFactory(LocalContext.current))
+    viewModel: AuthenticationViewModel = viewModel(factory = AppViewModelFactory(LocalContext.current))
 ) {
     val context = LocalContext.current
     val selectedUserId by viewModel.changeSelectedUserId
@@ -60,7 +60,7 @@ fun ForgotPasswordPage(
     if (passwordChangeSuccess) {
         LaunchedEffect(Unit) {
             navController.navigate("login") {
-                popUpTo("changePassword") { inclusive = true }
+                popUpTo("forgotPassword") { inclusive = true }
             }
         }
     }
@@ -139,7 +139,7 @@ fun ForgotPasswordPage(
 
         Button(
             onClick = {
-                viewModel.changePassword(selectedUserId.toInt(), phoneNumber, newPassword, confirmNewPassword, context)
+                viewModel.forgotPassword(selectedUserId.toInt(), phoneNumber, newPassword, confirmNewPassword, context)
             },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp)
@@ -152,7 +152,7 @@ fun ForgotPasswordPage(
         Button(
             onClick = {
                 navController.navigate("login") {
-                    popUpTo("changePassword") { inclusive = true }
+                    popUpTo("forgotPassword") { inclusive = true }
                 }
             },
             modifier = Modifier.fillMaxWidth(),

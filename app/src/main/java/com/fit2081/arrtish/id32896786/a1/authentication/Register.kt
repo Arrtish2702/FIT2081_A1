@@ -1,10 +1,6 @@
 package com.fit2081.arrtish.id32896786.a1.authentication
 
-import android.os.Bundle
 import android.widget.Toast
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -22,11 +18,10 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.fit2081.arrtish.id32896786.a1.ui.theme.A1Theme
 import androidx.compose.ui.unit.*
 import androidx.navigation.NavController
 import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
-import com.fit2081.arrtish.id32896786.a1.authentication.login.LoginViewModel
+import com.fit2081.arrtish.id32896786.a1.authentication.login.AuthenticationViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -37,7 +32,7 @@ fun RegisterPage(
     viewModelFactory: AppViewModelFactory
 ) {
     var context = LocalContext.current
-    val viewModel: LoginViewModel = viewModel(factory = viewModelFactory)
+    val viewModel: AuthenticationViewModel = viewModel(factory = viewModelFactory)
     val userIds by viewModel.unregisteredPatientIds.observeAsState(initial = emptyList())
     val selectedUserId by viewModel.regSelectedUserId
     val name by viewModel.regName

@@ -119,7 +119,7 @@ class NutriCoachViewModel(
                     The user has provided their health profile and nutrition data. Based on this, do ONE of the following:
                     
                     - If the user has an optimal fruit score (indicated as TRUE below), give a highly encouraging, personalized, celebratory message (max 3 sentences) to congratulate them and reinforce that habit.
-                    - Otherwise, give a brief and motivational dietary tips (3 sentences max per tip), tailored to the user’s profile, to help them improve their nutrition and habits.
+                    - Otherwise, give a motivational dietary tip/behaviour to change  (4 sentences max per tip), tailored to the user’s profile, to help them improve their nutrition and habits.
 
                     Make your tone empathetic, non-judgmental, empowering, and specific to the user.
 

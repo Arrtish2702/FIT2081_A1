@@ -33,9 +33,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.fit2081.arrtish.id32896786.a1.authentication.AuthManager
-import com.fit2081.arrtish.id32896786.a1.authentication.ForgotPasswordPage
 import com.fit2081.arrtish.id32896786.a1.authentication.login.LoginPage
 import com.fit2081.arrtish.id32896786.a1.authentication.RegisterPage
+import com.fit2081.arrtish.id32896786.a1.authentication.passwordmanager.ForgotPasswordPage
 import com.fit2081.arrtish.id32896786.a1.internalpages.clinician.ClinicianLogin
 import com.fit2081.arrtish.id32896786.a1.internalpages.clinician.ClinicianPage
 import com.fit2081.arrtish.id32896786.a1.internalpages.home.HomePage
@@ -71,7 +71,7 @@ class MainActivity : ComponentActivity() {
             val navController = rememberNavController()
             val navBackStackEntry by navController.currentBackStackEntryAsState()
             val currentRoute = navBackStackEntry?.destination?.route
-            val hideBottomBarRoutes = listOf("welcome", "login", "register", "changePassword", "questionnaire")
+            val hideBottomBarRoutes = listOf("welcome", "login", "register", "forgotPassword", "questionnaire")
 
             A1Theme(darkTheme = viewModel.isDarkTheme.value) {
                 Scaffold(
@@ -135,7 +135,7 @@ fun AppInitialisation(
             composable("register") {
                 RegisterPage(modifier, navController, viewModelFactory)
             }
-            composable("changePassword") {
+            composable("forgotPassword") {
                 ForgotPasswordPage(modifier, navController)
             }
             composable("home") {
@@ -335,21 +335,20 @@ private fun openMonashClinic(context: Context) {
 
 /**TODO LIST:
  *
- *
- * ADD UNIQUE PASSWORD IDENTIFIER CHECKER FOR PASSWD
+ * DO A CHANGE PASSWORD TO COMPLIMENT THE FORGOT PASSWORD
+ *  FORGOT PASSWORD - NEED TO USE SECURITY QUESTION OR NOT 
+ *  CHANGE PASSWORD - IF THE USER HAS CHANGED PW, ROUTE TO CHANGE PW ON AFTER LOGIN
  *
  * DO CHECK RUN OF ALL REQUIREMENTS FOR THE ASSIGNMENT
  *
  * DO DOCUMENT LIST OF HD REQUIREMENTS
- *  - put in pw hashing for user pws
- *  - put in change pw page for users whom logged out and forgot their pw
- *      - can add one inside of the app in settings page
- *  - saved ai tips into db for users to skim through
- *  - refactored routing and userid referencing for user ids in login/register/change pw
- *  - light/dark theme with rmb state
- *  - unique password requirements
- *  - stylised nutricoach prompts to encourage/congratulate users with high/low scores
- *  - stylised clinician prompts to give analysis/encourage more users based on the dataset for the insights
+ *  - put in pw hashing for user pws - 1
+ *  - put in change pw page for users whom logged out and forgot their pw - 0.5
+ *      - can add one inside of the app in settings page - 0.5 - MUST DO
+ *  - light/dark theme with rmb state - 0.3
+ *  - unique password requirements - 0.5
+ *  - stylised nutriCoach prompts to encourage/congratulate users with high/low scores - 1
+ *  - stylised clinician prompts to give analysis/encourage more users based on the dataset for the insights - 1
  *
 **/
 
@@ -360,6 +359,8 @@ private fun openMonashClinic(context: Context) {
 **/
 
 /** DONE
+ *
+ * ADD UNIQUE PASSWORD IDENTIFIER CHECKER FOR PASSWD
  *
  * ENHANCE THE PROMPTS OF CLINICIAN AND NUTRICOACH GEN AI
  *
