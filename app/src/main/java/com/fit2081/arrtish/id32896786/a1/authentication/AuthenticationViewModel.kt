@@ -176,7 +176,7 @@ class AuthenticationViewModel(private val foodIntakeRepository: FoodIntakeReposi
             }
 
             if (!PasswordUtils.isValidPassword(password)) {
-                registrationMessage.value = "Password must be at least 8 characters and include a capital letter, lowercase letter, number, and special symbol (!@#\$%^&*)."
+                registrationMessage.value = "Password must be 8+ chars, with upper, lower, number & symbol (!@#\$%^&*)."
                 return@launch
             }
 

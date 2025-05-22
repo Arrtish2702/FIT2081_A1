@@ -8,11 +8,14 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.*
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -40,13 +43,21 @@ fun RegisterPage(
     val password by viewModel.regPassword
     val confirmPassword by viewModel.regConfirmPassword
 
+    // Regex validation booleans
+    val hasMinLength = password.length >= 8
+    val hasUppercase = password.any { it.isUpperCase() }
+    val hasLowercase = password.any { it.isLowerCase() }
+    val hasNumber = password.any { it.isDigit() }
+    val hasSpecialChar = password.any { it in "!@#\$%^&*." }
+
+
     val message = viewModel.registrationMessage.value
 
     val scrollState = rememberScrollState()
 
     LaunchedEffect(message) {
         message?.let {
-            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, it, Toast.LENGTH_LONG).show()
             viewModel.registrationMessage.value = null // reset so it doesn’t keep showing
         }
     }
@@ -133,8 +144,24 @@ fun RegisterPage(
             placeholder = { Text("Enter your password") },
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            isError = password.isNotBlank() && !(hasMinLength && hasUppercase && hasLowercase && hasNumber && hasSpecialChar)
         )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Text(
+                text = "Password must include:",
+                style = MaterialTheme.typography.bodySmall
+            )
+            PasswordRequirement("• At least 8 characters", hasMinLength)
+            PasswordRequirement("• One uppercase letter", hasUppercase)
+            PasswordRequirement("• One lowercase letter", hasLowercase)
+            PasswordRequirement("• One number", hasNumber)
+            PasswordRequirement("• One special character (!@#\$%^&*)", hasSpecialChar)
+        }
+
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -182,3 +209,20 @@ fun RegisterPage(
         }
     }
 }
+
+@Composable
+fun PasswordRequirement(text: String, met: Boolean) {
+    val color = if (met) Color(0xFF2E7D32) else Color(0xFFD32F2F) // green/red
+
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Icon(
+            imageVector = if (met) Icons.Default.Check else Icons.Default.Clear,
+            contentDescription = null,
+            tint = color,
+            modifier = Modifier.size(16.dp)
+        )
+        Spacer(modifier = Modifier.width(4.dp))
+        Text(text = text, color = color, style = MaterialTheme.typography.bodySmall)
+    }
+}
+
