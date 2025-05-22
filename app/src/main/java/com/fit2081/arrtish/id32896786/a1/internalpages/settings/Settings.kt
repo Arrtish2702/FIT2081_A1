@@ -131,6 +131,20 @@ fun SettingsPage(
 
             Button(
                 onClick = {
+                    navController.navigate("changePassword")
+                },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Icon(Icons.Default.Lock, contentDescription = null)
+                Spacer(Modifier.width(8.dp))
+                Text("Change Password")
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Button(
+                onClick = {
                     AuthManager.logout(context)
                     Log.v(MainActivity.TAG, "userID on logout: $userId")
                     navController.navigate("login") {

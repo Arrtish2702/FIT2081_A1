@@ -14,4 +14,15 @@ object PasswordUtils {
     fun passwordsMatch(input: String, storedHashed: String): Boolean {
         return hashPassword(input) == storedHashed
     }
+
+    fun isValidPassword(password: String): Boolean {
+        val minLength = 8
+        val specialChars = "!@#\$%^&*"
+
+        return password.length >= minLength &&
+                password.any { it.isUpperCase() } &&
+                password.any { it.isLowerCase() } &&
+                password.any { it.isDigit() } &&
+                password.any { it in specialChars }
+    }
 }

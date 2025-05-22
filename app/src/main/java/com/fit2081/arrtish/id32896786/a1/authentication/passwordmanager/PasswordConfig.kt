@@ -249,7 +249,7 @@ fun ChangePasswordPage(
 
         OutlinedTextField(
             value = newPassword,
-            onValueChange = { viewModel.regPassword.value = it },
+            onValueChange = { viewModel.changeNewPassword.value = it },
             label = { Text("New Password") },
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
@@ -260,7 +260,7 @@ fun ChangePasswordPage(
 
         OutlinedTextField(
             value = confirmNewPassword,
-            onValueChange = { viewModel.regConfirmPassword.value = it },
+            onValueChange = { viewModel.changeConfirmPassword.value = it },
             label = { Text("Confirm New Password") },
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
@@ -289,14 +289,14 @@ fun ChangePasswordPage(
 
         Button(
             onClick = {
-                navController.navigate("login") {
+                navController.navigate("home") {
                     popUpTo("changePassword") { inclusive = true }
                 }
             },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp)
         ) {
-            Text("Back to Login")
+            Text("Back to Home")
         }
     }
 }

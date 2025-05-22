@@ -186,7 +186,7 @@ fun LoginPage(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp)
         ) {
-            Text("Change Password")
+            Text("Forgot your Password?")
         }
 
         Spacer(modifier = Modifier.height(12.dp))

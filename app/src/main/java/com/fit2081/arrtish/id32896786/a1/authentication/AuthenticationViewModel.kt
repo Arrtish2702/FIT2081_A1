@@ -74,6 +74,12 @@ class AuthenticationViewModel(private val foodIntakeRepository: FoodIntakeReposi
                 return@launch
             }
 
+            if (!PasswordUtils.isValidPassword(new)) {
+                forgotPasswordMessage.value = "Password must be at least 8 characters and include a capital letter, lowercase letter, number, and special symbol (!@#\$%^&*)."
+                return@launch
+            }
+
+
             if (new != confirm) {
                 forgotPasswordMessage.value = "New passwords do not match."
                 return@launch
@@ -117,6 +123,11 @@ class AuthenticationViewModel(private val foodIntakeRepository: FoodIntakeReposi
                 return@launch
             }
 
+            if (!PasswordUtils.isValidPassword(newPasswordInput)) {
+                changePasswordMessage.value = "Password must be at least 8 characters and include a capital letter, lowercase letter, number, and special symbol (!@#\$%^&*)."
+                return@launch
+            }
+
             // Confirm new password match
             if (newPasswordInput != confirmNewPasswordInput) {
                 changePasswordMessage.value = "New passwords do not match."
@@ -140,6 +151,45 @@ class AuthenticationViewModel(private val foodIntakeRepository: FoodIntakeReposi
         }
     }
 
+
+    fun appRegister(selectedId: String, name: String, phone: String, password: String, confirmPassword: String) {
+
+        Log.d(MainActivity.Companion.TAG, "LoginViewModel: attempting appRegister")
+        viewModelScope.launch (Dispatchers.IO){
+            registrationSuccessful.value = false
+            val patientId = selectedId.toIntOrNull()
+            if (patientId == null) {
+                registrationMessage.value = "Invalid ID format."
+                return@launch
+            }
+
+            val patient = patientRepository.getPatientById(patientId)
+
+            if (patient == null || patient.patientPhoneNumber != phone) {
+                registrationMessage.value = "ID or phone number is incorrect."
+                return@launch
+            }
+
+            if (password != confirmPassword) {
+                registrationMessage.value = "Passwords do not match."
+                return@launch
+            }
+
+            if (!PasswordUtils.isValidPassword(password)) {
+                registrationMessage.value = "Password must be at least 8 characters and include a capital letter, lowercase letter, number, and special symbol (!@#\$%^&*)."
+                return@launch
+            }
+
+
+            val updated = patient.copy(
+                patientName = name,
+                patientPassword = PasswordUtils.hashPassword(password)
+            )
+            patientRepository.updatePatient(updated)
+            registrationSuccessful.value = true
+            registrationMessage.value = "Registration successful!"
+        }
+    }
 
     fun appLogin(userId: String, password: String, navController: NavController, context: Context) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -194,39 +244,6 @@ class AuthenticationViewModel(private val foodIntakeRepository: FoodIntakeReposi
                     }
                 }
             }
-        }
-    }
-
-    fun appRegister(selectedId: String, name: String, phone: String, password: String, confirmPassword: String) {
-
-        Log.d(MainActivity.Companion.TAG, "LoginViewModel: attempting appRegister")
-        viewModelScope.launch (Dispatchers.IO){
-            registrationSuccessful.value = false
-            val patientId = selectedId.toIntOrNull()
-            if (patientId == null) {
-                registrationMessage.value = "Invalid ID format."
-                return@launch
-            }
-
-            val patient = patientRepository.getPatientById(patientId)
-
-            if (patient == null || patient.patientPhoneNumber != phone) {
-                registrationMessage.value = "ID or phone number is incorrect."
-                return@launch
-            }
-
-            if (password != confirmPassword) {
-                registrationMessage.value = "Passwords do not match."
-                return@launch
-            }
-
-            val updated = patient.copy(
-                patientName = name,
-                patientPassword = PasswordUtils.hashPassword(password)
-            )
-            patientRepository.updatePatient(updated)
-            registrationSuccessful.value = true
-            registrationMessage.value = "Registration successful!"
         }
     }
 
