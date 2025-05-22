@@ -84,14 +84,12 @@ fun ClinicianPage(
     navController: NavHostController,
     viewModelFactory: AppViewModelFactory
 ) {
+    val context = LocalContext.current
     val viewModel: ClinicianViewModel = viewModel(factory = viewModelFactory)
     val isLoading by viewModel.isLoading.observeAsState(initial = false)
     val avgScores by viewModel.generateAvgScores.observeAsState(Pair(0f, 0f))
 
-    // Observe generated patterns (insights) LiveData from ViewModel
     val insights by viewModel.patterns.observeAsState(initial = emptyList())
-    val foodIntakes by viewModel.allFoodIntakes.observeAsState(emptyList())
-
     val scrollState = rememberScrollState()
 
     Column(
@@ -109,8 +107,31 @@ fun ClinicianPage(
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text("Insight Generation Requirements", fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = """
+                    • At least 3 registered patients
+                    • At least 1 male and 1 female patient
+                    • At least some food intake data logged
+                    
+                    Insights will only be generated once these criteria are met.
+                    """.trimIndent(),
+                    fontSize = 14.sp
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
         Button(
-            onClick = { viewModel.generateInterestingPatterns() },  // Trigger data pattern generation
+            onClick = { viewModel.generateInterestingPatterns(context) },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6A1B9A))
@@ -126,9 +147,7 @@ fun ClinicianPage(
                     modifier = Modifier.fillMaxWidth(),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(24.dp)
-                    )
+                    CircularProgressIndicator(modifier = Modifier.size(24.dp))
                 }
             }
 
@@ -148,7 +167,6 @@ fun ClinicianPage(
             }
         }
 
-
         Spacer(modifier = Modifier.weight(1f))
 
         Button(
@@ -163,4 +181,3 @@ fun ClinicianPage(
         }
     }
 }
-
