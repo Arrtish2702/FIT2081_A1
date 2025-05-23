@@ -110,6 +110,23 @@ class QuestionnaireViewModel(
             return
         }
 
+        val mealMillis = mealDate!!.toMillisOfDay()
+        val sleepMillis = sleepDate!!.toMillisOfDay()
+        val wakeMillis = wakeDate!!.toMillisOfDay()
+
+        val isMealDuringSleep = if (sleepMillis < wakeMillis) {
+            // e.g., sleep at 10 PM, wake at 6 AM → same day range (invalid case)
+            mealMillis in sleepMillis until wakeMillis
+        } else {
+            // e.g., sleep at 10 PM, wake at 6 AM → crosses midnight
+            mealMillis >= sleepMillis || mealMillis < wakeMillis
+        }
+        Log.v(MainActivity.TAG,"isMealDuringSleep: $isMealDuringSleep")
+        if (isMealDuringSleep) {
+            questionnaireMessage.value = "Meal time cannot be during sleep time."
+            return
+        }
+
         val intake = FoodIntake(
             patientId = patientId ?: -1,
             sleepTime = sleepDate ?: Date(),
@@ -159,6 +176,12 @@ class QuestionnaireViewModel(
             initialHour, initialMinute, false
         )
         timePickerDialog.show()
+    }
+
+    private fun Date.toMillisOfDay(): Long {
+        val cal = Calendar.getInstance()
+        cal.time = this
+        return (cal.get(Calendar.HOUR_OF_DAY) * 60L + cal.get(Calendar.MINUTE)) * 60 * 1000
     }
 }
 
