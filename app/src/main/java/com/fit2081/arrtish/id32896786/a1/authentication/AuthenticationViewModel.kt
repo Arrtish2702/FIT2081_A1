@@ -209,18 +209,18 @@ class AuthenticationViewModel(
                 return@launch
             }
 
-            Log.v(MainActivity.Companion.TAG, "inside vm: $patientId")
+            Log.v(MainActivity.TAG, "inside vm: $patientId")
 
             val patient = patientRepository.getPatientById(patientId)
 
             val logpw = patient?.patientPassword
 
-            Log.v(MainActivity.Companion.TAG, "patient: $patient")
-            Log.v(MainActivity.Companion.TAG, "saved: $logpw")
-            Log.v(MainActivity.Companion.TAG, "input pw: $password")
+            Log.v(MainActivity.TAG, "patient: $patient")
+            Log.v(MainActivity.TAG, "saved: $logpw")
+            Log.v(MainActivity.TAG, "input pw: $password")
 
-            Log.v(MainActivity.Companion.TAG, "patient password length: ${patient?.patientPassword?.length}")
-            Log.v(MainActivity.Companion.TAG, "input password length: ${password.length}")
+            Log.v(MainActivity.TAG, "patient password length: ${patient?.patientPassword?.length}")
+            Log.v(MainActivity.TAG, "input password length: ${password.length}")
             when {
                 patient == null -> {
                     loginMessage.value = "User ID not found."
