@@ -8,9 +8,8 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
-
     private const val FRUITYVICE_BASE_URL = "https://www.fruityvice.com/"
-    private const val OPENAI_BASE_URL    = "https://api.openai.com/"
+    private const val OPENAI_BASE_URL = "https://api.openai.com/"
 
     fun createFruityViceApi(): FruityViceApi =
         Retrofit.Builder()
@@ -19,24 +18,10 @@ object RetrofitClient {
             .build()
             .create(FruityViceApi::class.java)
 
-    fun createOpenAiApi(apiKey: String): ChatGptApi {
-        val authInterceptor = Interceptor { chain ->
-            val request = chain.request().newBuilder()
-                .addHeader("Authorization", "Bearer $apiKey")
-                .addHeader("Content-Type", "application/json")
-                .build()
-            chain.proceed(request)
-        }
-
-        val client = OkHttpClient.Builder()
-            .addInterceptor(authInterceptor)
-            .build()
-
-        return Retrofit.Builder()
+    fun createOpenAiApi(): ChatGptApi =
+        Retrofit.Builder()
             .baseUrl(OPENAI_BASE_URL)
-            .client(client)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(ChatGptApi::class.java)
-    }
 }

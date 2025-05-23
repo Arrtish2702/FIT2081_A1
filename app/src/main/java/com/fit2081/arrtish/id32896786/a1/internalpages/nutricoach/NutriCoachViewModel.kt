@@ -9,6 +9,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.fit2081.arrtish.id32896786.a1.BuildConfig
 import com.fit2081.arrtish.id32896786.a1.MainActivity
 import com.fit2081.arrtish.id32896786.a1.api.fruityvice.FruityViceApi
 import com.fit2081.arrtish.id32896786.a1.databases.aitipsdb.AITips
@@ -170,15 +171,17 @@ class NutriCoachViewModel(
                     - Total HEIFA Score: ${patient.totalScore}
                 """.trimIndent()
 
-                    val response = openAiApi.getChatResponse(
-                        ChatGptRequest(
-                            model = "gpt-4.1",
-                            messages = listOf(
-                                Message("system", "You are a supportive and friendly nutrition coach."),
-                                Message("user", prompt)
-                            )
+                    val apiKey = "Bearer " + BuildConfig.OPEN_AI_API_KEY
+
+                    val request = ChatGptRequest(
+                        model = "gpt-4.1",
+                        messages = listOf(
+                            Message("system", "You are a supportive and friendly nutrition coach."),
+                            Message("user", prompt)
                         )
                     )
+
+                    val response = openAiApi.getChatResponse(apiKey, request)
 
                     val fullResponse = response.choices.firstOrNull()?.message?.content
                         ?: "You're doing great! Keep nourishing your body and celebrating your progress!"

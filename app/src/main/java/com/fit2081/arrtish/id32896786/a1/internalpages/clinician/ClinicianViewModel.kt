@@ -12,6 +12,7 @@ import com.fit2081.arrtish.id32896786.a1.databases.patientdb.PatientRepository
 import kotlinx.coroutines.launch
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.*
+import com.fit2081.arrtish.id32896786.a1.BuildConfig
 import com.fit2081.arrtish.id32896786.a1.MainActivity
 import com.fit2081.arrtish.id32896786.a1.api.gpt.ChatGptApi
 import com.fit2081.arrtish.id32896786.a1.api.gpt.ChatGptRequest
@@ -132,8 +133,8 @@ class ClinicianViewModel(
                     messages = messages,
                     temperature = 0.7
                 )
-
-                val response = openAiApi.getChatResponse(request)
+                val apiKey = "Bearer " + BuildConfig.OPEN_AI_API_KEY
+                val response = openAiApi.getChatResponse(apiKey, request)
                 val content = response.choices.firstOrNull()?.message?.content ?: "No insights found."
 
                 val allInsights = content

@@ -24,7 +24,7 @@ class AppViewModelFactory(
     val patientRepository = PatientRepository(db.patientDao())
     val foodIntakeRepository = FoodIntakeRepository(db.foodIntakeDao())
     val aiTipsRepository = AITipsRepository(db.aiTipsDao())
-    val openAIApi = RetrofitClient.createOpenAiApi(BuildConfig.OPEN_AI_API_KEY)
+    val openAIApi = RetrofitClient.createOpenAiApi()
     val fruityViceApi = RetrofitClient.createFruityViceApi()
 
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
