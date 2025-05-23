@@ -1,6 +1,5 @@
 package com.fit2081.arrtish.id32896786.a1.databases.foodintakedb
 
-import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -14,7 +13,7 @@ interface FoodIntakeDao {
     fun getFoodIntakeForPatient(patientId: Int): FoodIntake?
 
     @Query("SELECT * FROM food_intake")
-    fun getAllFoodIntakes(): LiveData<List<FoodIntake>>
+    suspend fun getAllFoodIntakes(): List<FoodIntake>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(foodIntake: FoodIntake)

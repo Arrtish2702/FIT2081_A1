@@ -72,7 +72,7 @@ class MainActivity : ComponentActivity() {
             val navController = rememberNavController()
             val navBackStackEntry by navController.currentBackStackEntryAsState()
             val currentRoute = navBackStackEntry?.destination?.route
-            val hideBottomBarRoutes = listOf("welcome", "login", "register", "forgotPassword", "questionnaire")
+            val hideBottomBarRoutes = listOf("welcome", "login", "register", "forgotPassword", "changePassword", "questionnaire")
 
             A1Theme(darkTheme = viewModel.isDarkTheme.value) {
                 Scaffold(

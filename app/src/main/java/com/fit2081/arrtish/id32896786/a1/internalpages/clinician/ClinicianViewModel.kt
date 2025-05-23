@@ -29,7 +29,6 @@ class ClinicianViewModel(
 ) : ViewModel() {
 
     val allPatients: LiveData<List<Patient>> = patientRepository.getAllRegisteredPatients()
-    val allFoodIntakes: LiveData<List<FoodIntake>> = foodIntakeRepository.getAllFoodIntakes()
 
     private val _patterns = MutableLiveData<List<String>>()
     val patterns: LiveData<List<String>> = _patterns
@@ -56,22 +55,25 @@ class ClinicianViewModel(
             _isLoading.value = true
             try {
                 val patients = allPatients.value ?: emptyList()
-                val foodIntakes = allFoodIntakes.value ?: emptyList()
+                val foodIntakes = withContext(Dispatchers.IO) {
+                    foodIntakeRepository.getAllFoodIntakes()
+                }
 
                 val femaleCount = patients.count { it.patientSex.equals("female", ignoreCase = true) }
                 val maleCount = patients.count { it.patientSex.equals("male", ignoreCase = true) }
 
-                Log.v(MainActivity.TAG, "$patients")
-                Log.v(MainActivity.TAG, "$foodIntakes")
+                Log.v(MainActivity.TAG, "patients: $patients")
+                Log.v(MainActivity.TAG, "foodintakes: $foodIntakes")
+                Log.v(MainActivity.TAG, "femaleCount: $femaleCount")
+                Log.v(MainActivity.TAG, "maleCount: $maleCount")
 
-                if (patients.size >= 3 || femaleCount >= 1 || maleCount >= 1) {
+                if (patients.size < 3 || femaleCount < 1 || maleCount < 1) {
                     val fallbackMessage = """
                     Insufficient number of patients to generate personalized nutrition insights yet. 
                 """.trimIndent()
                     withContext(Dispatchers.Main) {
                         Toast.makeText(context, fallbackMessage, Toast.LENGTH_LONG).show()
                     }
-
                     _isLoading.value = false
                     return@launch
                 }

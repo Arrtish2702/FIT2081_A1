@@ -92,7 +92,7 @@ class AuthenticationViewModel(
             }
 
             if (!PasswordUtils.isValidPassword(new)) {
-                forgotPasswordMessage.value = "Password must be at least 8 characters and include a capital letter, lowercase letter, number, and special symbol (!@#\$%^&*)."
+                forgotPasswordMessage.value = "Password must be 8+ chars, with uppercase, lowercase, number & special (!@#\$%^&*)."
                 return@launch
             }
 
@@ -137,7 +137,7 @@ class AuthenticationViewModel(
             }
 
             if (!PasswordUtils.isValidPassword(newPasswordInput)) {
-                changePasswordMessage.value = "Password must be at least 8 characters and include a capital letter, lowercase letter, number, and special symbol (!@#\$%^&*)."
+                changePasswordMessage.value = "Password does not meet requirements."
                 return@launch
             }
 
@@ -164,7 +164,7 @@ class AuthenticationViewModel(
 
     fun appRegister(selectedId: String, name: String, phone: String, password: String, confirmPassword: String) {
 
-        Log.d(MainActivity.Companion.TAG, "LoginViewModel: attempting appRegister")
+        Log.d(MainActivity.TAG, "LoginViewModel: attempting appRegister")
         viewModelScope.launch (Dispatchers.IO){
             registrationSuccessful.value = false
             val patientId = selectedId.toIntOrNull()
@@ -186,10 +186,9 @@ class AuthenticationViewModel(
             }
 
             if (!PasswordUtils.isValidPassword(password)) {
-                registrationMessage.value = "Password must be 8+ chars, with upper, lower, number & symbol (!@#\$%^&*)."
+                registrationMessage.value = "Password does not meet requirements."
                 return@launch
             }
-
 
             val updated = patient.copy(
                 patientName = name,

@@ -1,5 +1,6 @@
 package com.fit2081.arrtish.id32896786.a1.authentication.passwordmanager
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -27,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
+import com.fit2081.arrtish.id32896786.a1.MainActivity
 import com.fit2081.arrtish.id32896786.a1.authentication.AuthenticationViewModel
 import com.fit2081.arrtish.id32896786.a1.authentication.PasswordRequirement
 
@@ -158,7 +160,16 @@ fun ForgotPasswordPage(
 
         Button(
             onClick = {
-                viewModel.forgotPassword(selectedUserId.toInt(), phoneNumber, newPassword, confirmNewPassword, context)
+                if (selectedUserId.isNotEmpty() && phoneNumber.isNotEmpty()) {
+                    val userIdInt = selectedUserId.toIntOrNull()
+                    if (userIdInt != null) {
+                        viewModel.forgotPassword(userIdInt, phoneNumber, newPassword, confirmNewPassword, context)
+                    } else {
+                        Toast.makeText(context, "Invalid user ID", Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    Toast.makeText(context, "Please select a user ID and enter a phone number", Toast.LENGTH_SHORT).show()
+                }
             },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp)
@@ -310,13 +321,17 @@ fun ChangePasswordPage(
 
         Button(
             onClick = {
-                viewModel.changePassword(
-                    selectedUserId.toInt(),
-                    oldPassword,
-                    newPassword,
-                    confirmNewPassword,
-                    context
-                )
+                if (selectedUserId.isNotEmpty()) {
+                    viewModel.changePassword(
+                        selectedUserId.toInt(),
+                        oldPassword,
+                        newPassword,
+                        confirmNewPassword,
+                        context
+                    )
+                } else {
+                    Toast.makeText(context, "Please select a valid user ID", Toast.LENGTH_SHORT).show()
+                }
             },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp)

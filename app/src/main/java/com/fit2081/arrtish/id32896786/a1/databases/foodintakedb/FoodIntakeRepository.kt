@@ -1,7 +1,5 @@
 package com.fit2081.arrtish.id32896786.a1.databases.foodintakedb
 
-import androidx.lifecycle.LiveData
-
 
 class FoodIntakeRepository(private val foodIntakeDao: FoodIntakeDao) {
 
@@ -11,7 +9,7 @@ class FoodIntakeRepository(private val foodIntakeDao: FoodIntakeDao) {
     }
 
     /** LiveData stream of all food intake records */
-    fun getAllFoodIntakes(): LiveData<List<FoodIntake>> {
+    suspend fun getAllFoodIntakes(): List<FoodIntake> {
         return foodIntakeDao.getAllFoodIntakes()
     }
 
