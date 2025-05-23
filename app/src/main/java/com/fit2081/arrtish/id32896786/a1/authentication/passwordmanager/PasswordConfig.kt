@@ -227,7 +227,7 @@ fun ChangePasswordPage(
 
     if (passwordChangeSuccess) {
         LaunchedEffect(Unit) {
-            navController.navigate("login") {
+            navController.navigate("home") {
                 popUpTo("changePassword") { inclusive = true }
             }
         }
