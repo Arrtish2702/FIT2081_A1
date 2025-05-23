@@ -4,10 +4,7 @@ import android.app.TimePickerDialog
 import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import com.fit2081.arrtish.id32896786.a1.MainActivity
 import com.fit2081.arrtish.id32896786.a1.databases.foodintakedb.FoodIntake
 import com.fit2081.arrtish.id32896786.a1.databases.foodintakedb.FoodIntakeRepository
@@ -17,32 +14,43 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Date
-import java.util.Locale
+import java.util.*
 
+/**
+ * ViewModel for managing questionnaire state and logic related to food intake and patient data.
+ * It handles both UI-bound state (selected times, categories, persona) and database operations.
+ */
 class QuestionnaireViewModel(
     private val foodIntakeRepository: FoodIntakeRepository,
     private val patientRepository: PatientRepository
 ) : ViewModel() {
 
+    // LiveData holding patient info based on ID
     private val _patient = MutableLiveData<Patient?>()
     val patient: LiveData<Patient?> = _patient
 
+    // State holding messages for UI (success or validation feedback)
     var questionnaireMessage = mutableStateOf<String?>(null)
         private set
 
+    // Tracks which patient ID is currently being viewed/edited
     private var patientId: Int? = null
 
+    // Holds any existing food intake data for the patient
     private val _existingIntake = MutableLiveData<FoodIntake?>()
     val existingIntake: LiveData<FoodIntake?> = _existingIntake
 
+    // State variables for selected options from UI
     val selectedCategories = mutableStateOf<List<String>>(emptyList())
     val biggestMealTime = mutableStateOf("12:00 PM")
     val sleepTime = mutableStateOf("10:00 PM")
     val wakeTime = mutableStateOf("6:00 AM")
     val selectedPersona = mutableStateOf("")
 
+    /**
+     * Loads patient and food intake data from the database using patient ID.
+     * If intake exists, updates internal state accordingly.
+     */
     fun loadPatientDataByIdAndIntake(id: Int) {
         if (id != patientId) {
             patientId = id
@@ -52,17 +60,20 @@ class QuestionnaireViewModel(
                 _patient.postValue(patientData)
                 _existingIntake.postValue(intakeData)
 
+                // Populate UI state if intake already exists
                 intakeData?.let { setExistingFoodIntake(it) }
 
                 Log.v(MainActivity.TAG, "QuestionnaireVM: loaded intakeData: $intakeData")
                 Log.v(MainActivity.TAG, "QuestionnaireVM: loaded existingIntake: $existingIntake")
             }
-
         } else {
             Log.v(MainActivity.TAG, "QuestionnaireVM: no intake")
         }
     }
 
+    /**
+     * Updates ViewModel state based on an existing FoodIntake object.
+     */
     fun setExistingFoodIntake(intake: FoodIntake) {
         val fmt = SimpleDateFormat("hh:mm a", Locale.getDefault())
         biggestMealTime.value = fmt.format(intake.biggestMealTime)
@@ -70,6 +81,7 @@ class QuestionnaireViewModel(
         wakeTime.value = fmt.format(intake.wakeTime)
         selectedPersona.value = intake.selectedPersona
 
+        // Collects all selected food categories into state
         val categories = mutableListOf<String>()
         if (intake.eatsFruits) categories.add("Fruits")
         if (intake.eatsVegetables) categories.add("Vegetables")
@@ -83,6 +95,9 @@ class QuestionnaireViewModel(
         selectedCategories.value = categories
     }
 
+    /**
+     * Saves the user's food intake responses after validation.
+     */
     fun saveFoodIntake(
         selectedCategories: List<String>,
         biggestMealTime: String,
@@ -95,6 +110,7 @@ class QuestionnaireViewModel(
         val wakeDate = fmt.parse(wakeTime)
         val mealDate = fmt.parse(biggestMealTime)
 
+        // Input validation
         if (selectedCategories.isEmpty()) {
             questionnaireMessage.value = "Please select at least one food category."
             return
@@ -110,28 +126,29 @@ class QuestionnaireViewModel(
             return
         }
 
+        // Check if the meal time overlaps with the sleep period
         val mealMillis = mealDate!!.toMillisOfDay()
         val sleepMillis = sleepDate!!.toMillisOfDay()
         val wakeMillis = wakeDate!!.toMillisOfDay()
 
         val isMealDuringSleep = if (sleepMillis < wakeMillis) {
-            // e.g., sleep at 10 PM, wake at 6 AM → same day range (invalid case)
             mealMillis in sleepMillis until wakeMillis
         } else {
-            // e.g., sleep at 10 PM, wake at 6 AM → crosses midnight
             mealMillis >= sleepMillis || mealMillis < wakeMillis
         }
-        Log.v(MainActivity.TAG,"isMealDuringSleep: $isMealDuringSleep")
+
+        Log.v(MainActivity.TAG, "isMealDuringSleep: $isMealDuringSleep")
         if (isMealDuringSleep) {
             questionnaireMessage.value = "Meal time cannot be during sleep time."
             return
         }
 
+        // Create FoodIntake object and save it in DB
         val intake = FoodIntake(
             patientId = patientId ?: -1,
-            sleepTime = sleepDate ?: Date(),
-            wakeTime = wakeDate ?: Date(),
-            biggestMealTime = mealDate ?: Date(),
+            sleepTime = sleepDate,
+            wakeTime = wakeDate,
+            biggestMealTime = mealDate,
             selectedPersona = selectedPersona,
             eatsFruits = "Fruits" in selectedCategories,
             eatsVegetables = "Vegetables" in selectedCategories,
@@ -152,7 +169,9 @@ class QuestionnaireViewModel(
         }
     }
 
-
+    /**
+     * Converts given hour and minute into a formatted time string.
+     */
     fun formatTime(hour: Int, minute: Int): String {
         val calendar = Calendar.getInstance()
         calendar.set(Calendar.HOUR_OF_DAY, hour)
@@ -162,7 +181,10 @@ class QuestionnaireViewModel(
         return format.format(calendar.time)
     }
 
-    fun openTimePicker(context: Context,initialTime: String, onTimeSet: (String) -> Unit) {
+    /**
+     * Opens a TimePickerDialog and returns the selected time to the caller.
+     */
+    fun openTimePicker(context: Context, initialTime: String, onTimeSet: (String) -> Unit) {
         val calendar = Calendar.getInstance()
         val initialHour = calendar.get(Calendar.HOUR_OF_DAY)
         val initialMinute = calendar.get(Calendar.MINUTE)
@@ -178,10 +200,12 @@ class QuestionnaireViewModel(
         timePickerDialog.show()
     }
 
+    /**
+     * Extension function to get the number of milliseconds since midnight for a Date object.
+     */
     private fun Date.toMillisOfDay(): Long {
         val cal = Calendar.getInstance()
         cal.time = this
         return (cal.get(Calendar.HOUR_OF_DAY) * 60L + cal.get(Calendar.MINUTE)) * 60 * 1000
     }
 }
-

@@ -2,6 +2,17 @@ package com.fit2081.arrtish.id32896786.a1.internalpages.questionnaire
 
 import com.fit2081.arrtish.id32896786.a1.R
 
+/**
+ * PersonaEnum
+ *
+ * Enum class representing different user persona types based on questionnaire results.
+ * Each persona has:
+ *  - displayName: A user-friendly name for the persona
+ *  - description: A brief textual description of the persona traits
+ *  - imageResId: Drawable resource ID representing the persona visually
+ *
+ * Includes a special UNKNOWN persona for invalid or unmatched cases.
+ */
 enum class PersonaEnum(val displayName: String, val description: String, val imageResId: Int) {
     HEALTH_DEVOTEE(
         "Health Devotee",
@@ -40,8 +51,15 @@ enum class PersonaEnum(val displayName: String, val description: String, val ima
     );
 
     companion object {
+        /**
+         * Finds a PersonaEnum by matching the given display name.
+         *
+         * @param name The display name string to match.
+         * @return The matching PersonaEnum or UNKNOWN if no match found.
+         */
         fun fromDisplayName(name: String): PersonaEnum {
-            return values().find { it.displayName == name } ?: UNKNOWN
+            // Search all enum entries for a displayName matching the given name
+            return entries.find { it.displayName == name } ?: UNKNOWN
         }
     }
 }

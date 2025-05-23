@@ -28,7 +28,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
-
+/**
+ * Composable function displaying the questionnaire page for user input.
+ *
+ * @param userId The current user's ID.
+ * @param navController Navigation controller to handle page transitions.
+ * @param viewModelFactory Factory to create the QuestionnaireViewModel.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QuestionnairePage(
@@ -36,20 +42,29 @@ fun QuestionnairePage(
     navController: NavController,
     viewModelFactory: AppViewModelFactory
 ) {
+    // Get current Android context
     val context = LocalContext.current
+
+    // Obtain the ViewModel using the provided factory
     val viewModel: QuestionnaireViewModel = viewModel(factory = viewModelFactory)
 
     Log.v(MainActivity.TAG, "Questionnaire: Vm made")
 
-
+    // Load patient data and existing intake on first composition or when userId changes
     LaunchedEffect(userId) {
         viewModel.loadPatientDataByIdAndIntake(userId)
     }
 
+    // Observe existing food intake LiveData from ViewModel
     val foodIntake by viewModel.existingIntake.observeAsState()
 
-    val personas = listOf("Health Devotee", "Mindful Eater", "Wellness Striver", "Balance Seeker", "Health Procrastinator", "Food Carefree")
+    // List of persona options for selection
+    val personas = listOf(
+        "Health Devotee", "Mindful Eater", "Wellness Striver",
+        "Balance Seeker", "Health Procrastinator", "Food Carefree"
+    )
 
+    // Access ViewModel state variables for UI binding
     val selectedCategories = viewModel.selectedCategories
     val biggestMealTime = viewModel.biggestMealTime
     val sleepTime = viewModel.sleepTime
@@ -57,50 +72,57 @@ fun QuestionnairePage(
     val selectedPersona = viewModel.selectedPersona
     val scrollState = rememberScrollState()
 
+    // State controlling dropdown expansion and modal visibility
     var expanded by remember { mutableStateOf(false) }
     var showModal by remember { mutableStateOf(false) }
+
+    // Observe messages from ViewModel to show Toasts or navigate
     val questionnaireMessage by viewModel.questionnaireMessage
 
+    // Show toast messages on changes to questionnaireMessage LiveData
     LaunchedEffect(questionnaireMessage) {
         questionnaireMessage?.let {
             if (it.isNotBlank()) {
                 Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
 
+                // Navigate back to home screen after successful save
                 if (it == "Responses saved successfully.") {
                     navController.navigate("home") {
                         popUpTo("questionnaire") { inclusive = true }
                     }
                 }
 
+                // Reset message to avoid repeated toasts
                 viewModel.questionnaireMessage.value = ""
             }
         }
     }
 
+    // Log when existing intake data changes
     foodIntake?.let {
         Log.v(MainActivity.TAG, "UI: existing intake updated: $it")
     }
 
+    // Main scrollable column layout for questionnaire UI
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(
-                start = 16.dp,
-                end = 16.dp,
-                top = 16.dp,
-                bottom = 16.dp
-            )
+            .padding(16.dp)
             .verticalScroll(scrollState),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // Page title
         Text("Questionnaire", fontSize = 24.sp, fontWeight = FontWeight.Bold)
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        // Section: Food Categories selection label
         Text("Select Food Categories:", fontSize = 20.sp)
 
+        // List of food categories available for selection
         val foodCategories = listOf("Fruits", "Vegetables", "Grains", "Red Meat", "Seafood", "Poultry", "Fish", "Eggs","Nuts/Seeds")
 
+        // Display food categories in a 3-column grid with checkboxes
         LazyVerticalGrid(
             columns = GridCells.Fixed(3),
             modifier = Modifier
@@ -124,11 +146,14 @@ fun QuestionnairePage(
                     }
                 }
             }
-
         }
 
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Section: Persona selection label
         Text("Select Your Persona:", fontSize = 20.sp)
 
+        // Persona options shown in a 2-column grid as buttons
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
             modifier = Modifier
@@ -142,7 +167,7 @@ fun QuestionnairePage(
                     Button(
                         onClick = {
                             viewModel.selectedPersona.value = persona
-                            showModal = true
+                            showModal = true  // Show persona detail modal on selection
                         },
                         modifier = Modifier
                             .padding(vertical = 4.dp)
@@ -155,14 +180,17 @@ fun QuestionnairePage(
             }
         }
 
+        // Show detailed modal with persona description and image if triggered
         if (showModal) {
             PersonaModal(
                 selectedPersona = selectedPersona.value,
-                onDismiss = { showModal = false })
+                onDismiss = { showModal = false }
+            )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Dropdown menu for selecting persona (alternative to buttons)
         ExposedDropdownMenuBox(
             expanded = expanded,
             onExpandedChange = { expanded = !expanded }
@@ -171,8 +199,7 @@ fun QuestionnairePage(
                 value = selectedPersona.value,
                 onValueChange = {},
                 readOnly = true,
-                modifier = Modifier
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 trailingIcon = {
                     ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
                 }
@@ -195,6 +222,7 @@ fun QuestionnairePage(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Section: Meal Time selection label and button to open time picker dialog
         Text("Select Your Meal Time:", fontSize = 20.sp)
         Button(
             onClick = {
@@ -210,6 +238,7 @@ fun QuestionnairePage(
 
         Spacer(modifier = Modifier.height(8.dp))
 
+        // Section: Sleep Time selection label and button
         Text("Select Your Sleep Time:", fontSize = 20.sp)
         Button(
             onClick = {
@@ -225,6 +254,7 @@ fun QuestionnairePage(
 
         Spacer(modifier = Modifier.height(8.dp))
 
+        // Section: Wake Time selection label and button
         Text("Select Your Wake Time:", fontSize = 20.sp)
         Button(
             onClick = {
@@ -240,36 +270,43 @@ fun QuestionnairePage(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-
+        // Save responses button triggers ViewModel save method with current selections
         Row(horizontalArrangement = Arrangement.SpaceEvenly) {
-            Button(onClick = {
-                viewModel.saveFoodIntake(
-                    selectedCategories = selectedCategories.value,
-                    biggestMealTime = biggestMealTime.value,
-                    sleepTime = sleepTime.value,
-                    wakeTime = wakeTime.value,
-                    selectedPersona = selectedPersona.value
-                )
-            },
-            shape = RoundedCornerShape(12.dp)
+            Button(
+                onClick = {
+                    viewModel.saveFoodIntake(
+                        selectedCategories = selectedCategories.value,
+                        biggestMealTime = biggestMealTime.value,
+                        sleepTime = sleepTime.value,
+                        wakeTime = wakeTime.value,
+                        selectedPersona = selectedPersona.value
+                    )
+                },
+                shape = RoundedCornerShape(12.dp)
             ) {
                 Text("Save Responses")
             }
         }
+
         Spacer(modifier = Modifier.height(32.dp))
     }
 }
 
-
-
-
+/**
+ * Composable that displays a modal dialog showing persona details.
+ *
+ * @param selectedPersona The persona name currently selected.
+ * @param onDismiss Callback when the dialog is dismissed.
+ */
 @Composable
 fun PersonaModal(selectedPersona: String, onDismiss: () -> Unit) {
+    // Obtain the enum instance for the selected persona to get description and image
     val persona = PersonaEnum.fromDisplayName(selectedPersona)
 
     val textInput = persona.description
     val imageResId = persona.imageResId
 
+    // Show an AlertDialog with persona details and an image
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(selectedPersona) },
@@ -287,7 +324,8 @@ fun PersonaModal(selectedPersona: String, onDismiss: () -> Unit) {
             }
         },
         confirmButton = {
-            Button(onClick = onDismiss,
+            Button(
+                onClick = onDismiss,
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Text("Close")
