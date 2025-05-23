@@ -28,7 +28,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
-
+/**
+ * Composable function displaying the questionnaire page for user input.
+ *
+ * @param userId The current user's ID.
+ * @param navController Navigation controller to handle page transitions.
+ * @param viewModelFactory Factory to create the QuestionnaireViewModel.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QuestionnairePage(
@@ -36,72 +42,87 @@ fun QuestionnairePage(
     navController: NavController,
     viewModelFactory: AppViewModelFactory
 ) {
+    // Get current Android context
     val context = LocalContext.current
+
+    // Obtain the ViewModel using the provided factory
     val viewModel: QuestionnaireViewModel = viewModel(factory = viewModelFactory)
 
     Log.v(MainActivity.TAG, "Questionnaire: Vm made")
 
-
+    // Load patient data and existing intake on first composition or when userId changes
     LaunchedEffect(userId) {
         viewModel.loadPatientDataByIdAndIntake(userId)
     }
 
+    // Observe existing food intake LiveData from ViewModel
     val foodIntake by viewModel.existingIntake.observeAsState()
 
-    val personas = listOf("Health Devotee", "Mindful Eater", "Wellness Striver", "Balance Seeker", "Health Procrastinator", "Food Carefree")
+    // List of persona options for selection
+    val personas = listOf(
+        "Health Devotee", "Mindful Eater", "Wellness Striver",
+        "Balance Seeker", "Health Procrastinator", "Food Carefree"
+    )
 
+    // Access ViewModel state variables for UI binding
     val selectedCategories = viewModel.selectedCategories
     val biggestMealTime = viewModel.biggestMealTime
     val sleepTime = viewModel.sleepTime
     val wakeTime = viewModel.wakeTime
     val selectedPersona = viewModel.selectedPersona
-    val scrollState = rememberScrollState()  // Scroll state for vertical scrolling
+    val scrollState = rememberScrollState()
 
-    var expanded by remember { mutableStateOf(false) }  // State for dropdown menu expansion
-    var showModal by remember { mutableStateOf(false) }  // State for modal dialog visibility
+    // State controlling dropdown expansion and modal visibility
+    var expanded by remember { mutableStateOf(false) }
+    var showModal by remember { mutableStateOf(false) }
+
+    // Observe messages from ViewModel to show Toasts or navigate
     val questionnaireMessage by viewModel.questionnaireMessage
 
+    // Show toast messages on changes to questionnaireMessage LiveData
     LaunchedEffect(questionnaireMessage) {
         questionnaireMessage?.let {
             if (it.isNotBlank()) {
                 Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
 
+                // Navigate back to home screen after successful save
                 if (it == "Responses saved successfully.") {
                     navController.navigate("home") {
                         popUpTo("questionnaire") { inclusive = true }
                     }
                 }
 
-                viewModel.questionnaireMessage.value = "" // reset message
+                // Reset message to avoid repeated toasts
+                viewModel.questionnaireMessage.value = ""
             }
         }
     }
 
+    // Log when existing intake data changes
     foodIntake?.let {
         Log.v(MainActivity.TAG, "UI: existing intake updated: $it")
     }
 
+    // Main scrollable column layout for questionnaire UI
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(
-                start = 16.dp,
-                end = 16.dp,
-                top = 16.dp,
-                bottom = 16.dp // Ensures buttons at the bottom are visible
-            )
-            .verticalScroll(scrollState),  // Make column scrollable
+            .padding(16.dp)
+            .verticalScroll(scrollState),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // Page title
         Text("Questionnaire", fontSize = 24.sp, fontWeight = FontWeight.Bold)
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        Text("Select Food Categories:", fontSize = 20.sp)  // Label for food categories selection
+        // Section: Food Categories selection label
+        Text("Select Food Categories:", fontSize = 20.sp)
 
-        val foodCategories = listOf("Fruits", "Vegetables", "Grains", "Red Meat", "Seafood", "Poultry", "Fish", "Eggs","Nuts/Seeds")  // Food categories list
+        // List of food categories available for selection
+        val foodCategories = listOf("Fruits", "Vegetables", "Grains", "Red Meat", "Seafood", "Poultry", "Fish", "Eggs","Nuts/Seeds")
 
-        // Display food categories in a grid layout with checkboxes
+        // Display food categories in a 3-column grid with checkboxes
         LazyVerticalGrid(
             columns = GridCells.Fixed(3),
             modifier = Modifier
@@ -125,12 +146,14 @@ fun QuestionnairePage(
                     }
                 }
             }
-
         }
 
-        Text("Select Your Persona:", fontSize = 20.sp)  // Label for persona selection
+        Spacer(modifier = Modifier.height(16.dp))
 
-        // Display personas as buttons
+        // Section: Persona selection label
+        Text("Select Your Persona:", fontSize = 20.sp)
+
+        // Persona options shown in a 2-column grid as buttons
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
             modifier = Modifier
@@ -144,7 +167,7 @@ fun QuestionnairePage(
                     Button(
                         onClick = {
                             viewModel.selectedPersona.value = persona
-                            showModal = true
+                            showModal = true  // Show persona detail modal on selection
                         },
                         modifier = Modifier
                             .padding(vertical = 4.dp)
@@ -157,50 +180,50 @@ fun QuestionnairePage(
             }
         }
 
-        // Show persona modal dialog if `showModal` is true
+        // Show detailed modal with persona description and image if triggered
         if (showModal) {
             PersonaModal(
                 selectedPersona = selectedPersona.value,
-                onDismiss = { showModal = false })
+                onDismiss = { showModal = false }
+            )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))  // Spacer for layout spacing
+        Spacer(modifier = Modifier.height(16.dp))
 
-        // Exposed dropdown menu for selecting persona
+        // Dropdown menu for selecting persona (alternative to buttons)
         ExposedDropdownMenuBox(
             expanded = expanded,
-            onExpandedChange = { expanded = !expanded }  // Toggle dropdown visibility
+            onExpandedChange = { expanded = !expanded }
         ) {
             TextField(
                 value = selectedPersona.value,
                 onValueChange = {},
                 readOnly = true,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .menuAnchor(),  // Display the persona name in a read-only text field
+                modifier = Modifier.fillMaxWidth(),
                 trailingIcon = {
                     ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
                 }
             )
             ExposedDropdownMenu(
                 expanded = expanded,
-                onDismissRequest = { expanded = false }  // Close dropdown on dismiss
+                onDismissRequest = { expanded = false }
             ) {
                 personas.forEach { persona ->
                     DropdownMenuItem(
                         text = { Text(persona) },
                         onClick = {
-                            selectedPersona.value = persona  // Set selected persona
-                            expanded = false  // Close dropdown menu
+                            selectedPersona.value = persona
+                            expanded = false
                         }
                     )
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))  // Spacer for layout spacing
+        Spacer(modifier = Modifier.height(16.dp))
 
-        Text("Select Your Meal Time:", fontSize = 20.sp)  // Label for meal time selection
+        // Section: Meal Time selection label and button to open time picker dialog
+        Text("Select Your Meal Time:", fontSize = 20.sp)
         Button(
             onClick = {
                 viewModel.openTimePicker(
@@ -210,12 +233,13 @@ fun QuestionnairePage(
             },
             shape = RoundedCornerShape(12.dp)
         ) {
-            Text(biggestMealTime.value)  // Display selected meal time
+            Text(biggestMealTime.value)
         }
 
-        Spacer(modifier = Modifier.height(8.dp))  // Spacer for layout spacing
+        Spacer(modifier = Modifier.height(8.dp))
 
-        Text("Select Your Sleep Time:", fontSize = 20.sp)  // Label for sleep time selection
+        // Section: Sleep Time selection label and button
+        Text("Select Your Sleep Time:", fontSize = 20.sp)
         Button(
             onClick = {
                 viewModel.openTimePicker(
@@ -225,12 +249,13 @@ fun QuestionnairePage(
             },
             shape = RoundedCornerShape(12.dp)
         ) {
-            Text(sleepTime.value)  // Display selected sleep time
+            Text(sleepTime.value)
         }
 
-        Spacer(modifier = Modifier.height(8.dp))  // Spacer for layout spacing
+        Spacer(modifier = Modifier.height(8.dp))
 
-        Text("Select Your Wake Time:", fontSize = 20.sp)  // Label for wake time selection
+        // Section: Wake Time selection label and button
+        Text("Select Your Wake Time:", fontSize = 20.sp)
         Button(
             onClick = {
                 viewModel.openTimePicker(
@@ -240,62 +265,70 @@ fun QuestionnairePage(
             },
             shape = RoundedCornerShape(12.dp)
         ) {
-            Text(wakeTime.value)  // Display selected wake time
+            Text(wakeTime.value)
         }
 
-        Spacer(modifier = Modifier.height(16.dp))  // Spacer for layout spacing
+        Spacer(modifier = Modifier.height(16.dp))
 
-        // Row with save and clear buttons
+        // Save responses button triggers ViewModel save method with current selections
         Row(horizontalArrangement = Arrangement.SpaceEvenly) {
-            Button(onClick = {
-                viewModel.saveFoodIntake(
-                    selectedCategories = selectedCategories.value,
-                    biggestMealTime = biggestMealTime.value,
-                    sleepTime = sleepTime.value,
-                    wakeTime = wakeTime.value,
-                    selectedPersona = selectedPersona.value
-                )
-            },
-            shape = RoundedCornerShape(12.dp)
+            Button(
+                onClick = {
+                    viewModel.saveFoodIntake(
+                        selectedCategories = selectedCategories.value,
+                        biggestMealTime = biggestMealTime.value,
+                        sleepTime = sleepTime.value,
+                        wakeTime = wakeTime.value,
+                        selectedPersona = selectedPersona.value
+                    )
+                },
+                shape = RoundedCornerShape(12.dp)
             ) {
                 Text("Save Responses")
             }
         }
-        Spacer(modifier = Modifier.height(32.dp))  // Spacer for layout spacing
+
+        Spacer(modifier = Modifier.height(32.dp))
     }
 }
 
-
-
-// Modal to display selected persona details
+/**
+ * Composable that displays a modal dialog showing persona details.
+ *
+ * @param selectedPersona The persona name currently selected.
+ * @param onDismiss Callback when the dialog is dismissed.
+ */
 @Composable
 fun PersonaModal(selectedPersona: String, onDismiss: () -> Unit) {
+    // Obtain the enum instance for the selected persona to get description and image
     val persona = PersonaEnum.fromDisplayName(selectedPersona)
 
     val textInput = persona.description
     val imageResId = persona.imageResId
 
+    // Show an AlertDialog with persona details and an image
     AlertDialog(
-        onDismissRequest = onDismiss,  // Dismiss modal on request
-        title = { Text(selectedPersona) },  // Display selected persona's name
+        onDismissRequest = onDismiss,
+        title = { Text(selectedPersona) },
         text = {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Image(
-                    painter = painterResource(id = imageResId),  // Display persona image
+                    painter = painterResource(id = imageResId),
                     contentDescription = selectedPersona,
                     modifier = Modifier
                         .size(150.dp)
                         .clip(RoundedCornerShape(10.dp))
                 )
-                Spacer(modifier = Modifier.height(8.dp))  // Spacer for layout
-                Text(textInput, textAlign = TextAlign.Center)  // Display persona description
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(textInput, textAlign = TextAlign.Center)
             }
         },
         confirmButton = {
-            Button(onClick = onDismiss,
+            Button(
+                onClick = onDismiss,
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Text("Close")  // Close button to dismiss modal
+                Text("Close")
             }
         }
     )

@@ -1,28 +1,48 @@
 package com.fit2081.arrtish.id32896786.a1.databases.foodintakedb
 
-import androidx.lifecycle.LiveData
-
-
+/**
+ * Repository class that abstracts access to FoodIntake data sources.
+ * Handles data operations and provides a clean API to the rest of the app.
+ *
+ * @param foodIntakeDao DAO for accessing FoodIntake table.
+ */
 class FoodIntakeRepository(private val foodIntakeDao: FoodIntakeDao) {
 
-    /** Get the patient’s questionnaire data (or null if not answered) */
+    /**
+     * Get the FoodIntake questionnaire data for a given patient.
+     * Returns null if no data exists.
+     *
+     * @param patientId The patient's ID.
+     * @return FoodIntake or null
+     */
     fun getFoodIntake(patientId: Int): FoodIntake? {
         return foodIntakeDao.getFoodIntakeForPatient(patientId)
     }
 
-    /** LiveData stream of all food intake records */
-    fun getAllFoodIntakes(): LiveData<List<FoodIntake>> {
+    /**
+     * Get a list of all FoodIntake records asynchronously.
+     *
+     * @return List of all FoodIntake entries.
+     */
+    suspend fun getAllFoodIntakes(): List<FoodIntake> {
         return foodIntakeDao.getAllFoodIntakes()
     }
 
-    /** Insert or update the patient’s questionnaire */
+    /**
+     * Insert or update a FoodIntake record asynchronously.
+     *
+     * @param foodIntake The FoodIntake entity to insert or update.
+     */
     suspend fun insertFoodIntake(foodIntake: FoodIntake) {
         foodIntakeDao.insert(foodIntake)
     }
 
-    /** Delete the patient’s questionnaire (clearData) */
+    /**
+     * Delete the FoodIntake record for a specific patient asynchronously.
+     *
+     * @param patientId The patient's ID whose data should be deleted.
+     */
     suspend fun deleteFoodIntake(patientId: Int) {
         foodIntakeDao.deleteByPatient(patientId)
     }
 }
-

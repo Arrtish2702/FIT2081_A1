@@ -1,10 +1,6 @@
 package com.fit2081.arrtish.id32896786.a1.authentication
 
-import android.os.Bundle
 import android.widget.Toast
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -12,6 +8,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -22,13 +20,20 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.fit2081.arrtish.id32896786.a1.ui.theme.A1Theme
 import androidx.compose.ui.unit.*
 import androidx.navigation.NavController
 import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
-import com.fit2081.arrtish.id32896786.a1.authentication.login.LoginViewModel
 
 
+/**
+ * Composable function for the Registration screen.
+ * Displays a form allowing pre-registered users to claim their account by entering
+ * user ID, name, phone number, password and confirming password.
+ *
+ * @param modifier Modifier for this composable.
+ * @param navController Navigation controller to move between screens.
+ * @param viewModelFactory Factory for creating AuthenticationViewModel with dependencies.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterPage(
@@ -36,26 +41,42 @@ fun RegisterPage(
     navController: NavController,
     viewModelFactory: AppViewModelFactory
 ) {
-    var context = LocalContext.current
-    val viewModel: LoginViewModel = viewModel(factory = viewModelFactory)
+    val context = LocalContext.current
+
+    // Get AuthenticationViewModel instance with provided factory
+    val viewModel: AuthenticationViewModel = viewModel(factory = viewModelFactory)
+
+    // Observe list of unregistered patient IDs from ViewModel LiveData
     val userIds by viewModel.unregisteredPatientIds.observeAsState(initial = emptyList())
+
+    // Collect state from ViewModel for registration input fields
     val selectedUserId by viewModel.regSelectedUserId
     val name by viewModel.regName
     val phone by viewModel.regPhone
     val password by viewModel.regPassword
     val confirmPassword by viewModel.regConfirmPassword
 
+    // Password validation rules
+    val hasMinLength = password.length >= 8
+    val hasUppercase = password.any { it.isUpperCase() }
+    val hasLowercase = password.any { it.isLowerCase() }
+    val hasNumber = password.any { it.isDigit() }
+    val hasSpecialChar = password.any { it in "!@#\$%^&*." }
+
+    // Observe registration message for user feedback
     val message = viewModel.registrationMessage.value
 
     val scrollState = rememberScrollState()
 
+    // Show Toast when a registration message is emitted by the ViewModel
     LaunchedEffect(message) {
         message?.let {
-            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
-            viewModel.registrationMessage.value = null // reset so it doesn’t keep showing
+            Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+            viewModel.registrationMessage.value = null // Reset message after showing
         }
     }
 
+    // On successful registration, navigate back to login screen and clear registration from back stack
     if (viewModel.registrationSuccessful.value) {
         LaunchedEffect(Unit) {
             navController.navigate("login") {
@@ -64,7 +85,7 @@ fun RegisterPage(
         }
     }
 
-
+    // Main registration form layout in a vertical scrollable column
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -79,29 +100,29 @@ fun RegisterPage(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Dropdown for ID
+        // Dropdown menu state for selecting user ID
         var expanded by remember { mutableStateOf(false) }
 
-        // Exposed dropdown menu for user selection
+        // User ID selection dropdown menu
         ExposedDropdownMenuBox(
             expanded = expanded,
-            onExpandedChange = { expanded = !expanded }) { // Toggle dropdown expansion on click
+            onExpandedChange = { expanded = !expanded }) {
             OutlinedTextField(
-                value = selectedUserId, // Bind selected user ID to text field
-                onValueChange = {}, // No action on value change, read-only field
-                label = { Text("User ID") }, // Label for the input
-                leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) }, // Person icon
-                trailingIcon = { Icon(Icons.Filled.ArrowDropDown, contentDescription = null) }, // Dropdown icon
-                readOnly = true, // Make the field read-only
-                modifier = Modifier.fillMaxWidth().menuAnchor() // Full width and position dropdown
+                value = selectedUserId,
+                onValueChange = {},
+                label = { Text("User ID") },
+                leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
+                trailingIcon = { Icon(Icons.Filled.ArrowDropDown, contentDescription = null) },
+                readOnly = true,
+                modifier = Modifier.fillMaxWidth().menuAnchor()
             )
 
-            // Dropdown menu that shows all user IDs
+            // Dropdown items with available user IDs
             ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                userIds.forEach { userId -> // Loop through user IDs
+                userIds.forEach { userId ->
                     DropdownMenuItem(text = { Text(userId.toString()) }, onClick = {
-                        viewModel.regSelectedUserId.value = userId.toString() // Set selected user ID
-                        expanded = false // Close dropdown
+                        viewModel.regSelectedUserId.value = userId.toString()
+                        expanded = false
                     })
                 }
             }
@@ -109,6 +130,7 @@ fun RegisterPage(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Input field for user's name
         OutlinedTextField(
             value = name,
             onValueChange = { viewModel.regName.value = it },
@@ -120,6 +142,7 @@ fun RegisterPage(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Input field for user's phone number
         OutlinedTextField(
             value = phone,
             onValueChange = { viewModel.regPhone.value = it },
@@ -131,6 +154,7 @@ fun RegisterPage(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Password input field with validation error indication
         OutlinedTextField(
             value = password,
             onValueChange = { viewModel.regPassword.value = it },
@@ -138,11 +162,28 @@ fun RegisterPage(
             placeholder = { Text("Enter your password") },
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            isError = password.isNotBlank() && !(hasMinLength && hasUppercase && hasLowercase && hasNumber && hasSpecialChar)
         )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Display password requirements with check/clear icons
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Text(
+                text = "Password must include:",
+                style = MaterialTheme.typography.bodySmall
+            )
+            PasswordRequirement("• At least 8 characters", hasMinLength)
+            PasswordRequirement("• One uppercase letter", hasUppercase)
+            PasswordRequirement("• One lowercase letter", hasLowercase)
+            PasswordRequirement("• One number", hasNumber)
+            PasswordRequirement("• One special character (!@#\$%^&*)", hasSpecialChar)
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Confirm password input field
         OutlinedTextField(
             value = confirmPassword,
             onValueChange = { viewModel.regConfirmPassword.value = it },
@@ -155,6 +196,7 @@ fun RegisterPage(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Instructional text for pre-registered users
         Text(
             text = "This app is only for pre-registered users. Please enter your ID, phone number and password to claim your account.",
             style = MaterialTheme.typography.bodySmall,
@@ -164,6 +206,7 @@ fun RegisterPage(
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        // Button to trigger registration logic in ViewModel
         Button(
             onClick = { viewModel.appRegister(selectedUserId, name, phone, password, confirmPassword) },
             modifier = Modifier.fillMaxWidth(),
@@ -174,6 +217,7 @@ fun RegisterPage(
 
         Spacer(modifier = Modifier.height(12.dp))
 
+        // Button to navigate back to login screen
         Button(
             onClick = {
                 navController.navigate("login") {
@@ -185,5 +229,33 @@ fun RegisterPage(
         ) {
             Text("Return to Login")
         }
+    }
+}
+
+
+/**
+ * Composable function to display individual password requirement with an icon.
+ * Shows a check icon if requirement is met, otherwise a clear icon.
+ *
+ * @param text Description of the password requirement.
+ * @param met Boolean indicating if the requirement is met.
+ */
+@Composable
+fun PasswordRequirement(text: String, met: Boolean) {
+    val color = if (met) {
+        MaterialTheme.colorScheme.primary
+    } else {
+        MaterialTheme.colorScheme.error
+    }
+
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Icon(
+            imageVector = if (met) Icons.Default.Check else Icons.Default.Clear,
+            contentDescription = null,
+            tint = color,
+            modifier = Modifier.size(16.dp)
+        )
+        Spacer(modifier = Modifier.width(4.dp))
+        Text(text = text, color = color, style = MaterialTheme.typography.bodySmall)
     }
 }

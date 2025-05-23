@@ -22,52 +22,73 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
 
+/**
+ * NutriCoachPage Composable
+ *
+ * Displays a nutrition coach UI that:
+ * - Checks optimal fruit score for a user
+ * - Allows searching and fetching fruit nutritional details from Fruityvice API
+ * - Shows motivational AI-generated messages
+ * - Displays saved nutritional tips in a dialog
+ *
+ * @param userId The current user's ID for personalized data fetching
+ * @param modifier Modifier for styling and layout customization
+ * @param viewModelFactory Factory to provide NutriCoachViewModel instance with dependencies
+ */
 @Composable
 fun NutriCoachPage(
     userId: Int,
     modifier: Modifier = Modifier,
     viewModelFactory: AppViewModelFactory
 ) {
+    // Obtain the ViewModel instance using provided factory
     val viewModel: NutriCoachViewModel = viewModel(factory = viewModelFactory)
 
+    // On first composition, check the user's optimal fruit score
     LaunchedEffect(Unit) {
         viewModel.optimalFruitScoreChecker(userId)
     }
+
+    // Observe LiveData state from ViewModel as Compose states
     val isGenerating by viewModel.isGeneratingMessage.observeAsState(false)
-    var fruitName by remember { mutableStateOf("") }
+    val fruitName by viewModel.fruitName.observeAsState("")
     val motivationalMessage by viewModel.motivationalMessage.observeAsState("")
     val fruitDetails by viewModel.fruitDetails.observeAsState(emptyMap())
     val errorMessage by viewModel.errorMessage.observeAsState()
     val tipsList by viewModel.tipsList.observeAsState(emptyList())
     val optimalFruitScore by viewModel.optimalFruitScore.observeAsState()
 
+    // Local state to control showing of tips dialog
     var showTipsDialog by remember { mutableStateOf(false) }
 
+    // Scroll state for vertical scrolling in column
     val scrollState = rememberScrollState()
 
+    // Main container Box with padding and fill size
     Box(
         modifier = Modifier
             .fillMaxSize()
             .padding(top = 32.dp, bottom = 16.dp, start = 16.dp, end = 16.dp)
             .fillMaxHeight()
     ) {
+        // Main content Column with vertical scroll and padding
         Column(
             modifier = modifier
                 .fillMaxSize()
                 .verticalScroll(scrollState)
                 .padding(16.dp)
-
         ) {
+            // Page title
             Text("NutriCoach", fontSize = 24.sp, fontWeight = FontWeight.Bold)
 
             Spacer(Modifier.height(24.dp))
 
-            // Render the details
+            // Conditional UI based on user's optimal fruit score check status
             when (optimalFruitScore) {
                 true -> {
-                    // Show passive image when fruit score is optimal
+                    // If user has optimal fruit score, show random fruit image
                     AsyncImage(
-                        model = "https://picsum.photos/600/400", // size can be changed
+                        model = "https://picsum.photos/600/400",
                         contentDescription = "Random Fruit Image",
                         modifier = Modifier
                             .fillMaxWidth()
@@ -77,14 +98,25 @@ fun NutriCoachPage(
                     )
                 }
                 false -> {
+                    // If user does not have optimal fruit score, show Fruityvice API intro and input UI
+                    Text(
+                        "Fruityvice is a free online API that provides detailed nutritional information about various fruits. " +
+                                "Use this tool to enter a fruit name and fetch its nutritional details to help you make informed dietary choices.",
+                        fontSize = 14.sp,
+                        fontStyle = FontStyle.Italic,
+                        modifier = Modifier.padding(top = 8.dp, bottom = 16.dp)
+                    )
+
+                    // Input field for fruit name with two-way binding to ViewModel
                     OutlinedTextField(
                         value = fruitName,
-                        onValueChange = { fruitName = it },
+                        onValueChange = { viewModel.setFruitName(it) },
                         label = { Text("Fruit Name") },
                         modifier = Modifier.fillMaxWidth()
                     )
                     Spacer(Modifier.height(8.dp))
 
+                    // Button to trigger fetching fruit details
                     Button(
                         onClick = {
                             viewModel.fetchFruit(fruitName)
@@ -97,7 +129,7 @@ fun NutriCoachPage(
 
                     Spacer(Modifier.height(16.dp))
 
-                    // Show error if any
+                    // Show error message from ViewModel, if any
                     errorMessage?.let { err ->
                         Text(
                             text = err,
@@ -107,7 +139,7 @@ fun NutriCoachPage(
                         Spacer(Modifier.height(8.dp))
                     }
 
-                    // Show fruit details if not optimal
+                    // Display fruit nutritional details if available in key-value format
                     if (fruitDetails.isNotEmpty()) {
                         fruitDetails.forEach { (label, value) ->
                             Row(modifier = Modifier.fillMaxWidth()) {
@@ -119,6 +151,7 @@ fun NutriCoachPage(
                     }
                 }
                 null -> {
+                    // Show loading spinner while optimalFruitScore is loading
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -132,6 +165,7 @@ fun NutriCoachPage(
 
             Spacer(Modifier.height(24.dp))
 
+            // Button to generate AI motivational message
             Button(
                 onClick = {
                     viewModel.generateInsightfulMessage(userId)
@@ -146,6 +180,7 @@ fun NutriCoachPage(
 
             Spacer(Modifier.height(12.dp))
 
+            // Card to display motivational message or loading spinner or prompt text
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 elevation = CardDefaults.cardElevation(4.dp)
@@ -164,17 +199,23 @@ fun NutriCoachPage(
                     motivationalMessage.isNotBlank() -> {
                         Text(
                             motivationalMessage,
-                            fontStyle = FontStyle.Italic
+                            fontStyle = FontStyle.Italic,
+                            modifier = Modifier.padding(12.dp)
                         )
                     }
                     else -> {
-                        Text("Press the button above to receive a motivational insight.", fontStyle = FontStyle.Italic)
+                        Text(
+                            "Press the button above to receive a motivational insight.",
+                            fontStyle = FontStyle.Italic,
+                            modifier = Modifier.padding(12.dp)
+                        )
                     }
                 }
             }
 
             Spacer(Modifier.height(20.dp))
 
+            // Button to load and show saved nutritional tips in dialog
             Button(
                 onClick = {
                     viewModel.loadAllTips(userId)
@@ -186,7 +227,7 @@ fun NutriCoachPage(
                 Text("Show All Tips")
             }
 
-
+            // Dialog displaying all saved tips, shown if showTipsDialog is true
             if (showTipsDialog) {
                 Dialog(onDismissRequest = { showTipsDialog = false }) {
                     Surface(
@@ -209,6 +250,7 @@ fun NutriCoachPage(
                                 LazyColumn(
                                     modifier = Modifier.weight(1f)
                                 ) {
+                                    // Render each tip as a Card with response text and timestamp
                                     items(items = tipsList, key = { it.tipsId }) { tip ->
                                         Card(
                                             modifier = Modifier
@@ -232,10 +274,13 @@ fun NutriCoachPage(
                                     }
                                 }
                             } else {
+                                // Show message if no tips are available
                                 Text("No tips available.")
                             }
 
                             Spacer(Modifier.height(16.dp))
+
+                            // Button to close the dialog
                             Button(
                                 onClick = { showTipsDialog = false },
                                 modifier = Modifier.align(Alignment.End),
@@ -250,5 +295,3 @@ fun NutriCoachPage(
         }
     }
 }
-
-

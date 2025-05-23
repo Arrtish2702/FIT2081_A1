@@ -33,9 +33,10 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.fit2081.arrtish.id32896786.a1.authentication.AuthManager
-import com.fit2081.arrtish.id32896786.a1.authentication.ForgotPasswordPage
-import com.fit2081.arrtish.id32896786.a1.authentication.login.LoginPage
+import com.fit2081.arrtish.id32896786.a1.authentication.LoginPage
 import com.fit2081.arrtish.id32896786.a1.authentication.RegisterPage
+import com.fit2081.arrtish.id32896786.a1.authentication.passwordmanager.ChangePasswordPage
+import com.fit2081.arrtish.id32896786.a1.authentication.passwordmanager.ForgotPasswordPage
 import com.fit2081.arrtish.id32896786.a1.internalpages.clinician.ClinicianLogin
 import com.fit2081.arrtish.id32896786.a1.internalpages.clinician.ClinicianPage
 import com.fit2081.arrtish.id32896786.a1.internalpages.home.HomePage
@@ -45,35 +46,59 @@ import com.fit2081.arrtish.id32896786.a1.internalpages.questionnaire.Questionnai
 import com.fit2081.arrtish.id32896786.a1.internalpages.settings.SettingsPage
 
 
+/**
+ * MainActivity
+ *
+ * The entry point of the app.
+ * Sets up the theme, navigation controller, and view models.
+ * Initializes user session and data loading.
+ */
 class MainActivity : ComponentActivity() {
 
+    // Lazy initialization of AppViewModelFactory using the activity context
     private val viewModelFactory by lazy {
-        AppViewModelFactory(this)  // pass Activity as Context
+        AppViewModelFactory(this)
     }
 
+    // Lazy initialization of MainViewModel with the factory
     private val viewModel: MainViewModel by lazy {
         ViewModelProvider(this, viewModelFactory)[MainViewModel::class.java]
     }
 
+    /**
+     * Called when the activity is first created.
+     * Sets up the UI content with Compose, enables edge-to-edge, and starts data/session loading.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
 
+        // Load theme preference (dark or light) from saved settings
         viewModel.loadThemePreference(this)
 
+        // Load user session information (authentication state)
         AuthManager.loadSession(this)
 
+        // Load and insert data into the database asynchronously
         viewModel.loadAndInsertData(this)
 
+        // Enable edge-to-edge drawing (content under status/navigation bars)
         enableEdgeToEdge()
 
+        // Set Compose content
         setContent {
+            // Navigation controller to manage navigation stack
             val navController = rememberNavController()
+            // Observe navigation back stack for current route
             val navBackStackEntry by navController.currentBackStackEntryAsState()
             val currentRoute = navBackStackEntry?.destination?.route
-            val hideBottomBarRoutes = listOf("welcome", "login", "register", "changePassword", "questionnaire")
 
+            // Define routes where bottom bar should be hidden
+            val hideBottomBarRoutes = listOf("welcome", "login", "register", "forgotPassword", "changePassword", "questionnaire")
+
+            // App theme wrapper using user preference (dark or light)
             A1Theme(darkTheme = viewModel.isDarkTheme.value) {
+                // Scaffold with conditional bottom bar display
                 Scaffold(
                     bottomBar = {
                         if (currentRoute !in hideBottomBarRoutes) {
@@ -81,19 +106,37 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 ) { innerPadding ->
-                    AppInitialisation(Modifier.padding(innerPadding), navController, isDarkTheme = viewModel.isDarkTheme, viewModel, viewModelFactory)
+                    // Main app initialization composable with padding
+                    AppInitialisation(
+                        Modifier.padding(innerPadding),
+                        navController,
+                        isDarkTheme = viewModel.isDarkTheme,
+                        viewModel,
+                        viewModelFactory
+                    )
                 }
             }
         }
     }
 
     companion object {
+        // Log tag used throughout the app
         val TAG = "FIT2081-A3"
+        // Shared preferences name for persistent data
         val PREFS_NAME = "MyPrefs"
     }
 }
 
 
+/**
+ * AppInitialisation Composable
+ *
+ * Determines the start destination of the app based on:
+ * - User login status
+ * - Whether user has completed the questionnaire
+ *
+ * Displays a loading indicator while waiting, then sets up NavHost for app navigation.
+ */
 @Composable
 fun AppInitialisation(
     modifier: Modifier,
@@ -102,29 +145,45 @@ fun AppInitialisation(
     viewModel: MainViewModel,
     viewModelFactory: AppViewModelFactory
 ) {
+    // Observe userId from AuthManager to track login status
     val userId by AuthManager._userId
 
+    // Observe whether the questionnaire has been answered by user
     val hasAnsweredQuestionnaire by viewModel.hasAnsweredQuestionnaire.observeAsState(initial = false)
+    // Observe if the questionnaire check process is complete
     val questionnaireCheckComplete by viewModel.questionnaireCheckComplete.observeAsState(initial = false)
+
+    // Mutable state to hold start destination route once determined
     var startDestination by remember { mutableStateOf<String?>(null) }
 
-    // Trigger check and only update startDestination after completion
-    LaunchedEffect(userId, questionnaireCheckComplete) {
-        if (userId != null && userId != -1 && !questionnaireCheckComplete) {
-            viewModel.checkIfQuestionnaireAnswered(userId!!)
-        } else if (userId == null || userId == -1) {
-            startDestination = "welcome"
-        } else if (questionnaireCheckComplete) {
-            startDestination = if (!hasAnsweredQuestionnaire) "questionnaire" else "home"
+    // Side-effect: Update startDestination whenever relevant state changes
+    LaunchedEffect(userId, questionnaireCheckComplete, hasAnsweredQuestionnaire) {
+        when {
+            // No logged in user found, direct to welcome screen
+            userId == null || userId == -1 -> {
+                startDestination = "welcome"
+            }
+            // Questionnaire completion check in progress, trigger view model to check
+            !questionnaireCheckComplete -> {
+                viewModel.checkIfQuestionnaireAnswered(userId!!)
+            }
+            // Questionnaire check complete: route to home or questionnaire based on response
+            questionnaireCheckComplete -> {
+                startDestination = if (hasAnsweredQuestionnaire) "home" else "questionnaire"
+            }
         }
     }
+
+    // Log userId for debugging
     Log.v(MainActivity.TAG, "userID on login: $userId")
-    // 🌀 Show a loading indicator until startDestination is ready
+
     if (startDestination == null) {
+        // Show loading spinner while determining start destination
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
         }
     } else {
+        // Set up navigation host with the resolved start destination
         NavHost(navController = navController, startDestination = startDestination!!) {
             composable("welcome") {
                 WelcomePage(modifier, navController)
@@ -135,8 +194,11 @@ fun AppInitialisation(
             composable("register") {
                 RegisterPage(modifier, navController, viewModelFactory)
             }
-            composable("changePassword") {
+            composable("forgotPassword") {
                 ForgotPasswordPage(modifier, navController)
+            }
+            composable("changePassword") {
+                ChangePasswordPage(modifier, navController)
             }
             composable("home") {
                 HomePage(userId ?: -1, modifier, navController, viewModelFactory)
@@ -169,13 +231,23 @@ fun AppInitialisation(
     }
 }
 
-// Composable function for creating the bottom navigation bar.
+
+/**
+ * MyBottomAppBar Composable
+ *
+ * Bottom navigation bar displayed in main app screens (excluding some routes).
+ * Provides navigation to Home, Insights, NutriCoach, and Settings pages.
+ */
 @Composable
 fun MyBottomAppBar(navController: NavHostController) {
-    // State to track the currently selected item in the bottom navigation bar.
+    // Tracks currently selected tab index
     var selectedItem by remember { mutableStateOf(0) }
 
-    // List of navigation items: "home", "reports", "settings".
+    // Get current navigation destination for highlighting selected tab
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentDestination = navBackStackEntry?.destination
+
+    // List of bottom bar navigation routes
     val items = listOf(
         "home",
         "insights",
@@ -183,34 +255,23 @@ fun MyBottomAppBar(navController: NavHostController) {
         "settings"
     )
 
-    // NavigationBar composable to define the bottom navigation bar.
     NavigationBar {
-        // Iterate through each item in the 'items' list along with its index.
         items.forEachIndexed { index, item ->
-            // NavigationBarItem for each item in the list.
             NavigationBarItem(
-                // Define the icon based on the item's name.
                 icon = {
+                    // Icon changes depending on route
                     when (item) {
-                        // If the item is "home", show the Home icon.
                         "home" -> Icon(Icons.Filled.Home, contentDescription = "Home")
-
                         "insights" -> Icon(Icons.Filled.Person, contentDescription = "Insights")
-
                         "nutricoach" -> Icon(Icons.Filled.Info, contentDescription = "NutriCoach")
-
                         "settings" -> Icon(Icons.Filled.Settings, contentDescription = "Settings")
                     }
                 },
-                // Display the item's name as the label.
                 label = { Text(item) },
-                // Determine if this item is currently selected.
-                selected = selectedItem == index,
-                // Actions to perform when this item is clicked.
+                selected = currentDestination?.route == item,
                 onClick = {
-                    // Update the selectedItem state to the current index.
+                    // Update selected index and navigate to chosen route
                     selectedItem = index
-                    // Navigate to the corresponding screen based on the item's name.
                     navController.navigate(item)
                 }
             )
@@ -218,194 +279,83 @@ fun MyBottomAppBar(navController: NavHostController) {
     }
 }
 
-// Preview function for the WelcomePage Composable
-//@Preview(showBackground = true)
+/**
+ * WelcomePage Composable
+ *
+ * The welcome screen shown to new or unauthenticated users.
+ * Shows logo, info, disclaimer, links to external nutrition clinic, and buttons to Login/Register.
+ */
 @Composable
 fun WelcomePage(
     modifier: Modifier = Modifier,
     navController: NavController,
 ) {
-    // Get the current context to use it for navigation actions
+    // Get context to launch external links
     val context = LocalContext.current
+    // Scroll state for vertical scrolling
     val scrollState = rememberScrollState()
 
-    // Column layout to arrange components vertically
     Column(
         modifier = modifier
-            .fillMaxSize() // Fill the entire screen
+            .fillMaxSize()
             .verticalScroll(scrollState)
-            .padding(16.dp), // Add padding around the edges
-        verticalArrangement = Arrangement.Center, // Center the items vertically
-        horizontalAlignment = Alignment.CenterHorizontally // Center the items horizontally
+            .padding(16.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Display the app logo as an image
+        // App logo image
         Image(
-            painter = painterResource(id = R.drawable.logo_for_an_app_called_nutritrack), // Logo resource
-            contentDescription = "NutriTrack Logo", // Description for accessibility
-            modifier = Modifier.size(150.dp) // Set the image size to 150dp
+            painter = painterResource(id = R.drawable.logo_for_an_app_called_nutritrack),
+            contentDescription = "NutriTrack Logo",
+            modifier = Modifier.size(150.dp)
         )
 
-        // Display the app name as a large, bold text
+        // App name text
         Text(
             text = "NutriTrack",
-            fontSize = 28.sp, // Font size of 28sp
-            fontWeight = FontWeight.Bold, // Bold font weight
-            modifier = Modifier.padding(top = 8.dp) // Add top padding for spacing
+            fontSize = 28.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(top = 8.dp)
         )
 
-        // Spacer to add vertical space between components
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Display a disclaimer text about the app's purpose
+        // Disclaimer text about the app's educational purpose
         Text(
             text = "This app provides general health and nutrition information for educational purposes only. It is not intended as medical advice, diagnosis, or treatment. Always consult a qualified healthcare professional before making any changes to your diet, exercise, or health regimen. Use this app at your own risk. If you’d like to an Accredited Practicing Dietitian (APD), please visit the Monash Nutrition/Dietetics Clinic (discounted rates for students):",
-            fontSize = 14.sp, // Font size of 14sp
-            textAlign = TextAlign.Center, // Center-align the text
-            modifier = Modifier.padding(horizontal = 16.dp) // Horizontal padding for spacing
+            fontSize = 14.sp,
+            textAlign = TextAlign.Center
         )
 
-        // Spacer to add vertical space between components
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
-        // Display a clickable text to open the Monash Nutrition Clinic website
+        // External link to Monash Nutrition Clinic website, opens browser when clicked
         Text(
-            text = "Visit Monash Nutrition Clinic",
-            fontSize = 16.sp, // Font size of 16sp
-            color = Color.Blue, // Blue color for clickable text
-            fontWeight = FontWeight.Medium, // Medium font weight
-            modifier = Modifier
-                .clickable { openMonashClinic(context) } // Open the clinic website when clicked
-                .padding(8.dp) // Add padding around the text
+            text = "https://www.monash.edu/medicine/medicine-and-radiology/departments/clinical-sciences/monash-nutrition-and-dietetics-clinic",
+            color = Color.Blue,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.clickable {
+                // Open the URL in browser
+                val intent = Intent(Intent.ACTION_VIEW).apply {
+                    data = "https://www.monash.edu/medicine/medicine-and-radiology/departments/clinical-sciences/monash-nutrition-and-dietetics-clinic".toUri()
+                }
+                context.startActivity(intent)
+            }
         )
 
-        // Spacer to add vertical space between components
-        Spacer(modifier = Modifier.height(32.dp))
-
-        // Display a button to navigate to the LoginActivity
-        Button(
-            onClick = {
-                navController.navigate("login") {
-                    popUpTo("welcome") { inclusive = true }
-                }  // Start LoginActivity when clicked
-            },
-            modifier = Modifier
-                .fillMaxWidth(0.8f) // Fill 80% of the screen width
-                .height(50.dp), // Set the button height to 50dp
-            shape = RoundedCornerShape(12.dp) // Rounded corners for the button
-        ) {
-            // Text inside the button
-            Text("Login", fontSize = 18.sp) // Font size of 18sp
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(
-            onClick = {
-                navController.navigate("register") {
-                    popUpTo("welcome") { inclusive = true }
-                }
-            },
-            modifier = Modifier
-                .fillMaxWidth(0.8f) // Fill 80% of the screen width
-                .height(50.dp), // Set the button height to 50dp
-            shape = RoundedCornerShape(12.dp)
-        ) {
-            Text("New to this app? Register here")
-        }
-
-        // Spacer to add vertical space between components
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Display the author's name and student ID
-        Text(
-            text = "Arrtish Suthan (32896786)",
-            fontSize = 16.sp, // Font size of 16sp
-            fontWeight = FontWeight.Medium, // Medium font weight
-            color = Color.Gray // Gray color for the text
-        )
+        // Button row for Login and Register navigation
+        Row(
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Button(onClick = { navController.navigate("login") }) {
+                Text("Login")
+            }
+            Button(onClick = { navController.navigate("register") }) {
+                Text("Register")
+            }
+        }
     }
 }
-
-// Function to open the Monash Nutrition Clinic website
-private fun openMonashClinic(context: Context) {
-    val url = "https://www.monash.edu/medicine/scs/nutrition/clinics/nutrition" // URL of the clinic
-    val intent = Intent(Intent.ACTION_VIEW, url.toUri()) // Create an intent to open the URL in a browser
-    context.startActivity(intent) // Start the activity to open the URL
-}
-
-/**TODO LIST:
- *
- *
- * ADD UNIQUE PASSWORD IDENTIFIER CHECKER FOR PASSWD
- *
- * DO CHECK RUN OF ALL REQUIREMENTS FOR THE ASSIGNMENT
- *
- * DO DOCUMENT LIST OF HD REQUIREMENTS
- *  - put in pw hashing for user pws
- *  - put in change pw page for users whom logged out and forgot their pw
- *      - can add one inside of the app in settings page
- *  - saved ai tips into db for users to skim through
- *  - refactored routing and userid referencing for user ids in login/register/change pw
- *  - light/dark theme with rmb state
- *  - unique password requirements
- *  - stylised nutricoach prompts to encourage/congratulate users with high/low scores
- *  - stylised clinician prompts to give analysis/encourage more users based on the dataset for the insights
- *
-**/
-
-/** TO TEST
- *
- * DO SYSTEM WIDE APP TEST
- *
-**/
-
-/** DONE
- *
- * ENHANCE THE PROMPTS OF CLINICIAN AND NUTRICOACH GEN AI
- *
- * UPDATE THE NUTRICOACH GPT QUERY WITH ADDITIONAL PATIENT AND FOODINTAKE DATA
- *
- * DO THE NONSENSE FRUIT SCORE FOR FRUITYVICE
- *
- * FIX ROUTING FOR LOGIN AND QUESTIONNAIRE TO HAVE THE NAV CONTROLLER IN THE UI
- *
- * FIX THE HTTP CONNECTION TO SEND DATASET TO LLM FOR 3 KEY DATA PATTERNS - CLINICIAN PART
- *
- * TEST FRUITYVICEAPI AGAIN
- *
- * FIX UP THE CLINICIAN LOGIN BACKEND IN THE SETTINGS PART.
- *
- * FIX THE INSERT CHECK FOR QUESTIONNAIRE
- *
- * FIX SCREEN ROTATION ISSUES
- *
- * FIX DARKTHEME TO HOLD ON APP DESTROY
- *
- * FIX QUESTIONNAIRE NOT HOLDING STATE FOR SCREEN ROTATE
- *
- * CHANGE SHOW ALL TIPS TO USE A MODAL POP UP FOR STATELIFECYCLE - UI CHANGE
- *
- * HASHED THE PASSWORD FOR THE USERS
- *
- * IMPLEMENTED SAVED NUTRICOACH TIPS INTO A DB SYSTEM PER THE USER
- *
- * FIX UP THE BACKEND FOR THE NUTRICOACH ACTIVITY
- * USE THE VM TO MAKE HTTP CONNECTION TO CHATGPT API - NEED TO TEST WITH PROPER KEY
- * MAKE A SHOW ALL TIPS TO SAVE ALL PREVIOUS TIPS FROM THE LLM
- *
- * FIX QUESTIONNAIRE TO USE CORRECT TIMESTAMP
- *
- * FIX UP THE BROKEN QUESTIONNAIRE AND HOOK IT UP (INSERT/RETRIEVAL) FROM THE DB IN IRL TIME
- * FIX THE FOOD INTAKE ENTITY/DAO/REPO/QUESTIONNAIRE VM TO DO THIS
- *
- * USE THE VM TO MAKE HTTP CONNECTION TO FRUITYVICE
- *
- * REMOVE THE REMAINING LAUNCHED EFFECTS
- *
- * FIX LOGIN, SO LOGIN CREDENTIALS ARE RETAINED AFTER USER ONDESTROYS APP
- *
- * FIX DB/REPO/DAO TO USE LIVEDATA INSTEAD OF FLOW
- *
- * FIX UP THE CLINICIAN PAGE FOR THE AVG SCORE MALE & FEMALE
- *
- **/
