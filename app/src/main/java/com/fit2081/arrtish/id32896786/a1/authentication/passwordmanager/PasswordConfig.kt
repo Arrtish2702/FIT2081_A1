@@ -28,6 +28,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
 import com.fit2081.arrtish.id32896786.a1.authentication.AuthenticationViewModel
+import com.fit2081.arrtish.id32896786.a1.authentication.PasswordRequirement
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -46,6 +47,12 @@ fun ForgotPasswordPage(
     var expanded by remember { mutableStateOf(false) } // State to control dropdown menu expansion
     val scrollState = rememberScrollState()
 
+    // Regex validation booleans
+    val hasMinLength = newPassword.length >= 8
+    val hasUppercase = newPassword.any { it.isUpperCase() }
+    val hasLowercase = newPassword.any { it.isLowerCase() }
+    val hasNumber = newPassword.any { it.isDigit() }
+    val hasSpecialChar = newPassword.any { it in "!@#\$%^&*." }
 
     val message = viewModel.forgotPasswordMessage.value
     val passwordChangeSuccess = viewModel.forgotPasswordSuccessful.value
@@ -124,6 +131,20 @@ fun ForgotPasswordPage(
             modifier = Modifier.fillMaxWidth()
         )
 
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Text(
+                text = "Password must include:",
+                style = MaterialTheme.typography.bodySmall
+            )
+            PasswordRequirement("• At least 8 characters", hasMinLength)
+            PasswordRequirement("• One uppercase letter", hasUppercase)
+            PasswordRequirement("• One lowercase letter", hasLowercase)
+            PasswordRequirement("• One number", hasNumber)
+            PasswordRequirement("• One special character (!@#\$%^&*)", hasSpecialChar)
+        }
+
         Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(
@@ -178,6 +199,13 @@ fun ChangePasswordPage(
     val userIds by viewModel.registeredPatientIds.observeAsState(initial = emptyList())
     var expanded by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
+
+    // Regex validation booleans
+    val hasMinLength = newPassword.length >= 8
+    val hasUppercase = newPassword.any { it.isUpperCase() }
+    val hasLowercase = newPassword.any { it.isLowerCase() }
+    val hasNumber = newPassword.any { it.isDigit() }
+    val hasSpecialChar = newPassword.any { it in "!@#\$%^&*." }
 
     val message = viewModel.changePasswordMessage.value
     val passwordChangeSuccess = viewModel.changePasswordSuccessful.value
@@ -255,6 +283,20 @@ fun ChangePasswordPage(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             modifier = Modifier.fillMaxWidth()
         )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Text(
+                text = "Password must include:",
+                style = MaterialTheme.typography.bodySmall
+            )
+            PasswordRequirement("• At least 8 characters", hasMinLength)
+            PasswordRequirement("• One uppercase letter", hasUppercase)
+            PasswordRequirement("• One lowercase letter", hasLowercase)
+            PasswordRequirement("• One number", hasNumber)
+            PasswordRequirement("• One special character (!@#\$%^&*)", hasSpecialChar)
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
