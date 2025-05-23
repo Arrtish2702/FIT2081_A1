@@ -32,23 +32,12 @@ class AuthenticationViewModel(
     var password = mutableStateOf("")
         private set
 
-    var isDropdownExpanded = mutableStateOf(false)
-        private set
-
     fun updateSelectedUserId(newId: String) {
         selectedUserId.value = newId
     }
 
     fun updatePassword(newPassword: String) {
         password.value = newPassword
-    }
-
-    fun toggleDropdown() {
-        isDropdownExpanded.value = !isDropdownExpanded.value
-    }
-
-    fun dismissDropdown() {
-        isDropdownExpanded.value = false
     }
 
     var registrationSuccessful = mutableStateOf(false)
@@ -73,18 +62,20 @@ class AuthenticationViewModel(
     var regPassword = mutableStateOf("")
     var regConfirmPassword = mutableStateOf("")
 
-    var changeSelectedUserId = mutableStateOf("")
-    var changePhoneNumber = mutableStateOf("")
-    var changeNewPassword = mutableStateOf("")
-    var changeConfirmPassword = mutableStateOf("")
-
+    var forgotUserId = mutableStateOf("")
+    var forgotPhone = mutableStateOf("")
+    var forgotNewPassword = mutableStateOf("")
+    var forgotConfirmPassword = mutableStateOf("")
     val forgotPasswordMessage = mutableStateOf<String?>(null)
     val forgotPasswordSuccessful = mutableStateOf(false)
 
+    var changeSelectedUserId = mutableStateOf("")
+    var changeNewPassword = mutableStateOf("")
+    var changeConfirmPassword = mutableStateOf("")
     var oldPassword = mutableStateOf("")
-
     val changePasswordMessage = mutableStateOf<String?>(null)
     val changePasswordSuccessful = mutableStateOf(false)
+
 
     fun forgotPassword(selectedUserId: Int, inputPhoneNumber: String, new: String, confirm: String, context: Context) {
         viewModelScope.launch(Dispatchers.IO){

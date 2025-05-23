@@ -25,6 +25,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -66,7 +67,7 @@ fun LoginPage(
 
     val userIds by viewModel.registeredPatientIds.observeAsState(initial = emptyList())
     val selectedUserId by viewModel.selectedUserId
-    val expanded by viewModel.isDropdownExpanded
+    var expanded by remember { mutableStateOf(false) }
     val password by viewModel.password
 
     val loginMessage by viewModel.loginMessage
@@ -120,7 +121,7 @@ fun LoginPage(
 
         ExposedDropdownMenuBox(
             expanded = expanded,
-            onExpandedChange = { viewModel.toggleDropdown() }
+            onExpandedChange = { expanded = !expanded }
         ) {
             OutlinedTextField(
                 value = selectedUserId,
@@ -129,17 +130,18 @@ fun LoginPage(
                 leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
                 trailingIcon = { Icon(Icons.Filled.ArrowDropDown, contentDescription = null) },
                 readOnly = true,
-                modifier = Modifier
-                    .fillMaxWidth()
+                modifier = Modifier.fillMaxWidth().menuAnchor()
             )
-
-            ExposedDropdownMenu(expanded = expanded, onDismissRequest = { viewModel.dismissDropdown() }) {
+            ExposedDropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
                 userIds.forEach { userId ->
                     DropdownMenuItem(
                         text = { Text(userId.toString()) },
                         onClick = {
                             viewModel.updateSelectedUserId(userId.toString())
-                            viewModel.dismissDropdown()
+                            expanded = false
                         }
                     )
                 }

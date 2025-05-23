@@ -39,10 +39,10 @@ fun ForgotPasswordPage(
     viewModel: AuthenticationViewModel = viewModel(factory = AppViewModelFactory(LocalContext.current))
 ) {
     val context = LocalContext.current
-    val selectedUserId by viewModel.changeSelectedUserId
-    val phoneNumber by viewModel.changePhoneNumber
-    val newPassword by viewModel.changeNewPassword
-    val confirmNewPassword by viewModel.changeConfirmPassword
+    val selectedUserId by viewModel.forgotUserId
+    val phoneNumber by viewModel.forgotPhone
+    val newPassword by viewModel.forgotNewPassword
+    val confirmNewPassword by viewModel.forgotConfirmPassword
     val userIds by viewModel.registeredPatientIds.observeAsState(initial = emptyList())
     var expanded by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
@@ -81,7 +81,7 @@ fun ForgotPasswordPage(
     ) {
         Spacer(modifier = Modifier.height(40.dp))
 
-        Text(text = "Change Password", style = MaterialTheme.typography.titleLarge)
+        Text(text = "Forgot Password", style = MaterialTheme.typography.titleLarge)
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -101,7 +101,7 @@ fun ForgotPasswordPage(
             ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                 userIds.forEach { userId ->
                     DropdownMenuItem(text = { Text(userId.toString()) }, onClick = {
-                        viewModel.changeSelectedUserId.value = userId.toString()
+                        viewModel.forgotUserId.value = userId.toString()
                         expanded = false
                     })
                 }
@@ -112,7 +112,7 @@ fun ForgotPasswordPage(
 
         OutlinedTextField(
             value = phoneNumber,
-            onValueChange = { viewModel.regPhone.value = it },
+            onValueChange = { viewModel.forgotPhone.value = it },
             label = { Text("Phone Number") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
             modifier = Modifier.fillMaxWidth()
@@ -122,7 +122,7 @@ fun ForgotPasswordPage(
 
         OutlinedTextField(
             value = newPassword,
-            onValueChange = { viewModel.regPassword.value = it },
+            onValueChange = { viewModel.forgotNewPassword.value = it },
             label = { Text("New Password") },
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
@@ -147,7 +147,7 @@ fun ForgotPasswordPage(
 
         OutlinedTextField(
             value = confirmNewPassword,
-            onValueChange = { viewModel.regConfirmPassword.value = it },
+            onValueChange = { viewModel.forgotConfirmPassword.value = it },
             label = { Text("Confirm New Password") },
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),

@@ -66,7 +66,7 @@ class ClinicianViewModel(
 
                 if (patients.size >= 3 || femaleCount >= 1 || maleCount >= 1) {
                     val fallbackMessage = """
-                    There are currently an insufficient number of patients to generate personalized nutrition insights yet. 
+                    Insufficient number of patients to generate personalized nutrition insights yet. 
                 """.trimIndent()
                     withContext(Dispatchers.Main) {
                         Toast.makeText(context, fallbackMessage, Toast.LENGTH_LONG).show()

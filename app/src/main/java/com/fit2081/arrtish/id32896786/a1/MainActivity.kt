@@ -110,15 +110,22 @@ fun AppInitialisation(
     var startDestination by remember { mutableStateOf<String?>(null) }
 
 
-    LaunchedEffect(userId, questionnaireCheckComplete) {
-        if (userId != null && userId != -1 && !questionnaireCheckComplete) {
-            viewModel.checkIfQuestionnaireAnswered(userId!!)
-        } else if (userId == null || userId == -1) {
-            startDestination = "welcome"
-        } else if (questionnaireCheckComplete) {
-            startDestination = if (!hasAnsweredQuestionnaire) "questionnaire" else "home"
+    LaunchedEffect(userId, questionnaireCheckComplete, hasAnsweredQuestionnaire) {
+        when {
+            userId == null || userId == -1 -> {
+                startDestination = "welcome"
+            }
+
+            !questionnaireCheckComplete -> {
+                viewModel.checkIfQuestionnaireAnswered(userId!!)
+            }
+
+            questionnaireCheckComplete -> {
+                startDestination = if (hasAnsweredQuestionnaire) "home" else "questionnaire"
+            }
         }
     }
+
     Log.v(MainActivity.TAG, "userID on login: $userId")
     if (startDestination == null) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

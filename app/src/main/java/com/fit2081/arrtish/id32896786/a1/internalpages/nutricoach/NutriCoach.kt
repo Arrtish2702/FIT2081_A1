@@ -75,6 +75,16 @@ fun NutriCoachPage(
                     )
                 }
                 false -> {
+
+                    Text(
+                        "Fruityvice is a free online API that provides detailed nutritional information about various fruits. " +
+                                "Use this tool to enter a fruit name and fetch its nutritional details to help you make informed dietary choices.",
+                        fontSize = 14.sp,
+                        fontStyle = FontStyle.Italic,
+                        modifier = Modifier.padding(top = 8.dp, bottom = 16.dp)
+                    )
+
+
                     OutlinedTextField(
                         value = fruitName,
                         onValueChange = { viewModel.setFruitName(it) },
