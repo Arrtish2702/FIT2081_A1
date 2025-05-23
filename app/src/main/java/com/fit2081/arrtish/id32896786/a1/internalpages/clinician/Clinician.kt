@@ -144,13 +144,14 @@ fun ClinicianPage(
         when {
             isLoading -> {
                 Box(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentAlignment = Alignment.Center
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(top = 100.dp),
+                    contentAlignment = Alignment.TopCenter
                 ) {
-                    CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                    CircularProgressIndicator(modifier = Modifier.size(48.dp))
                 }
             }
-
             insights.isEmpty() -> {
                 Text(
                     "No insights available. Press 'Find Data Pattern' to generate insights.",

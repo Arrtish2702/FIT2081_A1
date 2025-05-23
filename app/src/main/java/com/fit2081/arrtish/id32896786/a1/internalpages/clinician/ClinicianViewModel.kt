@@ -65,15 +65,11 @@ class ClinicianViewModel(
                 Log.v(MainActivity.TAG, "$patients")
                 Log.v(MainActivity.TAG, "$foodIntakes")
 
-                if (patients.size <= 3 || femaleCount < 1 || maleCount < 1) {
+                if (patients.size <= 3 || femaleCount <= 1 || maleCount <= 1) {
                     val fallbackMessage = """
-                    There are currently only ${patients.size} registered patients in the system: 
-                    $femaleCount female(s) and $maleCount male(s). 
-
-                    This is not enough to generate personalized nutrition insights yet. 
-                    Please encourage more users to register and track their food intake so we can offer meaningful feedback in the future.
+                    There are currently an insufficient number of patients to generate personalized nutrition insights yet. 
                 """.trimIndent()
-
+//                    Please encourage more users to register and track their food intake so we can offer meaningful feedback in the future.
                     withContext(Dispatchers.Main) {
                         Toast.makeText(context, fallbackMessage, Toast.LENGTH_LONG).show()
                     }
