@@ -1,6 +1,5 @@
 package com.fit2081.arrtish.id32896786.a1.authentication.passwordmanager
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -33,22 +32,32 @@ import com.fit2081.arrtish.id32896786.a1.authentication.AuthenticationViewModel
 import com.fit2081.arrtish.id32896786.a1.authentication.PasswordRequirement
 
 
+/**
+ * Composable UI screen for handling the "Forgot Password" functionality.
+ * Allows users to select their User ID, enter phone number, and reset their password.
+ * Performs validation on the new password and confirmation before submission.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ForgotPasswordPage(
     modifier: Modifier = Modifier,
     navController: NavController,
+    // ViewModel injected with a factory to handle authentication-related logic
     viewModel: AuthenticationViewModel = viewModel(factory = AppViewModelFactory(LocalContext.current))
 ) {
     val context = LocalContext.current
+
+    // Observing values from ViewModel's mutable states and LiveData
     val selectedUserId by viewModel.forgotUserId
     val phoneNumber by viewModel.forgotPhone
     val newPassword by viewModel.forgotNewPassword
     val confirmNewPassword by viewModel.forgotConfirmPassword
     val userIds by viewModel.registeredPatientIds.observeAsState(initial = emptyList())
-    var expanded by remember { mutableStateOf(false) }
-    val scrollState = rememberScrollState()
 
+    var expanded by remember { mutableStateOf(false) }  // Dropdown menu expanded state
+    val scrollState = rememberScrollState()             // Scroll state for vertical scrolling
+
+    // Password validation checks
     val hasMinLength = newPassword.length >= 8
     val hasUppercase = newPassword.any { it.isUpperCase() }
     val hasLowercase = newPassword.any { it.isLowerCase() }
@@ -58,13 +67,15 @@ fun ForgotPasswordPage(
     val message = viewModel.forgotPasswordMessage.value
     val passwordChangeSuccess = viewModel.forgotPasswordSuccessful.value
 
+    // Show Toast message for any status update or errors from ViewModel
     LaunchedEffect(message) {
         message?.let {
             Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
-            viewModel.forgotPasswordMessage.value = null
+            viewModel.forgotPasswordMessage.value = null // Reset message after showing
         }
     }
 
+    // Navigate back to login on successful password change
     if (passwordChangeSuccess) {
         LaunchedEffect(Unit) {
             navController.navigate("login") {
@@ -73,6 +84,7 @@ fun ForgotPasswordPage(
         }
     }
 
+    // Main UI layout - a vertically scrollable column
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -87,6 +99,7 @@ fun ForgotPasswordPage(
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        // User ID dropdown selection field
         ExposedDropdownMenuBox(
             expanded = expanded,
             onExpandedChange = { expanded = !expanded }) {
@@ -100,6 +113,7 @@ fun ForgotPasswordPage(
                 modifier = Modifier.fillMaxWidth().menuAnchor()
             )
 
+            // Dropdown menu listing available user IDs
             ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                 userIds.forEach { userId ->
                     DropdownMenuItem(text = { Text(userId.toString()) }, onClick = {
@@ -112,6 +126,7 @@ fun ForgotPasswordPage(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Input field for phone number
         OutlinedTextField(
             value = phoneNumber,
             onValueChange = { viewModel.forgotPhone.value = it },
@@ -122,6 +137,7 @@ fun ForgotPasswordPage(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Input field for new password with password visual transformation
         OutlinedTextField(
             value = newPassword,
             onValueChange = { viewModel.forgotNewPassword.value = it },
@@ -133,6 +149,7 @@ fun ForgotPasswordPage(
 
         Spacer(modifier = Modifier.height(8.dp))
 
+        // Password requirements checklist displayed below the new password field
         Column(modifier = Modifier.fillMaxWidth()) {
             Text(
                 text = "Password must include:",
@@ -147,6 +164,7 @@ fun ForgotPasswordPage(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Input field for confirming new password
         OutlinedTextField(
             value = confirmNewPassword,
             onValueChange = { viewModel.forgotConfirmPassword.value = it },
@@ -158,11 +176,13 @@ fun ForgotPasswordPage(
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        // Button to submit password update request
         Button(
             onClick = {
                 if (selectedUserId.isNotEmpty() && phoneNumber.isNotEmpty()) {
                     val userIdInt = selectedUserId.toIntOrNull()
                     if (userIdInt != null) {
+                        // Call ViewModel method to handle password reset logic
                         viewModel.forgotPassword(userIdInt, phoneNumber, newPassword, confirmNewPassword, context)
                     } else {
                         Toast.makeText(context, "Invalid user ID", Toast.LENGTH_SHORT).show()
@@ -179,6 +199,7 @@ fun ForgotPasswordPage(
 
         Spacer(modifier = Modifier.height(12.dp))
 
+        // Button to navigate back to login screen
         Button(
             onClick = {
                 navController.navigate("login") {
@@ -193,22 +214,33 @@ fun ForgotPasswordPage(
     }
 }
 
+
+/**
+ * Composable UI screen for handling the "Change Password" functionality for logged-in users.
+ * Users select their User ID, enter old password, new password, and confirm the new password.
+ * Validates password requirements before allowing password update.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChangePasswordPage(
     modifier: Modifier = Modifier,
     navController: NavController,
+    // ViewModel injected with a factory to handle authentication-related logic
     viewModel: AuthenticationViewModel = viewModel(factory = AppViewModelFactory(LocalContext.current))
 ) {
     val context = LocalContext.current
+
+    // Observing values from ViewModel's mutable states and LiveData
     val selectedUserId by viewModel.changeSelectedUserId
     val oldPassword by viewModel.oldPassword
     val newPassword by viewModel.changeNewPassword
     val confirmNewPassword by viewModel.changeConfirmPassword
     val userIds by viewModel.registeredPatientIds.observeAsState(initial = emptyList())
-    var expanded by remember { mutableStateOf(false) }
-    val scrollState = rememberScrollState()
 
+    var expanded by remember { mutableStateOf(false) }  // Dropdown menu expanded state
+    val scrollState = rememberScrollState()             // Scroll state for vertical scrolling
+
+    // Password validation checks
     val hasMinLength = newPassword.length >= 8
     val hasUppercase = newPassword.any { it.isUpperCase() }
     val hasLowercase = newPassword.any { it.isLowerCase() }
@@ -218,13 +250,15 @@ fun ChangePasswordPage(
     val message = viewModel.changePasswordMessage.value
     val passwordChangeSuccess = viewModel.changePasswordSuccessful.value
 
+    // Show Toast message for any status update or errors from ViewModel
     LaunchedEffect(message) {
         message?.let {
             Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
-            viewModel.changePasswordMessage.value = null
+            viewModel.changePasswordMessage.value = null // Reset message after showing
         }
     }
 
+    // Navigate to home screen on successful password change
     if (passwordChangeSuccess) {
         LaunchedEffect(Unit) {
             navController.navigate("home") {
@@ -233,6 +267,7 @@ fun ChangePasswordPage(
         }
     }
 
+    // Main UI layout - a vertically scrollable column
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -247,6 +282,7 @@ fun ChangePasswordPage(
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        // User ID dropdown selection field
         ExposedDropdownMenuBox(
             expanded = expanded,
             onExpandedChange = { expanded = !expanded }) {
@@ -260,6 +296,7 @@ fun ChangePasswordPage(
                 modifier = Modifier.fillMaxWidth().menuAnchor()
             )
 
+            // Dropdown menu listing available user IDs
             ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                 userIds.forEach { userId ->
                     DropdownMenuItem(text = { Text(userId.toString()) }, onClick = {
@@ -272,6 +309,7 @@ fun ChangePasswordPage(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Input field for old password with password visual transformation
         OutlinedTextField(
             value = oldPassword,
             onValueChange = { viewModel.oldPassword.value = it },
@@ -283,6 +321,7 @@ fun ChangePasswordPage(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Input field for new password with password visual transformation
         OutlinedTextField(
             value = newPassword,
             onValueChange = { viewModel.changeNewPassword.value = it },
@@ -294,6 +333,7 @@ fun ChangePasswordPage(
 
         Spacer(modifier = Modifier.height(8.dp))
 
+        // Password requirements checklist displayed below the new password field
         Column(modifier = Modifier.fillMaxWidth()) {
             Text(
                 text = "Password must include:",
@@ -308,6 +348,7 @@ fun ChangePasswordPage(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Input field for confirming new password
         OutlinedTextField(
             value = confirmNewPassword,
             onValueChange = { viewModel.changeConfirmPassword.value = it },
@@ -319,9 +360,11 @@ fun ChangePasswordPage(
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        // Button to submit password change request
         Button(
             onClick = {
                 if (selectedUserId.isNotEmpty()) {
+                    // Call ViewModel method to handle password change logic
                     viewModel.changePassword(
                         selectedUserId.toInt(),
                         oldPassword,
@@ -341,6 +384,7 @@ fun ChangePasswordPage(
 
         Spacer(modifier = Modifier.height(12.dp))
 
+        // Button to navigate back to home screen
         Button(
             onClick = {
                 navController.navigate("home") {
@@ -354,4 +398,3 @@ fun ChangePasswordPage(
         }
     }
 }
-

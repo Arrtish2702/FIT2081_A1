@@ -1,4 +1,4 @@
-package com.fit2081.arrtish.id32896786.a1.authentication.login
+package com.fit2081.arrtish.id32896786.a1.authentication
 
 import android.util.Log
 import android.widget.Toast
@@ -25,7 +25,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -51,10 +50,15 @@ import androidx.navigation.NavController
 import com.fit2081.arrtish.id32896786.a1.AppViewModelFactory
 import com.fit2081.arrtish.id32896786.a1.MainActivity
 import com.fit2081.arrtish.id32896786.a1.R
-import com.fit2081.arrtish.id32896786.a1.authentication.AuthenticationViewModel
 
 
-
+/**
+ * Composable function for displaying the Login Page.
+ *
+ * @param modifier Modifier for styling and layout
+ * @param navController NavController for navigation between screens
+ * @param viewModelFactory Factory to provide AuthenticationViewModel
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginPage(
@@ -63,11 +67,14 @@ fun LoginPage(
     viewModelFactory: AppViewModelFactory
 ){
     val context = LocalContext.current
+
+    // Obtain AuthenticationViewModel instance using the provided factory
     val viewModel: AuthenticationViewModel = viewModel(factory = viewModelFactory)
 
+    // Observe LiveData from ViewModel for user IDs, selected ID, password, login message and loading state
     val userIds by viewModel.registeredPatientIds.observeAsState(initial = emptyList())
     val selectedUserId by viewModel.selectedUserId
-    var expanded by remember { mutableStateOf(false) }
+    var expanded by remember { mutableStateOf(false) } // Dropdown menu state for user selection
     val password by viewModel.password
 
     val loginMessage by viewModel.loginMessage
@@ -75,15 +82,17 @@ fun LoginPage(
 
     val scrollState = rememberScrollState()
 
+    // Show toast messages on login status changes
     LaunchedEffect(loginMessage) {
         loginMessage?.let {
             if (it.isNotBlank()) {
                 Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
-                viewModel.loginMessage.value = ""
+                viewModel.loginMessage.value = ""  // Reset login message after showing
             }
         }
     }
 
+    // Display loading overlay with spinner while login is in progress
     if (isLoading) {
         Box(
             modifier = Modifier
@@ -95,6 +104,7 @@ fun LoginPage(
         }
     }
 
+    // Main UI column containing logo, login form and buttons
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -103,6 +113,7 @@ fun LoginPage(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // App logo image at the top of the page
         Image(
             painter = painterResource(id = R.drawable.logo_for_an_app_called_nutritrack),
             contentDescription = "NutriTrack Logo",
@@ -113,12 +124,14 @@ fun LoginPage(
 
         Spacer(modifier = Modifier.height(36.dp))
 
+        // Header text "Login"
         Text(
             "Login",
             style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.Bold
         )
 
+        // Dropdown menu for selecting registered User ID
         ExposedDropdownMenuBox(
             expanded = expanded,
             onExpandedChange = { expanded = !expanded }
@@ -140,7 +153,7 @@ fun LoginPage(
                     DropdownMenuItem(
                         text = { Text(userId.toString()) },
                         onClick = {
-                            viewModel.updateSelectedUserId(userId.toString())
+                            viewModel.updateSelectedUserId(userId.toString()) // Update selected user ID in ViewModel
                             expanded = false
                         }
                     )
@@ -148,18 +161,20 @@ fun LoginPage(
             }
         }
 
+        // Password input field
         OutlinedTextField(
             value = password,
             onValueChange = { viewModel.updatePassword(it) },
             label = { Text("Password") },
             placeholder = { Text("Enter your password") },
-            visualTransformation = PasswordVisualTransformation(),
+            visualTransformation = PasswordVisualTransformation(), // Hide password text
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        // Login button triggers authentication
         Button(
             onClick = {
                 if (selectedUserId.isNotEmpty() && password.isNotEmpty()) {
@@ -179,6 +194,7 @@ fun LoginPage(
 
         Spacer(modifier = Modifier.height(12.dp))
 
+        // Navigate to Forgot Password screen
         Button(
             onClick = {
                 navController.navigate("forgotPassword") {
@@ -193,6 +209,7 @@ fun LoginPage(
 
         Spacer(modifier = Modifier.height(12.dp))
 
+        // Navigate to Register screen for new users
         Button(
             onClick = {
                 navController.navigate("register") {
