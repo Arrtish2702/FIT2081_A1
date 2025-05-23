@@ -7,12 +7,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.fit2081.arrtish.id32896786.a1.databases.patientdb.Patient
-import com.fit2081.arrtish.id32896786.a1.databases.AppDataBase
 import com.fit2081.arrtish.id32896786.a1.databases.patientdb.PatientRepository
-
+import com.fit2081.arrtish.id32896786.a1.databases.foodintakedb.FoodIntakeRepository
 import kotlinx.coroutines.Dispatchers
-
-
 import kotlinx.coroutines.launch
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -21,25 +18,45 @@ import androidx.core.content.edit
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 
-import com.fit2081.arrtish.id32896786.a1.authentication.AuthManager
-import com.fit2081.arrtish.id32896786.a1.databases.foodintakedb.FoodIntakeDao
-import com.fit2081.arrtish.id32896786.a1.databases.foodintakedb.FoodIntakeRepository
-import com.fit2081.arrtish.id32896786.a1.databases.patientdb.PatientDao
-
+/**
+ * MainViewModel
+ *
+ * ViewModel for managing app-wide data, including:
+ * - User preferences (dark theme)
+ * - Loading and inserting nutrition patient data from CSV
+ * - Checking if user has answered questionnaire based on Food Intake records
+ *
+ * Uses AndroidViewModel to have access to Application context.
+ *
+ * @param application The Application instance
+ * @param patientRepository Repository for patient database operations
+ * @param foodIntakeRepository Repository for food intake database operations
+ */
 class MainViewModel(
     application: Application,
     private val patientRepository: PatientRepository,
-    private val foodIntakeRepository: FoodIntakeRepository)
-: AndroidViewModel(application) {
+    private val foodIntakeRepository: FoodIntakeRepository
+) : AndroidViewModel(application) {
 
+    // Mutable state holding whether dark theme is enabled
     val isDarkTheme = mutableStateOf(false)
 
+    // LiveData tracking if user has answered questionnaire
     private val _hasAnsweredQuestionnaire = MutableLiveData(false)
     val hasAnsweredQuestionnaire: LiveData<Boolean> = _hasAnsweredQuestionnaire
 
+    // LiveData tracking if questionnaire check process is complete
     private val _questionnaireCheckComplete = MutableLiveData(false)
     val questionnaireCheckComplete: LiveData<Boolean> = _questionnaireCheckComplete
 
+
+    /**
+     * Checks asynchronously if a user with given userId has completed the questionnaire.
+     * This is done by checking if there is any food intake data for that user.
+     * Updates LiveData _hasAnsweredQuestionnaire and _questionnaireCheckComplete accordingly.
+     *
+     * @param userId The user ID to check for food intake records.
+     */
     fun checkIfQuestionnaireAnswered(userId: Int) {
         viewModelScope.launch(Dispatchers.IO) {
             val intake = foodIntakeRepository.getFoodIntake(userId)
@@ -48,15 +65,27 @@ class MainViewModel(
         }
     }
 
-    fun loadAndInsertData(context: Context) {
 
-        val sharedPreferences = context.getSharedPreferences(MainActivity.PREFS_NAME,Context.MODE_PRIVATE)
+    /**
+     * Loads nutrition patient data from "nutritrack_data.csv" asset and inserts it into the patient database.
+     * Uses shared preferences to ensure data is only loaded once (flag "isDataLoaded").
+     *
+     * Reads the CSV line by line, skips header, parses values, and constructs Patient objects.
+     * Uses patient sex to determine indices of gender-specific nutrition data columns.
+     *
+     * @param context Context used to access assets and shared preferences.
+     */
+    fun loadAndInsertData(context: Context) {
+        val sharedPreferences = context.getSharedPreferences(MainActivity.PREFS_NAME, Context.MODE_PRIVATE)
         val allEntries = sharedPreferences.all
+
+        // Log all shared preferences entries for debugging
         for ((key, value) in allEntries) {
             Log.v(MainActivity.TAG, "SharedPref entry: $key = $value")
         }
-        val isDataLoaded = sharedPreferences.getBoolean("isDataLoaded", false)
 
+        // Check if data is already loaded; if yes, skip loading
+        val isDataLoaded = sharedPreferences.getBoolean("isDataLoaded", false)
         if (isDataLoaded) {
             Log.v(MainActivity.TAG, "MainViewModel: Data already loaded. Skipping CSV insertion.")
             return
@@ -66,21 +95,26 @@ class MainViewModel(
         val currentDate = Date()
         println("Current Date object: $currentDate")
 
+        // Launch background coroutine to read CSV and insert patients
         viewModelScope.launch(Dispatchers.IO) {
             val inputStream = context.assets.open("nutritrack_data.csv")
             val reader = BufferedReader(InputStreamReader(inputStream))
             val lines = reader.readLines()
+
+            // Skip header line, iterate through data rows
             for (line in lines.drop(1)) {
                 val tokens = line.split(",")
-                if (tokens.size < 62) continue
+                if (tokens.size < 62) continue  // Ensure enough tokens
 
+                // Parse patient data fields from tokens
                 val phone = tokens[0]
                 val patientId = tokens[1].trim().toInt()
-                val name = ""
+                val name = ""  // Name not provided in CSV, set empty string
                 val sex = tokens[2]
-                val password = ""
+                val password = ""  // Password empty by default
                 val isMale = sex.equals("Male", ignoreCase = true)
 
+                // Create Patient object with parsed values and gender-specific nutrition data
                 val patient = Patient(
                     patientId = patientId,
                     patientName = name,
@@ -103,10 +137,13 @@ class MainViewModel(
                     discretionaryFoods = tokens[if (isMale) 5 else 6].toFloat(),
                     totalScore = tokens[if (isMale) 3 else 4].toFloat()
                 )
+
+                // Insert patient into database asynchronously
                 patientRepository.safeInsert(patient)
             }
 
-            sharedPreferences.edit() {
+            // Mark data as loaded in shared preferences
+            sharedPreferences.edit {
                 putBoolean("isDataLoaded", true)
             }
 
@@ -114,14 +151,28 @@ class MainViewModel(
         }
     }
 
+
+    /**
+     * Loads the saved theme preference (dark mode enabled or not) from shared preferences.
+     *
+     * @param context Context used to access shared preferences.
+     */
     fun loadThemePreference(context: Context) {
         val prefs = context.getSharedPreferences(MainActivity.PREFS_NAME, Context.MODE_PRIVATE)
         isDarkTheme.value = prefs.getBoolean("dark_mode", false)
     }
 
+
+    /**
+     * Saves the current theme preference (dark mode enabled or not) into shared preferences.
+     * Updates the isDarkTheme mutable state to notify UI.
+     *
+     * @param context Context used to access shared preferences.
+     * @param isDark Boolean indicating if dark mode is enabled.
+     */
     fun saveThemePreference(context: Context, isDark: Boolean) {
         val prefs = context.getSharedPreferences(MainActivity.PREFS_NAME, Context.MODE_PRIVATE)
-        prefs.edit() { putBoolean("dark_mode", isDark) }
+        prefs.edit { putBoolean("dark_mode", isDark) }
         isDarkTheme.value = isDark
     }
 }
