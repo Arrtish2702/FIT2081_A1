@@ -20,7 +20,7 @@ import java.util.Date
 import androidx.core.content.edit
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.fit2081.arrtish.id32896786.a1.MainActivity.Companion.PREFS_NAME
+
 import com.fit2081.arrtish.id32896786.a1.authentication.AuthManager
 import com.fit2081.arrtish.id32896786.a1.databases.foodintakedb.FoodIntakeDao
 import com.fit2081.arrtish.id32896786.a1.databases.foodintakedb.FoodIntakeRepository
@@ -115,13 +115,13 @@ class MainViewModel(
     }
 
     fun loadThemePreference(context: Context) {
-        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val prefs = context.getSharedPreferences(MainActivity.PREFS_NAME, Context.MODE_PRIVATE)
         isDarkTheme.value = prefs.getBoolean("dark_mode", false)
     }
 
     fun saveThemePreference(context: Context, isDark: Boolean) {
-        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        prefs.edit().putBoolean("dark_mode", isDark).apply()
+        val prefs = context.getSharedPreferences(MainActivity.PREFS_NAME, Context.MODE_PRIVATE)
+        prefs.edit() { putBoolean("dark_mode", isDark) }
         isDarkTheme.value = isDark
     }
 }

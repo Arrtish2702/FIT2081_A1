@@ -237,7 +237,7 @@ class AuthenticationViewModel(
                 else -> {
                     AuthManager.login(patientId, context)
                     val foodIntake = foodIntakeRepository.getFoodIntake(patientId)
-                    Log.v(MainActivity.Companion.TAG, "foodintake: $foodIntake")
+                    Log.v(MainActivity.TAG, "foodintake: $foodIntake")
                     withContext(Dispatchers.Main) {
                         loginMessage.value = "Login successful!"
                         loginSuccessful.value = true
