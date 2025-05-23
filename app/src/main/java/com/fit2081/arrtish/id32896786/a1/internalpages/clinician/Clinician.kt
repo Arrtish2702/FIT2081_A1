@@ -156,7 +156,6 @@ fun ClinicianPage(
                     "No insights available. Press 'Find Data Pattern' to generate insights.",
                     fontSize = 14.sp,
                     fontStyle = FontStyle.Italic,
-                    color = Color.Gray
                 )
             }
 
@@ -174,10 +173,9 @@ fun ClinicianPage(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color.Gray),
             shape = RoundedCornerShape(12.dp)
         ) {
-            Text("Done", color = Color.White)
+            Text("Done")
         }
     }
 }
