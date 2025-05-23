@@ -2,7 +2,10 @@ package com.fit2081.arrtish.id32896786.a1.authentication
 
 import android.content.Context
 import android.util.Log
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -15,11 +18,38 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class AuthenticationViewModel(private val foodIntakeRepository: FoodIntakeRepository, private val patientRepository: PatientRepository) : ViewModel() {
+class AuthenticationViewModel(
+    private val foodIntakeRepository: FoodIntakeRepository,
+    private val patientRepository: PatientRepository
+) : ViewModel() {
 
-//    val patientIds: LiveData<List<Int>> = patientRepository.allPatientIds()
     val registeredPatientIds: LiveData<List<Int>> = patientRepository.allRegisteredPatientIds()
     val unregisteredPatientIds: LiveData<List<Int>> = patientRepository.allUnregisteredPatientIds()
+
+    var selectedUserId = mutableStateOf("")
+        private set
+
+    var password = mutableStateOf("")
+        private set
+
+    var isDropdownExpanded = mutableStateOf(false)
+        private set
+
+    fun updateSelectedUserId(newId: String) {
+        selectedUserId.value = newId
+    }
+
+    fun updatePassword(newPassword: String) {
+        password.value = newPassword
+    }
+
+    fun toggleDropdown() {
+        isDropdownExpanded.value = !isDropdownExpanded.value
+    }
+
+    fun dismissDropdown() {
+        isDropdownExpanded.value = false
+    }
 
     var registrationSuccessful = mutableStateOf(false)
         private set
@@ -37,14 +67,12 @@ class AuthenticationViewModel(private val foodIntakeRepository: FoodIntakeReposi
         isLoading.value = value
     }
 
-    // Registration Form State
     var regSelectedUserId = mutableStateOf("")
     var regName = mutableStateOf("")
     var regPhone = mutableStateOf("")
     var regPassword = mutableStateOf("")
     var regConfirmPassword = mutableStateOf("")
 
-    // Change Password Form State
     var changeSelectedUserId = mutableStateOf("")
     var changePhoneNumber = mutableStateOf("")
     var changeNewPassword = mutableStateOf("")
@@ -55,7 +83,6 @@ class AuthenticationViewModel(private val foodIntakeRepository: FoodIntakeReposi
 
     var oldPassword = mutableStateOf("")
 
-    // UI state for change password
     val changePasswordMessage = mutableStateOf<String?>(null)
     val changePasswordSuccessful = mutableStateOf(false)
 
@@ -68,7 +95,6 @@ class AuthenticationViewModel(private val foodIntakeRepository: FoodIntakeReposi
                 return@launch
             }
 
-            // Trim and compare phone numbers
             if (patient.patientPhoneNumber.trim() != inputPhoneNumber.trim()) {
                 forgotPasswordMessage.value = "Phone number does not match User Account."
                 return@launch
@@ -79,13 +105,11 @@ class AuthenticationViewModel(private val foodIntakeRepository: FoodIntakeReposi
                 return@launch
             }
 
-
             if (new != confirm) {
                 forgotPasswordMessage.value = "New passwords do not match."
                 return@launch
             }
 
-            // Perform update
             val updatedPatient = patient.copy(
                 patientPassword = PasswordUtils.hashPassword(new.trim())
             )
@@ -111,13 +135,11 @@ class AuthenticationViewModel(private val foodIntakeRepository: FoodIntakeReposi
                 return@launch
             }
 
-            // Check if account is registered (i.e., password is set)
             if (patient.patientPassword.isEmpty()) {
                 changePasswordMessage.value = "This account is not registered yet."
                 return@launch
             }
 
-            // Verify the old password
             if (!PasswordUtils.passwordsMatch(oldPasswordInput, patient.patientPassword)) {
                 changePasswordMessage.value = "Old password is incorrect."
                 return@launch
@@ -128,19 +150,16 @@ class AuthenticationViewModel(private val foodIntakeRepository: FoodIntakeReposi
                 return@launch
             }
 
-            // Confirm new password match
             if (newPasswordInput != confirmNewPasswordInput) {
                 changePasswordMessage.value = "New passwords do not match."
                 return@launch
             }
 
-            // Check that new password is different
             if (PasswordUtils.passwordsMatch(newPasswordInput, patient.patientPassword)) {
                 changePasswordMessage.value = "New password must be different from old password."
                 return@launch
             }
 
-            // Update password
             val updatedPatient = patient.copy(
                 patientPassword = PasswordUtils.hashPassword(newPasswordInput.trim())
             )

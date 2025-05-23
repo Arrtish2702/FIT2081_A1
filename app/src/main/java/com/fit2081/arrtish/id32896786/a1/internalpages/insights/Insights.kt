@@ -30,7 +30,6 @@ fun InsightsPage(
     val context = LocalContext.current
     val patient by viewModel.patient.observeAsState()
 
-    // Call the ViewModel function to load data when userId changes
     viewModel.loadPatientDataById(userId)
 
     patient?.let { patientData ->
@@ -92,7 +91,7 @@ fun InsightsPage(
 
                 Slider(
                     value = totalScore,
-                    onValueChange = {}, // Read-only
+                    onValueChange = {},
                     valueRange = 0f..100f,
                     enabled = false,
                     colors = SliderDefaults.colors(
@@ -138,36 +137,32 @@ fun InsightsPage(
     }
 }
 
-// FoodScoreItem composable - Displays individual category name and score in a row
 @Composable
 fun FoodScoreItem(name: String, score: Number) {
     Row(
-        modifier = Modifier.fillMaxWidth(),  // Fill the width of the row
-        verticalAlignment = Alignment.CenterVertically  // Align items vertically at the center
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        // Category name text
-        Text(text = name, modifier = Modifier.weight(1f))  // Make name take available space
+        Text(text = name, modifier = Modifier.weight(1f))
 
-        Spacer(modifier = Modifier.width(2.dp))  // Add horizontal space
+        Spacer(modifier = Modifier.width(2.dp))
 
-        // Slider to display category score (disabled)
         Slider(
             value = score.toFloat(),
-            onValueChange = {},  // No interaction allowed (disabled slider)
-            valueRange = 0f..10f,  // Value range from 0 to 10
-            enabled = false,  // Slider is disabled (read-only)
+            onValueChange = {},
+            valueRange = 0f..10f,
+            enabled = false,
             modifier = Modifier
-                .weight(1.2f)  // Slider takes more space than name
-                .padding(),  // Add padding around slider
+                .weight(1.2f)
+                .padding(),
             colors = SliderDefaults.colors(
                 disabledThumbColor = MaterialTheme.colorScheme.primary,
                 disabledActiveTrackColor = MaterialTheme.colorScheme.primary
             )
         )
 
-        Spacer(modifier = Modifier.width(2.dp))  // Add horizontal space
+        Spacer(modifier = Modifier.width(2.dp))
 
-        // Display category score text (formatted to 2 decimal places)
         Text(text = "%.2f/10".format(score), modifier = Modifier.padding(start = 8.dp))
     }
 }

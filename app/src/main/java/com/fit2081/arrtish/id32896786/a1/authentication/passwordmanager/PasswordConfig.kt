@@ -44,10 +44,9 @@ fun ForgotPasswordPage(
     val newPassword by viewModel.changeNewPassword
     val confirmNewPassword by viewModel.changeConfirmPassword
     val userIds by viewModel.registeredPatientIds.observeAsState(initial = emptyList())
-    var expanded by remember { mutableStateOf(false) } // State to control dropdown menu expansion
+    var expanded by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
 
-    // Regex validation booleans
     val hasMinLength = newPassword.length >= 8
     val hasUppercase = newPassword.any { it.isUpperCase() }
     val hasLowercase = newPassword.any { it.isLowerCase() }
@@ -88,23 +87,22 @@ fun ForgotPasswordPage(
 
         ExposedDropdownMenuBox(
             expanded = expanded,
-            onExpandedChange = { expanded = !expanded }) { // Toggle dropdown expansion on click
+            onExpandedChange = { expanded = !expanded }) {
             OutlinedTextField(
-                value = selectedUserId, // Bind selected user ID to text field
-                onValueChange = {}, // No action on value change, read-only field
-                label = { Text("User ID") }, // Label for the input
-                leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) }, // Person icon
-                trailingIcon = { Icon(Icons.Filled.ArrowDropDown, contentDescription = null) }, // Dropdown icon
-                readOnly = true, // Make the field read-only
-                modifier = Modifier.fillMaxWidth().menuAnchor() // Full width and position dropdown
+                value = selectedUserId,
+                onValueChange = {},
+                label = { Text("User ID") },
+                leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
+                trailingIcon = { Icon(Icons.Filled.ArrowDropDown, contentDescription = null) },
+                readOnly = true,
+                modifier = Modifier.fillMaxWidth().menuAnchor()
             )
 
-            // Dropdown menu that shows all user IDs
             ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                userIds.forEach { userId -> // Loop through user IDs
+                userIds.forEach { userId ->
                     DropdownMenuItem(text = { Text(userId.toString()) }, onClick = {
-                        viewModel.changeSelectedUserId.value = userId.toString() // Set selected user ID
-                        expanded = false // Close dropdown
+                        viewModel.changeSelectedUserId.value = userId.toString()
+                        expanded = false
                     })
                 }
             }
@@ -200,7 +198,6 @@ fun ChangePasswordPage(
     var expanded by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
 
-    // Regex validation booleans
     val hasMinLength = newPassword.length >= 8
     val hasUppercase = newPassword.any { it.isUpperCase() }
     val hasLowercase = newPassword.any { it.isLowerCase() }

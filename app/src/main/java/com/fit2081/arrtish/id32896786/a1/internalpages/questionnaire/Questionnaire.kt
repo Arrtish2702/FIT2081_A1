@@ -55,10 +55,10 @@ fun QuestionnairePage(
     val sleepTime = viewModel.sleepTime
     val wakeTime = viewModel.wakeTime
     val selectedPersona = viewModel.selectedPersona
-    val scrollState = rememberScrollState()  // Scroll state for vertical scrolling
+    val scrollState = rememberScrollState()
 
-    var expanded by remember { mutableStateOf(false) }  // State for dropdown menu expansion
-    var showModal by remember { mutableStateOf(false) }  // State for modal dialog visibility
+    var expanded by remember { mutableStateOf(false) }
+    var showModal by remember { mutableStateOf(false) }
     val questionnaireMessage by viewModel.questionnaireMessage
 
     LaunchedEffect(questionnaireMessage) {
@@ -72,7 +72,7 @@ fun QuestionnairePage(
                     }
                 }
 
-                viewModel.questionnaireMessage.value = "" // reset message
+                viewModel.questionnaireMessage.value = ""
             }
         }
     }
@@ -88,20 +88,19 @@ fun QuestionnairePage(
                 start = 16.dp,
                 end = 16.dp,
                 top = 16.dp,
-                bottom = 16.dp // Ensures buttons at the bottom are visible
+                bottom = 16.dp
             )
-            .verticalScroll(scrollState),  // Make column scrollable
+            .verticalScroll(scrollState),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text("Questionnaire", fontSize = 24.sp, fontWeight = FontWeight.Bold)
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        Text("Select Food Categories:", fontSize = 20.sp)  // Label for food categories selection
+        Text("Select Food Categories:", fontSize = 20.sp)
 
-        val foodCategories = listOf("Fruits", "Vegetables", "Grains", "Red Meat", "Seafood", "Poultry", "Fish", "Eggs","Nuts/Seeds")  // Food categories list
+        val foodCategories = listOf("Fruits", "Vegetables", "Grains", "Red Meat", "Seafood", "Poultry", "Fish", "Eggs","Nuts/Seeds")
 
-        // Display food categories in a grid layout with checkboxes
         LazyVerticalGrid(
             columns = GridCells.Fixed(3),
             modifier = Modifier
@@ -128,9 +127,8 @@ fun QuestionnairePage(
 
         }
 
-        Text("Select Your Persona:", fontSize = 20.sp)  // Label for persona selection
+        Text("Select Your Persona:", fontSize = 20.sp)
 
-        // Display personas as buttons
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
             modifier = Modifier
@@ -157,50 +155,47 @@ fun QuestionnairePage(
             }
         }
 
-        // Show persona modal dialog if `showModal` is true
         if (showModal) {
             PersonaModal(
                 selectedPersona = selectedPersona.value,
                 onDismiss = { showModal = false })
         }
 
-        Spacer(modifier = Modifier.height(16.dp))  // Spacer for layout spacing
+        Spacer(modifier = Modifier.height(16.dp))
 
-        // Exposed dropdown menu for selecting persona
         ExposedDropdownMenuBox(
             expanded = expanded,
-            onExpandedChange = { expanded = !expanded }  // Toggle dropdown visibility
+            onExpandedChange = { expanded = !expanded }
         ) {
             TextField(
                 value = selectedPersona.value,
                 onValueChange = {},
                 readOnly = true,
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .menuAnchor(),  // Display the persona name in a read-only text field
+                    .fillMaxWidth(),
                 trailingIcon = {
                     ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
                 }
             )
             ExposedDropdownMenu(
                 expanded = expanded,
-                onDismissRequest = { expanded = false }  // Close dropdown on dismiss
+                onDismissRequest = { expanded = false }
             ) {
                 personas.forEach { persona ->
                     DropdownMenuItem(
                         text = { Text(persona) },
                         onClick = {
-                            selectedPersona.value = persona  // Set selected persona
-                            expanded = false  // Close dropdown menu
+                            selectedPersona.value = persona
+                            expanded = false
                         }
                     )
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))  // Spacer for layout spacing
+        Spacer(modifier = Modifier.height(16.dp))
 
-        Text("Select Your Meal Time:", fontSize = 20.sp)  // Label for meal time selection
+        Text("Select Your Meal Time:", fontSize = 20.sp)
         Button(
             onClick = {
                 viewModel.openTimePicker(
@@ -210,12 +205,12 @@ fun QuestionnairePage(
             },
             shape = RoundedCornerShape(12.dp)
         ) {
-            Text(biggestMealTime.value)  // Display selected meal time
+            Text(biggestMealTime.value)
         }
 
-        Spacer(modifier = Modifier.height(8.dp))  // Spacer for layout spacing
+        Spacer(modifier = Modifier.height(8.dp))
 
-        Text("Select Your Sleep Time:", fontSize = 20.sp)  // Label for sleep time selection
+        Text("Select Your Sleep Time:", fontSize = 20.sp)
         Button(
             onClick = {
                 viewModel.openTimePicker(
@@ -225,12 +220,12 @@ fun QuestionnairePage(
             },
             shape = RoundedCornerShape(12.dp)
         ) {
-            Text(sleepTime.value)  // Display selected sleep time
+            Text(sleepTime.value)
         }
 
-        Spacer(modifier = Modifier.height(8.dp))  // Spacer for layout spacing
+        Spacer(modifier = Modifier.height(8.dp))
 
-        Text("Select Your Wake Time:", fontSize = 20.sp)  // Label for wake time selection
+        Text("Select Your Wake Time:", fontSize = 20.sp)
         Button(
             onClick = {
                 viewModel.openTimePicker(
@@ -240,12 +235,12 @@ fun QuestionnairePage(
             },
             shape = RoundedCornerShape(12.dp)
         ) {
-            Text(wakeTime.value)  // Display selected wake time
+            Text(wakeTime.value)
         }
 
-        Spacer(modifier = Modifier.height(16.dp))  // Spacer for layout spacing
+        Spacer(modifier = Modifier.height(16.dp))
 
-        // Row with save and clear buttons
+
         Row(horizontalArrangement = Arrangement.SpaceEvenly) {
             Button(onClick = {
                 viewModel.saveFoodIntake(
@@ -261,13 +256,13 @@ fun QuestionnairePage(
                 Text("Save Responses")
             }
         }
-        Spacer(modifier = Modifier.height(32.dp))  // Spacer for layout spacing
+        Spacer(modifier = Modifier.height(32.dp))
     }
 }
 
 
 
-// Modal to display selected persona details
+
 @Composable
 fun PersonaModal(selectedPersona: String, onDismiss: () -> Unit) {
     val persona = PersonaEnum.fromDisplayName(selectedPersona)
@@ -276,26 +271,26 @@ fun PersonaModal(selectedPersona: String, onDismiss: () -> Unit) {
     val imageResId = persona.imageResId
 
     AlertDialog(
-        onDismissRequest = onDismiss,  // Dismiss modal on request
-        title = { Text(selectedPersona) },  // Display selected persona's name
+        onDismissRequest = onDismiss,
+        title = { Text(selectedPersona) },
         text = {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Image(
-                    painter = painterResource(id = imageResId),  // Display persona image
+                    painter = painterResource(id = imageResId),
                     contentDescription = selectedPersona,
                     modifier = Modifier
                         .size(150.dp)
                         .clip(RoundedCornerShape(10.dp))
                 )
-                Spacer(modifier = Modifier.height(8.dp))  // Spacer for layout
-                Text(textInput, textAlign = TextAlign.Center)  // Display persona description
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(textInput, textAlign = TextAlign.Center)
             }
         },
         confirmButton = {
             Button(onClick = onDismiss,
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Text("Close")  // Close button to dismiss modal
+                Text("Close")
             }
         }
     )

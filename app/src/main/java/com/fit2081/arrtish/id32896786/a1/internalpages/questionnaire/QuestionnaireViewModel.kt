@@ -23,7 +23,7 @@ import java.util.Locale
 
 class QuestionnaireViewModel(
     private val foodIntakeRepository: FoodIntakeRepository,
-    private val patientRepository: PatientRepository           // inject via factory or pass in after login
+    private val patientRepository: PatientRepository
 ) : ViewModel() {
 
     private val _patient = MutableLiveData<Patient?>()
@@ -32,7 +32,6 @@ class QuestionnaireViewModel(
     var questionnaireMessage = mutableStateOf<String?>(null)
         private set
 
-    // This will hold the current userId
     private var patientId: Int? = null
 
     private val _existingIntake = MutableLiveData<FoodIntake?>()
@@ -50,7 +49,6 @@ class QuestionnaireViewModel(
             viewModelScope.launch(Dispatchers.IO) {
                 val patientData = patientRepository.getPatientById(id)
                 val intakeData = foodIntakeRepository.getFoodIntake(id)
-//                Log.v(MainActivity.TAG, "QuestionnaireVM: loaded intakeData from method: $intakeData")
                 _patient.postValue(patientData)
                 _existingIntake.postValue(intakeData)
 
@@ -85,8 +83,6 @@ class QuestionnaireViewModel(
         selectedCategories.value = categories
     }
 
-
-    /** Saves or replaces the patient’s FoodIntake */
     fun saveFoodIntake(
         selectedCategories: List<String>,
         biggestMealTime: String,
@@ -140,41 +136,29 @@ class QuestionnaireViewModel(
     }
 
 
-
-    /** Clears the saved questionnaire for this patient */
-    fun clearFoodIntake() {
-        viewModelScope.launch (Dispatchers.IO) {
-            foodIntakeRepository.deleteFoodIntake(patientId?:-1)
-        }
-        Log.v(MainActivity.TAG, "QuestionnaireVM: data cleared from db")
-    }
-
-    // Function to format time to "hh:mm a" format
     fun formatTime(hour: Int, minute: Int): String {
         val calendar = Calendar.getInstance()
         calendar.set(Calendar.HOUR_OF_DAY, hour)
         calendar.set(Calendar.MINUTE, minute)
 
-        val format = SimpleDateFormat("hh:mm a", Locale.getDefault())  // Date format for time
-        return format.format(calendar.time)  // Return formatted time
+        val format = SimpleDateFormat("hh:mm a", Locale.getDefault())
+        return format.format(calendar.time)
     }
 
-    // Function to open a time picker dialog and set the time
     fun openTimePicker(context: Context,initialTime: String, onTimeSet: (String) -> Unit) {
-        val calendar = Calendar.getInstance()  // Get current calendar instance
-        val initialHour = calendar.get(Calendar.HOUR_OF_DAY)  // Initial hour of the day
-        val initialMinute = calendar.get(Calendar.MINUTE)  // Initial minute of the day
+        val calendar = Calendar.getInstance()
+        val initialHour = calendar.get(Calendar.HOUR_OF_DAY)
+        val initialMinute = calendar.get(Calendar.MINUTE)
 
-        // Create and show time picker dialog
         val timePickerDialog = TimePickerDialog(
             context,
             { _, hourOfDay, minute ->
-                val time = formatTime(hourOfDay, minute)  // Format time
-                onTimeSet(time)  // Set the chosen time
+                val time = formatTime(hourOfDay, minute)
+                onTimeSet(time)
             },
             initialHour, initialMinute, false
         )
-        timePickerDialog.show()  // Show time picker dialog
+        timePickerDialog.show()
     }
 }
 

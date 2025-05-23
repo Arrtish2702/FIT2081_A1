@@ -1,6 +1,10 @@
 package com.fit2081.arrtish.id32896786.a1.internalpages.nutricoach
 
 import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -26,7 +30,6 @@ class NutriCoachViewModel(
     private val openAiApi: ChatGptApi
 ) : ViewModel() {
 
-    // Expose the details map as LiveData / State
     private val _fruitDetails = MutableLiveData<Map<String, String>>(emptyMap())
     val fruitDetails: LiveData<Map<String, String>> = _fruitDetails
 
@@ -45,6 +48,12 @@ class NutriCoachViewModel(
     private val _isGeneratingMessage = MutableLiveData(false)
     val isGeneratingMessage: LiveData<Boolean> = _isGeneratingMessage
 
+    private val _fruitName = MutableLiveData("")
+    val fruitName: LiveData<String> = _fruitName
+
+    fun setFruitName(name: String) {
+        _fruitName.value = name
+    }
 
     fun loadAllTips(patientId: Int) {
         viewModelScope.launch (Dispatchers.IO) {
@@ -74,7 +83,7 @@ class NutriCoachViewModel(
     fun fetchFruit(name: String) {
         viewModelScope.launch (Dispatchers.IO) {
             try {
-                val fruits = fruityViceApi.getAllFruits() // get all fruits
+                val fruits = fruityViceApi.getAllFruits()
                 val fruit = fruits.firstOrNull { it.name.equals(name.trim(), ignoreCase = true) }
 
                 if (fruit != null) {
@@ -104,7 +113,7 @@ class NutriCoachViewModel(
     fun generateInsightfulMessage(patientId: Int) {
         viewModelScope.launch(Dispatchers.IO) {
             _isGeneratingMessage.postValue(true)
-            _motivationalMessage.postValue("") // Clear previous message
+            _motivationalMessage.postValue("")
 
             try {
                 val patient = patientRepository.getPatientById(patientId)

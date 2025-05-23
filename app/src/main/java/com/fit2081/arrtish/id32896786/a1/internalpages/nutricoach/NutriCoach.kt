@@ -34,7 +34,7 @@ fun NutriCoachPage(
         viewModel.optimalFruitScoreChecker(userId)
     }
     val isGenerating by viewModel.isGeneratingMessage.observeAsState(false)
-    var fruitName by remember { mutableStateOf("") }
+    val fruitName by viewModel.fruitName.observeAsState("")
     val motivationalMessage by viewModel.motivationalMessage.observeAsState("")
     val fruitDetails by viewModel.fruitDetails.observeAsState(emptyMap())
     val errorMessage by viewModel.errorMessage.observeAsState()
@@ -62,12 +62,10 @@ fun NutriCoachPage(
 
             Spacer(Modifier.height(24.dp))
 
-            // Render the details
             when (optimalFruitScore) {
                 true -> {
-                    // Show passive image when fruit score is optimal
                     AsyncImage(
-                        model = "https://picsum.photos/600/400", // size can be changed
+                        model = "https://picsum.photos/600/400",
                         contentDescription = "Random Fruit Image",
                         modifier = Modifier
                             .fillMaxWidth()
@@ -79,7 +77,7 @@ fun NutriCoachPage(
                 false -> {
                     OutlinedTextField(
                         value = fruitName,
-                        onValueChange = { fruitName = it },
+                        onValueChange = { viewModel.setFruitName(it) },
                         label = { Text("Fruit Name") },
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -97,7 +95,6 @@ fun NutriCoachPage(
 
                     Spacer(Modifier.height(16.dp))
 
-                    // Show error if any
                     errorMessage?.let { err ->
                         Text(
                             text = err,
@@ -107,7 +104,6 @@ fun NutriCoachPage(
                         Spacer(Modifier.height(8.dp))
                     }
 
-                    // Show fruit details if not optimal
                     if (fruitDetails.isNotEmpty()) {
                         fruitDetails.forEach { (label, value) ->
                             Row(modifier = Modifier.fillMaxWidth()) {

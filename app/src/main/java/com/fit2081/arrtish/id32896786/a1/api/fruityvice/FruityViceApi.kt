@@ -7,8 +7,6 @@ interface FruityViceApi {
     @GET("api/fruit/all")
     suspend fun getAllFruits(): List<Fruit>
 
-
-    // Search by name :contentReference[oaicite:6]{index=6}
     @GET("api/fruit/{name}")
     suspend fun getFruitByName(@Path("name") name: String): Fruit
 

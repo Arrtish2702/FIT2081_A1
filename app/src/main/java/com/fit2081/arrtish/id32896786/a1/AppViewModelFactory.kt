@@ -48,7 +48,6 @@ class AppViewModelFactory(
                 ClinicianViewModel(patientRepository, foodIntakeRepository, openAIApi ) as T
             }
             modelClass.isAssignableFrom(NutriCoachViewModel::class.java) -> {
-//                @Suppress("UNCHECKED_CAST")
                 NutriCoachViewModel(patientRepository, foodIntakeRepository, aiTipsRepository, fruityViceApi, openAIApi) as T
             }
             modelClass.isAssignableFrom(QuestionnaireViewModel::class.java) -> {

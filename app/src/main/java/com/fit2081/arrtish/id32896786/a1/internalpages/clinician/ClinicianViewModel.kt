@@ -37,7 +37,6 @@ class ClinicianViewModel(
     private val _isLoading = MutableLiveData(false)
     val isLoading: LiveData<Boolean> get() = _isLoading
 
-    // Automatically compute average scores when patient list changes
     val generateAvgScores: LiveData<Pair<Float, Float>> = allPatients.map { patients ->
         val malePatients = patients.filter { it.patientSex.equals("male", ignoreCase = true) }
         val femalePatients = patients.filter { it.patientSex.equals("female", ignoreCase = true) }
@@ -65,11 +64,10 @@ class ClinicianViewModel(
                 Log.v(MainActivity.TAG, "$patients")
                 Log.v(MainActivity.TAG, "$foodIntakes")
 
-                if (patients.size <= 3 || femaleCount <= 1 || maleCount <= 1) {
+                if (patients.size >= 3 || femaleCount >= 1 || maleCount >= 1) {
                     val fallbackMessage = """
                     There are currently an insufficient number of patients to generate personalized nutrition insights yet. 
                 """.trimIndent()
-//                    Please encourage more users to register and track their food intake so we can offer meaningful feedback in the future.
                     withContext(Dispatchers.Main) {
                         Toast.makeText(context, fallbackMessage, Toast.LENGTH_LONG).show()
                     }

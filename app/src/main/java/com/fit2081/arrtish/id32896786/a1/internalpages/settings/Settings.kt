@@ -33,10 +33,8 @@ fun SettingsPage(
     navController: NavHostController,
     isDarkTheme: MutableState<Boolean>,
     viewModelFactory: AppViewModelFactory
-
 ) {
-    var expanded by remember { mutableStateOf(false) }
-    var context = LocalContext.current
+    val context = LocalContext.current
     val settingsViewModel: SettingsViewModel = viewModel(factory = viewModelFactory)
     val mainViewModel: MainViewModel = viewModel(factory = viewModelFactory)
 
@@ -46,7 +44,6 @@ fun SettingsPage(
         settingsViewModel.loadPatientDataById(userId)
     }
 
-    // Default values before patient data is loaded
     val phoneNumber = patient?.patientPhoneNumber ?: "Loading..."
     val userName = patient?.patientName ?: "Loading..."
 
@@ -67,7 +64,6 @@ fun SettingsPage(
 
             Spacer(Modifier.height(24.dp))
 
-            // User Info Section
             Text("ACCOUNT", fontWeight = FontWeight.SemiBold)
             Spacer(Modifier.height(8.dp))
 

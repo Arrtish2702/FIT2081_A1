@@ -25,13 +25,10 @@ import java.util.Date
 @TypeConverters(DateConverter::class)
 data class FoodIntake(
     @PrimaryKey(autoGenerate = true) val patientId: Int,
-    // Use Date instead of DateTime (with converters if needed)
     var sleepTime: Date,
     var wakeTime: Date,
     var biggestMealTime: Date,
     var selectedPersona: String,
-
-    // Food category checkboxes
     var eatsFruits: Boolean = false,
     var eatsVegetables: Boolean = false,
     var eatsGrains: Boolean = false,

@@ -28,7 +28,7 @@ fun ClinicianLogin(
     viewModelFactory: AppViewModelFactory
 ) {
     val viewModel: AuthenticationViewModel = viewModel(factory = viewModelFactory)
-    var context = LocalContext.current
+    val context = LocalContext.current
 
     var clinicianKey by remember { mutableStateOf("") }
 
@@ -68,9 +68,9 @@ fun ClinicianLogin(
                 .height(48.dp),
             shape = RoundedCornerShape(12.dp)
         ) {
-            Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = null, tint = Color.White)
+            Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = null)
             Spacer(modifier = Modifier.width(8.dp))
-            Text("Clinician Login", color = Color.White)
+            Text("Clinician Login")
         }
     }
 }
@@ -133,10 +133,9 @@ fun ClinicianPage(
         Button(
             onClick = { viewModel.generateInterestingPatterns(context) },
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6A1B9A))
+            shape = RoundedCornerShape(12.dp)
         ) {
-            Text("Find Data Pattern", color = Color.White)
+            Text("Find Data Pattern")
         }
 
         Spacer(modifier = Modifier.height(24.dp))

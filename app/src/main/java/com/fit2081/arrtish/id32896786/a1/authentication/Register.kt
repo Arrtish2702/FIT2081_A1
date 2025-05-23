@@ -34,7 +34,7 @@ fun RegisterPage(
     navController: NavController,
     viewModelFactory: AppViewModelFactory
 ) {
-    var context = LocalContext.current
+    val context = LocalContext.current
     val viewModel: AuthenticationViewModel = viewModel(factory = viewModelFactory)
     val userIds by viewModel.unregisteredPatientIds.observeAsState(initial = emptyList())
     val selectedUserId by viewModel.regSelectedUserId
@@ -43,7 +43,6 @@ fun RegisterPage(
     val password by viewModel.regPassword
     val confirmPassword by viewModel.regConfirmPassword
 
-    // Regex validation booleans
     val hasMinLength = password.length >= 8
     val hasUppercase = password.any { it.isUpperCase() }
     val hasLowercase = password.any { it.isLowerCase() }
@@ -58,7 +57,7 @@ fun RegisterPage(
     LaunchedEffect(message) {
         message?.let {
             Toast.makeText(context, it, Toast.LENGTH_LONG).show()
-            viewModel.registrationMessage.value = null // reset so it doesn’t keep showing
+            viewModel.registrationMessage.value = null
         }
     }
 
@@ -85,29 +84,26 @@ fun RegisterPage(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Dropdown for ID
         var expanded by remember { mutableStateOf(false) }
 
-        // Exposed dropdown menu for user selection
         ExposedDropdownMenuBox(
             expanded = expanded,
-            onExpandedChange = { expanded = !expanded }) { // Toggle dropdown expansion on click
+            onExpandedChange = { expanded = !expanded }) {
             OutlinedTextField(
-                value = selectedUserId, // Bind selected user ID to text field
-                onValueChange = {}, // No action on value change, read-only field
-                label = { Text("User ID") }, // Label for the input
-                leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) }, // Person icon
-                trailingIcon = { Icon(Icons.Filled.ArrowDropDown, contentDescription = null) }, // Dropdown icon
-                readOnly = true, // Make the field read-only
-                modifier = Modifier.fillMaxWidth().menuAnchor() // Full width and position dropdown
+                value = selectedUserId,
+                onValueChange = {},
+                label = { Text("User ID") },
+                leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
+                trailingIcon = { Icon(Icons.Filled.ArrowDropDown, contentDescription = null) },
+                readOnly = true,
+                modifier = Modifier.fillMaxWidth().menuAnchor()
             )
 
-            // Dropdown menu that shows all user IDs
             ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                userIds.forEach { userId -> // Loop through user IDs
+                userIds.forEach { userId ->
                     DropdownMenuItem(text = { Text(userId.toString()) }, onClick = {
-                        viewModel.regSelectedUserId.value = userId.toString() // Set selected user ID
-                        expanded = false // Close dropdown
+                        viewModel.regSelectedUserId.value = userId.toString()
+                        expanded = false
                     })
                 }
             }
@@ -212,7 +208,11 @@ fun RegisterPage(
 
 @Composable
 fun PasswordRequirement(text: String, met: Boolean) {
-    val color = if (met) Color(0xFF2E7D32) else Color(0xFFD32F2F) // green/red
+    val color = if (met) {
+        MaterialTheme.colorScheme.primary
+    } else {
+        MaterialTheme.colorScheme.error
+    }
 
     Row(verticalAlignment = Alignment.CenterVertically) {
         Icon(

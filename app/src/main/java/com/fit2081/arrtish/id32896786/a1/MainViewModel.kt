@@ -57,7 +57,6 @@ class MainViewModel(
         }
         val isDataLoaded = sharedPreferences.getBoolean("isDataLoaded", false)
 
-        // If data has already been loaded, return early
         if (isDataLoaded) {
             Log.v(MainActivity.TAG, "MainViewModel: Data already loaded. Skipping CSV insertion.")
             return
@@ -71,10 +70,9 @@ class MainViewModel(
             val inputStream = context.assets.open("nutritrack_data.csv")
             val reader = BufferedReader(InputStreamReader(inputStream))
             val lines = reader.readLines()
-            // Loop through each line in the CSV, skipping the header (first row)
             for (line in lines.drop(1)) {
                 val tokens = line.split(",")
-                if (tokens.size < 62) continue // skip malformed lines
+                if (tokens.size < 62) continue
 
                 val phone = tokens[0]
                 val patientId = tokens[1].trim().toInt()
@@ -108,7 +106,6 @@ class MainViewModel(
                 patientRepository.safeInsert(patient)
             }
 
-            // After data insertion, set the flag in SharedPreferences
             sharedPreferences.edit() {
                 putBoolean("isDataLoaded", true)
             }
