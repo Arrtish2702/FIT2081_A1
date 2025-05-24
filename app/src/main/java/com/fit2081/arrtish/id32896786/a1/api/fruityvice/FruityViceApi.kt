@@ -1,5 +1,9 @@
 package com.fit2081.arrtish.id32896786.a1.api.fruityvice
-
+/**
+ * Disclaimer:
+ * This file may include comments or documentation assisted by OpenAI's GPT model.
+ * All code logic and architectural decisions were implemented and verified by the developer.
+ */
 import retrofit2.http.GET
 import retrofit2.http.Path
 

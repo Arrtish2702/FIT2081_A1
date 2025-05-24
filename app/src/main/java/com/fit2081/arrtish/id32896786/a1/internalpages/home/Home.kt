@@ -1,5 +1,9 @@
 package com.fit2081.arrtish.id32896786.a1.internalpages.home
-
+/**
+ * Disclaimer:
+ * This file may include comments or documentation assisted by OpenAI's GPT model.
+ * All code logic and architectural decisions were implemented and verified by the developer.
+ */
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
